@@ -63,6 +63,10 @@ function GeometryField({ audioOn }: { audioOn: boolean }) {
 
     const render = () => {
       context.clearRect(0, 0, width, height);
+      if (window.location.pathname === "/" && window.scrollY < height * 0.92) {
+        raf = requestAnimationFrame(render);
+        return;
+      }
       frame += reduced ? 0.08 : 1;
       stormRef.current *= 0.982;
       const isNight = new Date().getHours() < 6 || new Date().getHours() >= 19;
@@ -188,6 +192,7 @@ export function SiteExperience({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [secret, setSecret] = useState(false);
+  const [studioStatus, setStudioStatus] = useState("SYSTEMS — STANDING BY");
   const audioRef = useRef<AudioContext | null>(null);
   const audioNodes = useRef<{ oscillator: OscillatorNode; gain: GainNode } | null>(null);
   const clickTimes = useRef<number[]>([]);
@@ -196,6 +201,20 @@ export function SiteExperience({ children }: { children: ReactNode }) {
     const seen = sessionStorage.getItem("wbs-entrance");
     const timer = window.setTimeout(() => setEntrance(!seen), 0);
     return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const updateStatus = () => {
+      const hour = new Date().getHours();
+      setStudioStatus(hour >= 10 && hour < 18
+        ? "RECORDING — DESERT STUDIO"
+        : hour >= 18 && hour < 23
+          ? "MIXING — NIGHT ROOM"
+          : "SYSTEMS — STANDING BY");
+    };
+    updateStatus();
+    const interval = window.setInterval(updateStatus, 60_000);
+    return () => window.clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -272,9 +291,6 @@ export function SiteExperience({ children }: { children: ReactNode }) {
     }
   };
 
-  const hour = new Date().getHours();
-  const studioStatus = hour >= 10 && hour < 18 ? "RECORDING — DESERT STUDIO" : hour >= 18 && hour < 23 ? "MIXING — NIGHT ROOM" : "SYSTEMS — STANDING BY";
-
   return (
     <>
       <GeometryField audioOn={audioOn} />
@@ -307,11 +323,12 @@ export function SiteExperience({ children }: { children: ReactNode }) {
             <p className="eyebrow">THE CONSTELLATION / FIVE RAYS</p>
             <h2>ONE BODY.<br />FIVE SYSTEMS.</h2>
             <div className="ray-list">
-              <a href="https://wholebody.earth"><span>01</span><strong>EARTH</strong><em>Foundation</em></a>
-              <div className="ray-active"><span>02</span><strong>WATER</strong><em>Studios / You are here</em></div>
-              <a href="https://wholebody.earth"><span>03</span><strong>FIRE</strong><em>Ventures</em></a>
-              <a href="https://wholebody.earth"><span>04</span><strong>AIR</strong><em>Media</em></a>
-              <a href="https://wholebody.earth"><span>05</span><strong>ETHER</strong><em>Guild</em></a>
+              <a href="https://wholebody.earth"><span>00</span><strong>WHOLE</strong><em>All Elements / Root</em></a>
+              <a href="https://wholebody.foundation"><span>01</span><strong>EARTH</strong><em>Foundation</em></a>
+              <div className="ray-active" data-domain="wholebody.studio"><span>02</span><strong>WATER</strong><em>Studios / You are here</em></div>
+              <a href="https://wholebody.community"><span>03</span><strong>FIRE</strong><em>Presence</em></a>
+              <a href="https://wholebody.press"><span>04</span><strong>AIR</strong><em>Press</em></a>
+              <a href="https://wholebody.law"><span>05</span><strong>ETHER</strong><em>Guardian</em></a>
             </div>
           </div>
         </div>

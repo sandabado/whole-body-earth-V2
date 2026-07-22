@@ -39,13 +39,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "The artist eats first. Always.",
       type: "website",
       siteName: "Whole Body Studios",
-      images: [{ url: `${origin}/og.png`, width: 1731, height: 909, alt: "Whole Body Studios — Infrastructure, Not a Label" }],
+      images: [{ url: `${origin}/og-water.png`, width: 1731, height: 909, alt: "Whole Body Studios — Infrastructure, Not a Label" }],
     },
     twitter: {
       card: "summary_large_image",
       title: "Whole Body Studios — Infrastructure, Not a Label",
       description: "The artist eats first. Always.",
-      images: [`${origin}/og.png`],
+      images: [`${origin}/og-water.png`],
     },
   };
 }

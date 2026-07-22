@@ -1,0 +1,48 @@
+{
+  "heroConfigs": {
+    "presence": {
+      "element": "fire",
+      "colorBase": "#050505",
+      "colorPrimary": "#E8542A",
+      "colorSecondary": "#B83D1A",
+      "colorSurface": "#EDEDED",
+      "cameraDriftSpeed": 0.0005,
+      "cameraRotationDegrees": 0,
+      "pointerInfluenceStrength": 0.02,
+      "scrollAccelerationMultiplier": 1.5,
+      "headlineDelayMs": 2000,
+      "introDurationMs": 8000,
+      "ambientFlareIntervalMs": 30000,
+      "resolutionQuality": "high",
+      "fluidDissipation": 0.98,
+      "flowVelocityScale": 0.3,
+      "curlNoiseAmplitude": 0.45,
+      "audioEnabledByDefault": false,
+      "audioVolume": 0.3,
+      "audioUrl": "/sounds/fire-breath.mp3",
+      "isActive": true
+    },
+    "studios": {
+      "element": "water",
+      "colorBase": "#050505",
+      "colorPrimary": "#2BA8A0",
+      "colorSecondary": "#1A4D4D",
+      "colorSurface": "#EDEDED",
+      "cameraDriftSpeed": 0.0003,
+      "cameraRotationDegrees": 2,
+      "pointerInfluenceStrength": 0.03,
+      "scrollAccelerationMultiplier": 0.8,
+      "headlineDelayMs": 3000,
+      "introDurationMs": 10000,
+      "ambientFlareIntervalMs": 45000,
+      "resolutionQuality": "high",
+      "fluidDissipation": 0.96,
+      "flowVelocityScale": 0.2,
+      "curlNoiseAmplitude": 0.35,
+      "audioEnabledByDefault": false,
+      "audioVolume": 0.25,
+      "audioUrl": "/sounds/water-caustics.mp3",
+      "isActive": true
+    }
+  }
+}

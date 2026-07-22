@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import HeroEngine from "./HeroEngine/HeroEngine";
 import { HudCard } from "./HudCard";
 
 const tickerEntries = [
@@ -163,7 +164,10 @@ function Calculator() {
 export function HomePage() {
   return (
     <>
-      <section className="hero">
+      <HeroEngine
+        siteSlug="studios"
+        ariaLabel="Whole Body Studios — infrastructure for independent artists"
+      >
         <div className="hero-coordinate hero-coordinate--left">33.8734° N<br />115.9010° W</div>
         <div className="hero-coordinate hero-coordinate--right">RAY II / WATER<br />SIGNAL: ACTIVE</div>
         <div className="hero-copy">
@@ -177,7 +181,7 @@ export function HomePage() {
         </div>
         <div className="trust-line"><span>FEED FIRST</span><i>·</i><span>ARTIST-OWNED</span><i>·</i><span>ZERO EXTRACTION</span></div>
         <div className="hero-scroll"><span>SCROLL TO ENTER</span><i /></div>
-      </section>
+      </HeroEngine>
 
       <TerminalTicker />
 
