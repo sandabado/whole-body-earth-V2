@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { HomePage } from "./components/HomePage";
+import { ConstellationPlaceholder } from "./components/ConstellationPlaceholder";
 
 export const metadata: Metadata = {
-  title: "Infrastructure, Not a Label",
+  title: "The Whole Body Constellation",
+  description: "Five pillars. One Whole Body.",
 };
 
-export default function Home() {
-  return <HomePage />;
+export default function WholeHome() {
+  return <ConstellationPlaceholder mode="whole" />;
 }

@@ -1,0 +1,236 @@
+.page {
+  --accent: #ededed;
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 73% 42%, rgba(237, 237, 237, 0.09), transparent 23rem),
+    linear-gradient(135deg, #050505, #09090e 54%, #050505);
+  color: #ededed;
+  isolation: isolate;
+}
+
+.guardian {
+  --accent: #8b6fd6;
+  background:
+    radial-gradient(circle at 73% 42%, rgba(139, 111, 214, 0.15), transparent 24rem),
+    linear-gradient(135deg, #050505, #0d0914 54%, #050505);
+}
+
+.sky {
+  position: absolute;
+  z-index: -3;
+  inset: 0;
+  opacity: 0.46;
+  background-image:
+    radial-gradient(circle, rgba(237, 237, 237, 0.8) 0 1px, transparent 1.2px),
+    radial-gradient(circle, rgba(43, 168, 160, 0.45) 0 1px, transparent 1.3px);
+  background-position: 0 0, 47px 63px;
+  background-size: 137px 137px, 191px 191px;
+  mask-image: linear-gradient(90deg, transparent, #000 32%, #000);
+}
+
+.geometry {
+  position: absolute;
+  z-index: -2;
+  top: 50%;
+  right: 8vw;
+  width: min(40vw, 540px);
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  animation: orbit 34s linear infinite;
+}
+
+.geometry::before,
+.geometry::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+  transform: rotate(45deg);
+}
+
+.geometry::after {
+  inset: 28%;
+  border-radius: 50%;
+  transform: none;
+}
+
+.geometry i {
+  position: absolute;
+  top: 50%;
+  left: -8%;
+  width: 116%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 28%, transparent), transparent);
+}
+
+.geometry i:nth-child(2) { transform: rotate(36deg); }
+.geometry i:nth-child(3) { transform: rotate(72deg); }
+.geometry i:nth-child(4) { transform: rotate(108deg); }
+.geometry i:nth-child(5) { transform: rotate(144deg); }
+
+.geometry span {
+  position: absolute;
+  inset: 42%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 13%, #050505);
+  color: var(--accent);
+  font-size: clamp(28px, 4vw, 52px);
+  box-shadow: 0 0 70px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 34px;
+  border-bottom: 1px solid #292934;
+  background: transparent;
+  backdrop-filter: blur(12px) saturate(115%);
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: #ededed;
+  cursor: pointer;
+  font: 500 10px/1 var(--font-mono), monospace;
+  letter-spacing: 0.12em;
+}
+
+.brand > span { color: var(--accent); font-size: 20px; }
+.brand em { color: var(--accent); font-style: normal; }
+.brand small { color: #777785; font-size: 7px; line-height: 5px; }
+.header > p { color: #777785; font: 400 8px/1 var(--font-mono), monospace; letter-spacing: 0.14em; }
+
+.main {
+  width: min(1180px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: clamp(88px, 15vh, 150px) 0 92px;
+}
+
+.eyebrow {
+  margin: 0 0 24px;
+  color: var(--accent);
+  font: 500 9px/1 var(--font-mono), monospace;
+  letter-spacing: 0.2em;
+}
+
+.main h1 {
+  max-width: 870px;
+  margin: 0;
+  font: 500 clamp(52px, 8vw, 112px)/0.88 var(--font-display), Georgia, serif;
+  letter-spacing: -0.055em;
+}
+
+.main h1 em {
+  color: transparent;
+  font-style: normal;
+  -webkit-text-stroke: 1px var(--accent);
+}
+
+.declaration {
+  max-width: 690px;
+  margin: 34px 0 48px;
+  color: #aaaab6;
+  font-size: clamp(15px, 1.45vw, 19px);
+  line-height: 1.75;
+}
+
+.pillars {
+  position: relative;
+  z-index: 2;
+  max-width: 850px;
+  border-top: 1px solid #30303b;
+}
+
+.pillars a {
+  --pillar-color: #ededed;
+  display: grid;
+  grid-template-columns: 42px 34px 1fr 130px 20px;
+  align-items: center;
+  gap: 15px;
+  min-height: 60px;
+  border-bottom: 1px solid #30303b;
+  transition: padding 180ms ease, background 180ms ease;
+}
+
+.pillars a:hover {
+  padding-left: 10px;
+  background: color-mix(in srgb, var(--pillar-color) 5%, transparent);
+}
+
+.pillars span,
+.pillars em {
+  color: #777785;
+  font: 400 8px/1 var(--font-mono), monospace;
+  letter-spacing: 0.12em;
+  font-style: normal;
+  text-transform: uppercase;
+}
+
+.pillars b,
+.pillars i { color: var(--pillar-color); font-style: normal; }
+.pillars strong { font: 500 17px/1 var(--font-display), Georgia, serif; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.awaiting {
+  width: min(620px, 100%);
+  padding: 28px;
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, transparent);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.awaiting span { color: #888894; font: 400 8px/1 var(--font-mono), monospace; letter-spacing: 0.14em; }
+.awaiting strong { display: block; margin: 17px 0; color: var(--accent); font: 500 22px/1 var(--font-display), Georgia, serif; letter-spacing: 0.1em; }
+.awaiting p { margin: 0; color: #aaaab6; line-height: 1.7; }
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 34px;
+  border-top: 1px solid #292934;
+  color: #777785;
+  font: 400 8px/1 var(--font-mono), monospace;
+  letter-spacing: 0.14em;
+}
+
+.footer button {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+@keyframes orbit {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+@media (max-width: 720px) {
+  .header { height: 64px; padding: 0 18px; }
+  .header > p { display: none; }
+  .main { width: calc(100% - 40px); padding: 80px 0 70px; }
+  .geometry { right: -32vw; top: 32%; width: 90vw; opacity: 0.5; }
+  .main h1 { font-size: clamp(48px, 14vw, 72px); }
+  .pillars a { grid-template-columns: 28px 28px 1fr 18px; }
+  .pillars em { grid-column: 3; padding-bottom: 12px; }
+  .pillars i { grid-column: 4; grid-row: 1 / span 2; }
+  .footer { align-items: flex-start; flex-direction: column; padding-inline: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .geometry { animation: none; }
+  .pillars a { transition: none; }
+}

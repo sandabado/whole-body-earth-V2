@@ -1,0 +1,99 @@
+.layer {
+  position: fixed;
+  z-index: 8;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.layer::before {
+  content: "";
+  position: absolute;
+  right: -12vw;
+  bottom: -28vh;
+  left: -12vw;
+  height: 55vh;
+  background:
+    radial-gradient(ellipse at 18% 100%, rgba(232, 84, 42, 0.08), transparent 35%),
+    radial-gradient(ellipse at 72% 110%, rgba(232, 84, 42, 0.055), transparent 38%);
+  filter: blur(18px);
+  opacity: 0.78;
+}
+
+.field {
+  position: absolute;
+  inset: 0;
+  opacity: 0.62;
+  mix-blend-mode: screen;
+}
+
+.ember {
+  position: absolute;
+  bottom: -12px;
+  left: var(--ember-x);
+  width: var(--ember-size);
+  height: var(--ember-size);
+  border-radius: 50%;
+  background: #ff6b3d;
+  box-shadow:
+    0 0 4px rgba(255, 107, 61, 0.92),
+    0 0 10px rgba(232, 84, 42, 0.54);
+  opacity: 0;
+  animation: ember-rise var(--ember-duration) linear var(--ember-delay) infinite;
+  will-change: transform, opacity;
+}
+
+.ember:nth-child(5n) {
+  background: #c4a686;
+  box-shadow:
+    0 0 4px rgba(196, 166, 134, 0.8),
+    0 0 9px rgba(232, 84, 42, 0.45);
+}
+
+.ember:nth-child(7n) {
+  filter: blur(0.45px);
+}
+
+@keyframes ember-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--ember-drift-a), 18px, 0) scale(0.55);
+  }
+  9% {
+    opacity: var(--ember-alpha);
+  }
+  42% {
+    opacity: var(--ember-alpha);
+    transform: translate3d(var(--ember-drift-b), -44vh, 0) scale(0.9);
+  }
+  72% {
+    opacity: var(--ember-alpha-low);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--ember-drift-c), -108vh, 0) scale(0.2);
+  }
+}
+
+@media (max-width: 720px) {
+  .field {
+    opacity: 0.5;
+  }
+
+  .ember:nth-child(n + 37) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field {
+    display: none;
+  }
+
+  .layer::before {
+    background: radial-gradient(ellipse at 50% 115%, rgba(232, 84, 42, 0.08), transparent 48%);
+    filter: none;
+    opacity: 1;
+  }
+}

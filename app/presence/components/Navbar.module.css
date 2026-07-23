@@ -1,0 +1,523 @@
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skipLink {
+  position: fixed;
+  z-index: 260;
+  top: 8px;
+  left: 8px;
+  padding: 10px 14px;
+  border: 1px solid #e8542a;
+  background: #050505;
+  color: #ededed;
+  font: 500 9px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: translateY(-160%);
+  transition: transform 150ms ease;
+}
+
+.skipLink:focus {
+  transform: translateY(0);
+}
+
+.header {
+  position: fixed;
+  z-index: 100;
+  inset: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(205px, 1fr) auto minmax(205px, 1fr);
+  height: var(--header, 72px);
+  align-items: center;
+  gap: 24px;
+  padding: 0 clamp(18px, 2.7vw, 42px);
+  border-bottom: 1px solid transparent;
+  background: linear-gradient(180deg, rgba(5, 5, 5, 0.54), transparent);
+  transition:
+    background 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease,
+    backdrop-filter 300ms ease;
+}
+
+.header.scrolled {
+  border-color: rgba(42, 42, 56, 0.76);
+  background: rgba(16, 11, 8, 0.82);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(20px) saturate(125%);
+}
+
+.brandLockup {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-self: start;
+}
+
+.homeMark {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: #e8542a;
+  font: 400 26px/1 var(--font-display);
+  filter: drop-shadow(0 0 11px rgba(232, 84, 42, 0.58));
+  transition:
+    color 180ms ease,
+    transform 180ms ease,
+    filter 180ms ease;
+}
+
+.homeMark::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(232, 84, 42, 0.25);
+  transform: rotate(45deg);
+  transition: border-color 180ms ease;
+}
+
+.homeMark:hover,
+.homeMark:focus-visible {
+  color: #ff6b3d;
+  filter: drop-shadow(0 0 15px rgba(232, 84, 42, 0.8));
+  transform: scale(1.03);
+}
+
+.homeMark:hover::after,
+.homeMark:focus-visible::after {
+  border-color: rgba(232, 84, 42, 0.7);
+}
+
+.homeMark:focus-visible,
+.brandButton:focus-visible,
+.menuButton:focus-visible,
+.join:focus-visible,
+.drawer button:focus-visible,
+.drawer a:focus-visible {
+  outline: 2px solid #e8542a;
+  outline-offset: 3px;
+}
+
+.brandButton {
+  position: relative;
+  display: inline-flex;
+  min-height: 44px;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 0 8px;
+  border: 0;
+  background: transparent;
+  color: #ededed;
+  cursor: pointer;
+  text-align: left;
+}
+
+.brandWords {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  font: 400 9px/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.brandWords > span {
+  color: #c4a686;
+}
+
+.brandWords strong {
+  color: #e8542a;
+  font: inherit;
+}
+
+.chevron {
+  width: 6px;
+  height: 6px;
+  margin-top: 1px;
+  border-right: 1px solid #e8542a;
+  border-bottom: 1px solid #e8542a;
+  transform: rotate(45deg) translateY(-2px);
+  transform-origin: center;
+  transition: transform 200ms ease;
+}
+
+.brandButton[aria-expanded="true"] .chevron {
+  transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.desktopNav {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(15px, 2.1vw, 31px);
+}
+
+.desktopNav a {
+  position: relative;
+  display: grid;
+  height: 100%;
+  place-items: center;
+  color: #a8a2a0;
+  font: 400 8px/1 var(--font-mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  transition: color 180ms ease;
+}
+
+.desktopNav a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 18px;
+  left: 0;
+  height: 1px;
+  background: #e8542a;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 220ms ease;
+}
+
+.desktopNav a:hover,
+.desktopNav a:focus-visible,
+.desktopNav a.active {
+  color: #ededed;
+}
+
+.desktopNav a:hover::after,
+.desktopNav a:focus-visible::after,
+.desktopNav a.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(9px, 1.4vw, 19px);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #c4a686;
+  font: 400 7px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status i,
+.drawerBottom p i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e8542a;
+  box-shadow: 0 0 9px rgba(232, 84, 42, 0.9);
+  animation: nav-status-pulse 2.8s ease-in-out infinite;
+}
+
+.join {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  border: 1px solid rgba(232, 84, 42, 0.85);
+  color: #e8542a;
+  font: 500 8px/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.join:hover {
+  background: #e8542a;
+  color: #050505;
+  box-shadow: 0 0 18px rgba(232, 84, 42, 0.22);
+}
+
+.menuButton {
+  display: none;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  gap: 5px;
+  padding: 12px 10px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.menuButton > span:not(.srOnly) {
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: #ededed;
+}
+
+.menuButton > span:nth-child(2) {
+  width: 13px;
+  margin-left: 7px;
+  background: #e8542a;
+}
+
+.drawerBackdrop {
+  position: fixed;
+  z-index: 180;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(5, 5, 5, 0.72);
+  backdrop-filter: blur(7px);
+  animation: nav-backdrop-in 180ms ease-out both;
+}
+
+.drawer {
+  display: flex;
+  width: min(88vw, 410px);
+  min-height: 100dvh;
+  flex-direction: column;
+  overflow-y: auto;
+  border-left: 1px solid rgba(232, 84, 42, 0.3);
+  background:
+    radial-gradient(circle at 100% 100%, rgba(232, 84, 42, 0.13), transparent 40%),
+    #0a0a0f;
+  box-shadow: -20px 0 70px rgba(0, 0, 0, 0.58);
+  animation: nav-drawer-in 280ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.drawerTop {
+  display: flex;
+  min-height: 92px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 16px 26px;
+  border-bottom: 1px solid #2a2a38;
+}
+
+.drawerTop > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drawerGlyph {
+  color: #e8542a;
+  font: 400 27px/1 var(--font-display);
+  filter: drop-shadow(0 0 10px rgba(232, 84, 42, 0.6));
+}
+
+.drawerTop p {
+  margin: 0;
+  color: #c4a686;
+  font: 400 8px/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.drawerTop button {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #e8542a;
+  cursor: pointer;
+  font-size: 26px;
+}
+
+.drawerNav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 26px;
+}
+
+.drawerNav a {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  min-height: 58px;
+  align-items: center;
+  border-bottom: 1px solid rgba(42, 42, 56, 0.74);
+  color: #ededed;
+  font: 500 clamp(17px, 5vw, 21px)/1 var(--font-display);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.drawerNav a > span {
+  color: #8888a0;
+  font: 400 7px/1 var(--font-mono);
+}
+
+.drawerNav a > i {
+  color: #8888a0;
+  font: 400 12px/1 var(--font-body);
+  font-style: normal;
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.drawerNav a:hover,
+.drawerNav a.drawerActive {
+  color: #e8542a;
+}
+
+.drawerNav a:hover > i {
+  color: #e8542a;
+  transform: translate(2px, -2px);
+}
+
+.drawerBottom {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+  padding: 28px 26px 34px;
+}
+
+.drawerBottom button,
+.drawerBottom > a {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  border: 1px solid #2a2a38;
+  background: transparent;
+  color: #ededed;
+  cursor: pointer;
+  font: 500 8px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.drawerBottom > a {
+  justify-content: center;
+  border-color: #e8542a;
+  background: #e8542a;
+  color: #050505;
+}
+
+.drawerBottom p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  color: #c4a686;
+  font: 400 7px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@keyframes nav-status-pulse {
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 14px rgba(232, 84, 42, 1);
+  }
+}
+
+@keyframes nav-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes nav-drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media (max-width: 1180px) {
+  .header {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .status span {
+    display: none;
+  }
+}
+
+@media (max-width: 920px) {
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding-right: 10px;
+    padding-left: 12px;
+  }
+
+  .desktopNav,
+  .join {
+    display: none;
+  }
+
+  .actions {
+    gap: 3px;
+  }
+
+  .status {
+    display: inline-flex;
+    width: 30px;
+    height: 44px;
+    justify-content: center;
+  }
+
+  .menuButton {
+    display: grid;
+  }
+}
+
+@media (max-width: 420px) {
+  .brandButton {
+    padding-left: 3px;
+  }
+
+  .brandWords {
+    font-size: 8px;
+  }
+
+  .homeMark {
+    width: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .homeMark,
+  .chevron,
+  .desktopNav a::after,
+  .drawerNav a > i {
+    transition-duration: 0.01ms;
+  }
+
+  .status i,
+  .drawerBottom p i,
+  .drawerBackdrop,
+  .drawer {
+    animation: none;
+  }
+
+  .homeMark:hover,
+  .homeMark:focus-visible {
+    transform: none;
+  }
+}

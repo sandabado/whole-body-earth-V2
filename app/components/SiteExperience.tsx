@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ProductSwitcher } from "./ProductSwitcher";
 
 const edges: [number, number][] = [];
 const phi = (1 + Math.sqrt(5)) / 2;
@@ -63,7 +64,7 @@ function GeometryField({ audioOn }: { audioOn: boolean }) {
 
     const render = () => {
       context.clearRect(0, 0, width, height);
-      if (window.location.pathname === "/" && window.scrollY < height * 0.92) {
+      if (window.location.pathname === "/studios" && window.scrollY < height * 0.92) {
         raf = requestAnimationFrame(render);
         return;
       }
@@ -162,24 +163,38 @@ function Entrance({ onComplete }: { onComplete: () => void }) {
 }
 
 const navLinks = [
-  ["/", "Manifesto"],
-  ["/catalog", "Catalog"],
-  ["/about", "About"],
-  ["/contact", "Contact"],
+  ["/studios", "Manifesto"],
+  ["/studios/catalog", "Catalog"],
+  ["/studios/about", "About"],
+  ["/studios/contact", "Contact"],
 ] as const;
 
-function Footer() {
+const portalNavLinks = [
+  ["/studios", "Studios"],
+  ["/foundation", "Foundation"],
+  ["/presence", "Presence"],
+  ["/press", "Press"],
+] as const;
+
+const siteConfig = {
+  studios: { name: "STUDIOS", glyph: "🜄", accent: "#2ba8a0", rgb: "43,168,160" },
+  foundation: { name: "FOUNDATION", glyph: "🜃", accent: "#65a765", rgb: "101,167,101" },
+  presence: { name: "PRESENCE", glyph: "🜂", accent: "#e8542a", rgb: "232,84,42" },
+  press: { name: "PRESS", glyph: "🜁", accent: "#c9a227", rgb: "201,162,39" },
+} as const;
+
+function Footer({ glyph }: { glyph: string }) {
   return (
     <footer className="site-footer">
       <div>
-        <p className="footer-glyph">🜄</p>
+        <p className="footer-glyph">{glyph}</p>
         <p className="footer-oath" aria-label="So It Is Built. So It Holds. So It Is.">
           SO IT <span data-alt="FORGED">BUILT</span>. SO IT <span data-alt="ENDURES">HOLDS</span>. SO IT <span data-alt="REMAINS">IS</span>. 🍀
         </p>
       </div>
       <div className="footer-meta">
         <p>WHOLE BODY GUILD LLC · CALIFORNIA</p>
-        <div><Link href="/privacy">PRIVACY</Link><Link href="/terms">TERMS</Link></div>
+        <div><Link href="/studios/privacy">PRIVACY</Link><Link href="/studios/terms">TERMS</Link></div>
       </div>
     </footer>
   );
@@ -187,6 +202,17 @@ function Footer() {
 
 export function SiteExperience({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const current = pathname.startsWith("/studios")
+    ? "studios"
+    : pathname.startsWith("/foundation")
+    ? "foundation"
+    : pathname.startsWith("/presence")
+      ? "presence"
+      : pathname.startsWith("/press")
+        ? "press"
+        : null;
+  const activeSite = current ? siteConfig[current] : siteConfig.studios;
+  const activeNav = current === "studios" ? navLinks : portalNavLinks;
   const [entrance, setEntrance] = useState(false);
   const [audioOn, setAudioOn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -291,22 +317,39 @@ export function SiteExperience({ children }: { children: ReactNode }) {
     }
   };
 
+  if (current !== "studios") {
+    return <>{children}</>;
+  }
+
   return (
-    <>
+    <div
+      className={`site-experience site-experience--${current}`}
+      style={{
+        "--water": activeSite.accent,
+        "--active-rgb": activeSite.rgb,
+      } as React.CSSProperties}
+    >
       <GeometryField audioOn={audioOn} />
       <div className="atmosphere-grain" aria-hidden="true" />
       {entrance && <Entrance onComplete={completeEntrance} />}
       <header className="site-header">
-        <button className="brand" onClick={() => setSwitcherOpen(true)} aria-label="Open Whole Body product switcher">
-          <span className="brand-mark" onClick={glyphClick}>🜄</span>
-          <span>WHOLE BODY<span>/STUDIOS</span></span>
+        <button
+          className="brand"
+          onClick={() => setSwitcherOpen(true)}
+          aria-label="Open Whole Body product switcher"
+          aria-haspopup="dialog"
+          aria-expanded={switcherOpen}
+          aria-controls="constellation-dialog"
+        >
+          <span className="brand-mark" onClick={glyphClick}>{activeSite.glyph}</span>
+          <span>WHOLE BODY<span>/{activeSite.name}</span></span>
           <span className="brand-grid" aria-hidden="true">••<br />••</span>
         </button>
         <nav className={menuOpen ? "nav-links nav-links--open" : "nav-links"} aria-label="Primary navigation">
-          {navLinks.map(([href, label]) => (
+          {activeNav.map(([href, label]) => (
             <Link onClick={() => setMenuOpen(false)} className={pathname === href ? "active" : ""} href={href} key={href}>{label}</Link>
           ))}
-          <Link className="nav-apply" href="/apply" onClick={() => setMenuOpen(false)}>Apply</Link>
+          <Link className="nav-apply" href="/studios/apply" onClick={() => setMenuOpen(false)}>Apply</Link>
         </nav>
         <div className="header-tools">
           <span className="studio-status"><i />{studioStatus}</span>
@@ -316,26 +359,14 @@ export function SiteExperience({ children }: { children: ReactNode }) {
           <button className="menu-toggle" onClick={() => setMenuOpen((value) => !value)} aria-expanded={menuOpen}>MENU</button>
         </div>
       </header>
-      {switcherOpen && (
-        <div className="product-switcher" role="dialog" aria-modal="true" aria-label="Whole Body constellation">
-          <button className="switcher-close" onClick={() => setSwitcherOpen(false)}>CLOSE ×</button>
-          <div className="switcher-inner">
-            <p className="eyebrow">THE CONSTELLATION / FIVE RAYS</p>
-            <h2>ONE BODY.<br />FIVE SYSTEMS.</h2>
-            <div className="ray-list">
-              <a href="https://wholebody.earth"><span>00</span><strong>WHOLE</strong><em>All Elements / Root</em></a>
-              <a href="https://wholebody.foundation"><span>01</span><strong>EARTH</strong><em>Foundation</em></a>
-              <div className="ray-active" data-domain="wholebody.studio"><span>02</span><strong>WATER</strong><em>Studios / You are here</em></div>
-              <a href="https://wholebody.community"><span>03</span><strong>FIRE</strong><em>Presence</em></a>
-              <a href="https://wholebody.press"><span>04</span><strong>AIR</strong><em>Press</em></a>
-              <a href="https://wholebody.law"><span>05</span><strong>ETHER</strong><em>Guardian</em></a>
-            </div>
-          </div>
-        </div>
-      )}
+      <ProductSwitcher
+        current={current}
+        open={switcherOpen}
+        onClose={() => setSwitcherOpen(false)}
+      />
       {secret && <div className="secret-marquee">THE FREQUENCY WAS NEVER LOST. IT WAS HELD IN THE BODY.</div>}
       <main>{children}</main>
-      <Footer />
-    </>
+      <Footer glyph={activeSite.glyph} />
+    </div>
   );
 }
