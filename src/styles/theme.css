@@ -1,0 +1,39 @@
+:root {
+  --void: #050505;
+  --carbon: #0a0a0f;
+  --steel: #12121a;
+  --mercury: #2a2a38;
+  --bone: #ededed;
+  --ghost: #8888a0;
+  --water: #2ba8a0;
+  --water-dim: #1f7771;
+  --water-soft: rgba(43, 168, 160, 0.12);
+  --fire: #d16b45;
+  --earth: #84a66e;
+  --press: #d4af37;
+  --guardian: #8f5bff;
+
+  /* Compatibility aliases: one Studios accent, not multiple competing colors. */
+  --plasma: var(--water);
+  --flux: var(--water);
+  --halo: var(--water);
+
+  --font-display-fallback: "Cinzel", serif;
+  --font-mono-fallback: "DM Mono", monospace;
+  --font-body-fallback: "Inter", sans-serif;
+
+  /* A soft geometric scale shared by panels, controls, and page surfaces. */
+  --radius: 0.625rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-control: var(--radius-md);
+  --radius-surface: var(--radius-xl);
+  --border-solid: 3px;
+  --max-width: 1200px;
+
+  --scanline-opacity: 0.018;
+  --grid-color: rgba(43, 168, 160, 0.035);
+}

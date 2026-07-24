@@ -1,0 +1,2 @@
+import { ContainerPage } from "@/components/presence/ContainerPage";
+export default function MenPage() { return <ContainerPage eyebrow="Whole Body Men" title="Not a men's group. A forge." meta="Weekly · 90 minutes · Virtual · $97/month" opening="The world told you to be strong. Strong means silent. Strong means alone. That's not strength. That's extraction dressed as virtue." body="Whole Body Men is a closed container for men who are done performing. Weekly deep work. Same faces. Same room. Real accountability as witness." cta="Apply for the forge →" />; }

@@ -1,3 +1,0 @@
-"use client";
-import { useRef } from "react";import { useFrame } from "@react-three/fiber";import type { Mesh } from "three";
-export default function SoundWaveField(){const refs=useRef<Mesh[]>([]);useFrame(({clock})=>{refs.current.forEach((m,i)=>{const t=(clock.elapsedTime*.34+i*.2)%1,s=.35+t*2.15;m.scale.set(s,s,s);const mat=m.material as import("three").MeshBasicMaterial;mat.opacity=(1-t)*.38})});return <group position={[0,.18,0]}>{Array.from({length:5},(_,i)=><mesh key={i} ref={e=>{if(e)refs.current[i]=e}} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.46,.48,64]}/><meshBasicMaterial color="#84a66e" transparent opacity={.3}/></mesh>)}</group>}

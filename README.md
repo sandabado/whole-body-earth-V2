@@ -1,98 +1,60 @@
-# vinext-starter
+# Whole Body OS
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+One application for Whole Body Earth and its five pillar journeys, built with
+Next.js App Router and designed to deploy on Vercel.
 
-## Prerequisites
+## Engineering baseline
 
-- Node.js `>=22.13.0`
+- Next.js 16 App Router with a single `src/proxy.ts` entry for Supabase session
+  refresh, route aliases, and domain-aware pillar routing.
+- Shared navigation, tokens, and pillar-aware components. Individual pillar content is organized under `src/app/pillars/*`.
+- Whole Body Earth remains the root portal. Studios, Press, Foundation,
+  Community/Presence, and Guardian also resolve through short routes and their
+  dedicated domains.
+- Guardian includes the public Quincunx/Position 9 constitutional model. Live
+  assignment and coherence scoring remain Phase 2 authenticated capabilities.
+- Supabase is the application data source of truth. Partnership applications are validated server-side and inserted only with a server-only Supabase service-role key.
+- No payment, scheduling, reader, or ephemeris flow is represented as live until its backend contract exists.
 
-## Quick Start
+## Local development
 
 ```bash
 npm install
 npm run dev
+```
+
+Use `.env.example` as the environment contract. Never commit `.env.local` or production keys.
+
+## Deployment contract
+
+Set these in Vercel for each environment:
+
+| Service | Required variables | Notes |
+| --- | --- | --- |
+| Supabase | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | The service-role key is server-only. Apply all files in `supabase/migrations/` before enabling application intake. |
+| Resend | `RESEND_API_KEY`, `ADMIN_EMAIL` | Replace the default Resend sender with a verified Whole Body domain before production email. |
+| Stripe | `STRIPE_RESTRICTED_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` | Checkout is not implemented yet. Use Checkout Sessions, a least-privilege restricted key, dynamic payment methods, and verified webhooks when it is. |
+| Calendly | `CALENDLY_URL` | The `/calendar` booking CTA opens this HTTPS URL. Set it to the appropriate hosted event, routing, or scheduling page. |
+| Swiss Ephemeris | `SWISSEPH_API_URL`, `SWISSEPH_API_KEY` | Base URL and server-only key for the separately deployed natal-chart service in `services/ephemeris`. |
+
+## Planned integration boundaries
+
+- **Stripe:** There is no checkout route yet. Product/price IDs, fulfillment rules, tax settings, and webhook event handling must be defined before introducing one.
+- **Calendly:** The public calendar uses one configurable external scheduling handoff. Keep booking ownership, event types, confirmation, and webhooks in the hosted scheduling system until a server-owned intake contract is introduced.
+- **Swiss Ephemeris:** The separately deployable Node service lives in `services/ephemeris`. Keep calculations server-side, retain its license record, and never expose its key to the browser.
+- **Press reader:** Secure reader accounts and watermarked editions are intentionally marked as forthcoming until authentication, purchase entitlements, and storage access policies are designed together.
+
+## Verification
+
+```bash
+npx tsc --noEmit
+npm run lint
 npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+The production build is the source-of-truth release check.
+## Homepage archive and rollback
 
-## Included Shape
+The original homepage is preserved at `/home-alt-1`.
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+To revert the living homepage, replace `src/app/page.tsx` with `src/app/home-alt-1/page.tsx`, then build and deploy. The archive intentionally keeps the original v1 layout and components intact.

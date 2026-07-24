@@ -1,0 +1,2 @@
+import { ContainerPage } from "@/components/presence/ContainerPage";
+export default function WomenPage() { return <ContainerPage eyebrow="Whole Body Women" title="Not a support group. A hearth." meta="Weekly · 90 minutes · Virtual · $97/month" opening="The world told you to be small. Small means accommodating. Small means quiet. That's not generosity. That's extraction dressed as care." body="Whole Body Women is a closed container for women who are done shrinking. Weekly deep work. Same faces. Same room. Real accountability as mirror." cta="Apply for the hearth →" />; }

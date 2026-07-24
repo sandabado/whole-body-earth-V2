@@ -1,0 +1,27 @@
+import Link from "next/link";
+import { formatStorePrice, getStoreItems, type StoreItem } from "@/lib/storefront";
+
+const pillarLabel: Record<StoreItem["pillar"], string> = {
+  presence: "Presence", foundation: "Foundation", press: "Whole Body Press", studios: "Whole Body Studios", guardian: "Guardian",
+};
+
+export default async function StorePage() {
+  const items = await getStoreItems();
+
+  return <main className="relative overflow-hidden pb-28">
+    <section className="border-b border-[#ff78c4]/30 px-6 py-16 sm:py-24"><div className="mx-auto grid max-w-[1200px] gap-10 lg:grid-cols-[1.05fr_.95fr] lg:items-end"><div><p className="font-mono text-[10px] uppercase tracking-[.2em] text-[#ff9dcc]">Whole Body Earth Store</p><h1 className="mt-5 max-w-3xl font-display text-5xl font-medium leading-[.94] text-bone sm:text-6xl">Objects for the work<br /><span className="text-[#ff9dcc]">to continue.</span></h1><p className="mt-6 max-w-2xl text-base leading-7 text-ghost sm:text-lg">Music, books, studio editions, and field objects from every pillar—held in one shared commerce system.</p></div><div className="border border-[#ff78c4]/35 bg-[#ff78c4]/[.055] p-5 sm:p-6"><p className="font-mono text-[10px] uppercase tracking-[.14em] text-[#ff9dcc]">One store · one account</p><p className="mt-3 max-w-md text-sm leading-6 text-bone/80">Your orders, reader access, and future releases live together here. The first editions are entering the archive now.</p><a href="#editions" className="mt-5 inline-block border border-[#ff78c4] px-4 py-2 font-mono text-[10px] uppercase tracking-[.12em] text-[#ff9dcc] transition-colors hover:bg-[#ff78c4] hover:text-void">Browse editions ↓</a></div></div></section>
+
+    <section id="editions" className="px-6 py-14 sm:py-20"><div className="mx-auto max-w-[1200px]"><div className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><p className="font-mono text-[10px] uppercase tracking-[.16em] text-ghost">Current and incoming</p><h2 className="mt-2 font-display text-3xl text-bone sm:text-4xl">The first shelf</h2></div><p className="font-mono text-[10px] uppercase tracking-[.12em] text-[#ff9dcc]">{items.length} editions in view</p></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{items.map((item) => <StoreCard key={item.id} item={item} />)}</div></div></section>
+
+    <section className="px-6"><div className="mx-auto max-w-[1200px] border-y border-mercury py-10 sm:flex sm:items-center sm:justify-between sm:gap-8"><div><p className="font-mono text-[10px] uppercase tracking-[.15em] text-[#ff9dcc]">For the work, not the warehouse</p><p className="mt-2 max-w-2xl text-sm leading-6 text-ghost">Every release enters the same account and order system. Studios projects stay in the <Link href="/pillars/studios/catalog" className="text-water hover:text-bone">Studios catalog</Link>; the Store is where the whole constellation becomes tangible.</p></div><Link href="/account" className="mt-5 inline-block shrink-0 border border-[#ff78c4]/70 px-4 py-2 font-mono text-[10px] uppercase tracking-[.12em] text-[#ff9dcc] transition-colors hover:bg-[#ff78c4] hover:text-void sm:mt-0">Your account →</Link></div></section>
+  </main>;
+}
+
+function StoreCard({ item }: { item: StoreItem }) {
+  return <article className="group relative flex min-h-[29rem] flex-col overflow-hidden border border-mercury bg-carbon/70 p-4 transition duration-300 hover:-translate-y-1 hover:border-[#ff78c4]/75 hover:shadow-[0_20px_45px_rgba(255,120,196,.12)]"><div className="relative mb-5 aspect-[1/.84] overflow-hidden border border-mercury bg-void"><ProductVisual item={item} /><div className="absolute top-3 left-3 border border-[#ff78c4]/60 bg-void/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[.12em] text-[#ff9dcc]">{pillarLabel[item.pillar]}</div><div className="absolute right-3 bottom-3 bg-void/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[.12em] text-bone/75">{item.availability === "available" ? "Available" : "Coming soon"}</div></div><p className="font-mono text-[10px] uppercase tracking-[.14em] text-[#ff9dcc]">{item.type}</p><h2 className="mt-2 font-display text-2xl leading-tight text-bone">{item.title}</h2><p className="mt-2 text-sm leading-6 text-ghost">{item.description ?? "A Whole Body Earth edition."}</p><div className="mt-auto flex items-end justify-between gap-4 pt-6"><p className="font-mono text-sm text-bone">{formatStorePrice(item.priceCents)}</p><Link href="/account" className="font-mono text-[10px] uppercase tracking-[.11em] text-[#ff9dcc] transition-colors group-hover:text-bone">{item.availability === "available" ? "View edition →" : "Release list →"}</Link></div></article>;
+}
+
+function ProductVisual({ item }: { item: StoreItem }) {
+  if (item.imageUrl) return <div aria-hidden="true" className="absolute inset-0 bg-cover bg-center opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100" style={{ backgroundImage: `url(${item.imageUrl})` }} />;
+  return <div className="flex h-full items-end bg-[radial-gradient(circle_at_50%_20%,rgba(255,120,196,.26),transparent_26%),linear-gradient(135deg,#141019,#050505)] p-5"><div><p className="font-mono text-[10px] uppercase tracking-[.22em] text-[#ff9dcc]">Whole Body Earth</p><p className="mt-2 font-display text-3xl leading-none text-bone">{item.title}</p></div><span aria-hidden="true" className="absolute top-1/2 right-7 -translate-y-1/2 font-display text-7xl text-[#ff78c4]/25">♁</span></div>;
+}

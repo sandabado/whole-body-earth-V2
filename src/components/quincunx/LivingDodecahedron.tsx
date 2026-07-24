@@ -1,0 +1,1075 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  CANONICAL_ORIENTATION,
+  DODECAHEDRON_EDGES,
+  DODECAHEDRON_FACES,
+  DODECAHEDRON_VERTICES,
+  FACE_COORDINATES,
+  getAdjacentHouses,
+  type Point3,
+} from "@/lib/dodecahedron/topology";
+import { formatBirthTime, type BirthProfile } from "@/lib/birth-profile";
+import { PENDING_HOUSE_PRESENCE, type HousePresenceMap, type HousePresenceState } from "@/lib/astrology/dodecanic-map";
+import { hexToRgba, HOUSE_ROMAN, HOUSE_SPECTRUM, HOUSE_SPECTRUM_ORDER, mixHouseColors } from "@/lib/house-spectrum";
+import type { ObserverSnapshot, CommunityTelemetry } from "@/lib/observer-telemetry";
+import type { DodecahedralEdgeState, HouseFaceState } from "@/lib/quincunx/whole-body";
+import type { HouseNumber } from "@/types/houses";
+
+type Selection =
+  | { kind: "center"; id: "Ø" }
+  | { kind: "face"; id: HouseNumber }
+  | { kind: "edge"; id: string };
+
+type ProjectedPoint = {
+  x: number;
+  y: number;
+  z: number;
+};
+
+type ProjectedFace = ProjectedPoint & {
+  house: HouseNumber;
+  radius: number;
+  facing: number;
+  points: readonly ProjectedPoint[];
+};
+
+type ProjectedEdge = {
+  id: string;
+  from: ProjectedPoint;
+  to: ProjectedPoint;
+  z: number;
+};
+
+interface LivingDodecahedronProps {
+  snapshot: ObserverSnapshot;
+  community: CommunityTelemetry;
+  connection: "connecting" | "live" | "local";
+  profile: BirthProfile | null;
+  housePresence?: HousePresenceMap;
+  onOpenTriangle: () => void;
+}
+
+const COLORS = {
+  OPEN: "#b8ff5a",
+  MONITOR: "#ffd166",
+  CLOSE: "#ff5f57",
+  IDLE: "#53605b",
+} as const;
+
+const RESTING_STRUCTURE_COLOR = "#b8adf2";
+
+const FIELD_LAYERS = [
+  { id: "sphere", label: "Sphere" },
+  { id: "torus", label: "Torus" },
+  { id: "dodecahedron", label: "Solid" },
+  { id: "quincunx", label: "Quincunx" },
+  { id: "compass", label: "N·S·E·W" },
+  { id: "human", label: "You" },
+  { id: "labels", label: "Labels" },
+] as const;
+
+type FieldLayer = (typeof FIELD_LAYERS)[number]["id"];
+
+const DEFAULT_FIELD_LAYERS: Record<FieldLayer, boolean> = {
+  sphere: true,
+  torus: true,
+  dodecahedron: true,
+  quincunx: true,
+  compass: true,
+  human: true,
+  labels: true,
+};
+
+const COMPASS_DIRECTIONS = [
+  { label: "N", coordinates: [-1.321327, -0.816625, -1.128548] as Point3 },
+  { label: "E", coordinates: [-0.96, -0.593313, 1.553313] as Point3 },
+  { label: "S", coordinates: [1.321327, 0.816625, 1.128548] as Point3 },
+  { label: "W", coordinates: [0.96, 0.593313, -1.553313] as Point3 },
+] as const;
+
+const QUINCUNX_DOMAINS = [
+  { id: "physical", label: "PHYSICAL", element: "EARTH · SOUTH", symbol: "🜃", current: "V", color: "#84a66e", coordinates: [0.674427, 0.416819, 0.57603] as Point3 },
+  { id: "mental", label: "MENTAL", element: "AIR · NORTH", symbol: "🜁", current: "∧", color: "#d4af37", coordinates: [-0.674427, -0.416819, -0.57603] as Point3 },
+  { id: "emotional", label: "EMOTIONAL", element: "WATER · WEST", symbol: "🜄", current: "W", color: "#2ba8a0", coordinates: [0.49, 0.302837, -0.792837] as Point3 },
+  { id: "spiritual", label: "SPIRITUAL", element: "FIRE · EAST", symbol: "🜂", current: "∞", color: "#d16b45", coordinates: [-0.49, -0.302837, 0.792837] as Point3 },
+] as const;
+
+function rotatePoint([x, y, z]: Point3, angleY: number, angleX: number, angleZ: number): Point3 {
+  const cosY = Math.cos(angleY);
+  const sinY = Math.sin(angleY);
+  const xY = x * cosY + z * sinY;
+  const zY = -x * sinY + z * cosY;
+  const cosX = Math.cos(angleX);
+  const sinX = Math.sin(angleX);
+  const yX = y * cosX - zY * sinX;
+  const zX = y * sinX + zY * cosX;
+  const cosZ = Math.cos(angleZ);
+  const sinZ = Math.sin(angleZ);
+  return [xY * cosZ - yX * sinZ, xY * sinZ + yX * cosZ, zX];
+}
+
+function shortestAngleDelta(from: number, to: number): number {
+  return Math.atan2(Math.sin(to - from), Math.cos(to - from));
+}
+
+function distanceToSegment(
+  pointX: number,
+  pointY: number,
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+): number {
+  const dx = endX - startX;
+  const dy = endY - startY;
+  if (dx === 0 && dy === 0) return Math.hypot(pointX - startX, pointY - startY);
+  const t = Math.max(0, Math.min(1, ((pointX - startX) * dx + (pointY - startY) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(pointX - (startX + t * dx), pointY - (startY + t * dy));
+}
+
+function tracePolygon(
+  context: CanvasRenderingContext2D,
+  points: readonly ProjectedPoint[],
+): void {
+  context.beginPath();
+  points.forEach((point, index) => {
+    if (index === 0) context.moveTo(point.x, point.y);
+    else context.lineTo(point.x, point.y);
+  });
+  context.closePath();
+}
+
+function isPointInPolygon(x: number, y: number, points: readonly ProjectedPoint[]): boolean {
+  let inside = false;
+  for (let index = 0, previous = points.length - 1; index < points.length; previous = index, index += 1) {
+    const point = points[index];
+    const prior = points[previous];
+    const crosses = (point.y > y) !== (prior.y > y)
+      && x < ((prior.x - point.x) * (y - point.y)) / (prior.y - point.y) + point.x;
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+function formatPercent(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
+export function LivingDodecahedron({ snapshot, community, connection, profile, housePresence = PENDING_HOUSE_PRESENCE, onOpenTriangle }: LivingDodecahedronProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hitMapRef = useRef<{
+    faces: ProjectedFace[];
+    edges: ProjectedEdge[];
+    center: { x: number; y: number } | null;
+  }>({ faces: [], edges: [], center: null });
+  const rotationRef = useRef({ ...CANONICAL_ORIENTATION });
+  const idleReturnRef = useRef({
+    lastInteraction: null as number | null,
+    active: false,
+    locked: false,
+    startedAt: 0,
+    startRotation: { ...CANONICAL_ORIENTATION },
+  });
+  const orbitRef = useRef({
+    pointerInside: false,
+    pointerId: null as number | null,
+    startX: 0,
+    startY: 0,
+    startRotationX: 0,
+    startRotationY: 0,
+    moved: false,
+  });
+  const spaceHeldRef = useRef(false);
+  const suppressClickRef = useRef(false);
+  const [rotating, setRotating] = useState(false);
+  const [spaceHeld, setSpaceHeld] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [selection, setSelection] = useState<Selection>({ kind: "center", id: "Ø" });
+  const [layers, setLayers] = useState<Record<FieldLayer, boolean>>(() => ({ ...DEFAULT_FIELD_LAYERS }));
+  const body = snapshot.body;
+  const aethericCoherence = body.pillars.find((pillar) => pillar.id === "aetheric")?.coherence ?? body.overallCoherence;
+  const collapseCoherence = body.quincunx.corners.physical.coherence;
+  const expanseCoherence = body.quincunx.corners.mental.coherence;
+  const balanceDelta = collapseCoherence - expanseCoherence;
+  const balanceLabel = Math.abs(balanceDelta) < 0.05
+    ? "BALANCED"
+    : balanceDelta > 0
+      ? "COLLAPSE WEIGHT"
+      : "EXPANSE WEIGHT";
+
+  const selectedFace = useMemo(
+    () => selection.kind === "face"
+      ? body.faces.find((face) => face.house.number === selection.id) ?? null
+      : null,
+    [body.faces, selection],
+  );
+  const selectedEdge = useMemo(
+    () => selection.kind === "edge"
+      ? body.edges.find((edge) => edge.id === selection.id) ?? null
+      : null,
+    [body.edges, selection],
+  );
+
+  function markObjectInteraction() {
+    idleReturnRef.current.lastInteraction = null;
+    idleReturnRef.current.active = false;
+    idleReturnRef.current.locked = false;
+  }
+
+  useEffect(() => {
+    const stopOrbit = () => {
+      const pointerId = orbitRef.current.pointerId;
+      if (pointerId === null) return;
+      suppressClickRef.current = orbitRef.current.moved;
+      orbitRef.current.pointerId = null;
+      setDragging(false);
+      const canvas = canvasRef.current;
+      if (canvas?.hasPointerCapture(pointerId)) canvas.releasePointerCapture(pointerId);
+    };
+    const isEditable = (target: EventTarget | null) => target instanceof HTMLElement
+      && (target.matches("input, textarea, select") || target.isContentEditable);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== "Space" || isEditable(event.target)) return;
+      const canvasActive = orbitRef.current.pointerInside || document.activeElement === canvasRef.current;
+      if (!canvasActive) return;
+      event.preventDefault();
+      if (spaceHeldRef.current) return;
+      spaceHeldRef.current = true;
+      setSpaceHeld(true);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.code !== "Space" || !spaceHeldRef.current) return;
+      event.preventDefault();
+      spaceHeldRef.current = false;
+      setSpaceHeld(false);
+      stopOrbit();
+    };
+    const onBlur = () => {
+      spaceHeldRef.current = false;
+      setSpaceHeld(false);
+      stopOrbit();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let frame = 0;
+    let lastTime = performance.now();
+    if (idleReturnRef.current.lastInteraction === null) {
+      idleReturnRef.current.lastInteraction = lastTime;
+    }
+
+    const render = (time: number) => {
+      const rect = canvas.getBoundingClientRect();
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(rect.width, 1);
+      const height = Math.max(rect.height, 1);
+      const targetWidth = Math.round(width * pixelRatio);
+      const targetHeight = Math.round(height * pixelRatio);
+      if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+      }
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      context.clearRect(0, 0, width, height);
+
+      const elapsed = Math.min(time - lastTime, 40);
+      lastTime = time;
+      const idleReturn = idleReturnRef.current;
+      const isIdle = orbitRef.current.pointerId === null
+        && time - (idleReturn.lastInteraction ?? time) >= 30_000;
+      if (isIdle && !idleReturn.locked) {
+        if (!idleReturn.active) {
+          idleReturn.active = true;
+          idleReturn.startedAt = time;
+          idleReturn.startRotation = { ...rotationRef.current };
+        }
+        const progress = reduceMotion ? 1 : Math.min(1, (time - idleReturn.startedAt) / 4_000);
+        const spring = 1 - ((1 - progress) ** 3) * Math.cos(progress * Math.PI * 2);
+        rotationRef.current = {
+          x: idleReturn.startRotation.x + shortestAngleDelta(idleReturn.startRotation.x, CANONICAL_ORIENTATION.x) * spring,
+          y: idleReturn.startRotation.y + shortestAngleDelta(idleReturn.startRotation.y, CANONICAL_ORIENTATION.y) * spring,
+          z: idleReturn.startRotation.z + shortestAngleDelta(idleReturn.startRotation.z, CANONICAL_ORIENTATION.z) * spring,
+        };
+        if (progress >= 1) {
+          rotationRef.current = { ...CANONICAL_ORIENTATION };
+          idleReturn.active = false;
+          idleReturn.locked = true;
+          if (rotating) setRotating(false);
+        }
+      } else if (rotating && !reduceMotion && orbitRef.current.pointerId === null && !idleReturn.locked) {
+        rotationRef.current.y += elapsed * (0.000065 + body.overallCoherence * 0.000085);
+      }
+
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const fieldSize = Math.min(width, height);
+      const latticeScale = fieldSize * 0.84;
+      const sphereBreath = reduceMotion ? 0 : Math.sin(time * 0.0008) * (0.002 + body.overallCoherence * 0.0025);
+      const sphereRadius = fieldSize * (0.445 + sphereBreath);
+      const angleX = rotationRef.current.x;
+      const angleY = rotationRef.current.y;
+      const angleZ = rotationRef.current.z;
+      const projectedVertices = DODECAHEDRON_VERTICES.map((coordinates): ProjectedPoint => {
+        const [x, y, z] = rotatePoint(coordinates, angleY, angleX, angleZ);
+        const perspective = 1 / (4.8 - z);
+        return {
+          x: centerX + x * latticeScale * perspective,
+          y: centerY + y * latticeScale * perspective,
+          z,
+        };
+      });
+      const compassPoints = COMPASS_DIRECTIONS.map((direction) => {
+        const [x, y, z] = rotatePoint(direction.coordinates, angleY, angleX, angleZ);
+        const perspective = 1 / (4.8 - z);
+        return {
+          ...direction,
+          x: centerX + x * latticeScale * perspective,
+          y: centerY + y * latticeScale * perspective,
+          z,
+        };
+      });
+      const axisPoints = ([
+        [-1.197453, -0.740066, -1.022747],
+        [1.197453, 0.740066, 1.022747],
+      ] as Point3[]).map((coordinates) => {
+        const [x, y, z] = rotatePoint(coordinates, angleY, angleX, angleZ);
+        const perspective = 1 / (4.8 - z);
+        return { x: centerX + x * latticeScale * perspective, y: centerY + y * latticeScale * perspective, z };
+      });
+      const vortexClock = !reduceMotion && body.overallCoherence < 0.5
+        ? Math.floor(time / (95 - body.overallCoherence * 100)) * (95 - body.overallCoherence * 100)
+        : time;
+      const vortexPhase = reduceMotion ? 0 : -vortexClock * (0.00018 + body.overallCoherence * 0.00024);
+      const vortexSteps = 108;
+      const vortexPoints = Array.from({ length: vortexSteps + 1 }, (_, index) => {
+        const u = (index / vortexSteps) * Math.PI * 2 + vortexPhase;
+        const v = u * 3 + vortexPhase * 0.7;
+        const majorRadius = 1.3;
+        const minorRadius = 0.4;
+        const coordinates: Point3 = [
+          (majorRadius + minorRadius * Math.cos(v)) * Math.cos(u),
+          minorRadius * Math.sin(v),
+          (majorRadius + minorRadius * Math.cos(v)) * Math.sin(u),
+        ];
+        const [x, y, z] = rotatePoint(coordinates, angleY, angleX, angleZ);
+        const perspective = 1 / (4.8 - z);
+        return { x: centerX + x * latticeScale * perspective, y: centerY + y * latticeScale * perspective, z };
+      });
+      const projectedFaces = DODECAHEDRON_FACES.map(({ house, vertexIndices }): ProjectedFace => {
+        const points = vertexIndices.map((index) => projectedVertices[index]);
+        const x = points.reduce((sum, point) => sum + point.x, 0) / points.length;
+        const y = points.reduce((sum, point) => sum + point.y, 0) / points.length;
+        const z = points.reduce((sum, point) => sum + point.z, 0) / points.length;
+        const radius = points.reduce((sum, point) => sum + Math.hypot(point.x - x, point.y - y), 0) / points.length;
+        const facing = rotatePoint(FACE_COORDINATES[house], angleY, angleX, angleZ)[2];
+        return { house, x, y, z, radius, facing, points };
+      });
+      const topologyEdgeMap = new Map(DODECAHEDRON_EDGES.map((edge) => [edge.id, edge]));
+      const edges = body.edges.map((edge): ProjectedEdge => {
+        const topology = topologyEdgeMap.get(edge.id)!;
+        const from = projectedVertices[topology.vertexIndices[0]];
+        const to = projectedVertices[topology.vertexIndices[1]];
+        return { id: edge.id, from, to, z: (from.z + to.z) / 2 };
+      });
+      hitMapRef.current = { faces: projectedFaces, edges, center: { x: centerX, y: centerY } };
+
+      const radial = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.min(width, height) * 0.48);
+      radial.addColorStop(0, "rgba(184, 255, 90, 0.09)");
+      radial.addColorStop(0.45, "rgba(94, 234, 212, 0.035)");
+      radial.addColorStop(1, "rgba(3, 8, 8, 0)");
+      context.fillStyle = radial;
+      context.fillRect(0, 0, width, height);
+
+      if (layers.sphere) {
+        const sphereField = context.createRadialGradient(
+          centerX - sphereRadius * 0.22,
+          centerY - sphereRadius * 0.28,
+          sphereRadius * 0.04,
+          centerX,
+          centerY,
+          sphereRadius,
+        );
+        sphereField.addColorStop(0, `rgba(210, 255, 225, ${0.025 + body.overallCoherence * 0.025})`);
+        sphereField.addColorStop(0.58, `rgba(111, 160, 144, ${0.012 + body.overallCoherence * 0.02})`);
+        sphereField.addColorStop(0.9, `rgba(143, 91, 255, ${0.025 + body.overallCoherence * 0.035})`);
+        sphereField.addColorStop(1, "rgba(5, 10, 8, 0)");
+        context.beginPath();
+        context.arc(centerX, centerY, sphereRadius, 0, Math.PI * 2);
+        context.fillStyle = sphereField;
+        context.fill();
+
+        context.save();
+        context.translate(centerX, centerY);
+        context.rotate(angleY * 0.35);
+        context.strokeStyle = `rgba(205, 239, 220, ${0.07 + body.overallCoherence * 0.12})`;
+        context.lineWidth = 0.8;
+        context.setLineDash([2, 7]);
+        context.beginPath();
+        context.ellipse(0, 0, sphereRadius, sphereRadius * 0.28, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.beginPath();
+        context.ellipse(0, 0, sphereRadius * 0.3, sphereRadius, angleX * 0.45, 0, Math.PI * 2);
+        context.stroke();
+        context.restore();
+        context.setLineDash([]);
+
+        const sphereBoundary = context.createLinearGradient(
+          centerX - sphereRadius,
+          centerY - sphereRadius,
+          centerX + sphereRadius,
+          centerY + sphereRadius,
+        );
+        sphereBoundary.addColorStop(0, "rgba(142, 181, 160, 0.18)");
+        sphereBoundary.addColorStop(0.34, `rgba(227, 255, 237, ${0.32 + body.overallCoherence * 0.35})`);
+        sphereBoundary.addColorStop(0.7, `rgba(167, 132, 255, ${0.22 + body.overallCoherence * 0.26})`);
+        sphereBoundary.addColorStop(1, "rgba(114, 145, 130, 0.14)");
+        context.beginPath();
+        context.arc(centerX, centerY, sphereRadius, 0, Math.PI * 2);
+        context.strokeStyle = sphereBoundary;
+        context.shadowColor = body.overallCoherence > 0.6 ? "rgba(184, 255, 90, 0.28)" : "rgba(255, 209, 102, 0.16)";
+        context.shadowBlur = 10 + body.overallCoherence * 15;
+        context.lineWidth = 1.2 + body.overallCoherence * 0.8;
+        context.stroke();
+        context.shadowBlur = 0;
+      }
+
+      if (layers.compass) compassPoints.forEach((point) => {
+        context.beginPath();
+        context.moveTo(centerX, centerY);
+        context.lineTo(point.x, point.y);
+        context.strokeStyle = point.z > 0
+          ? "rgba(206, 233, 217, 0.24)"
+          : "rgba(135, 154, 144, 0.11)";
+        context.lineWidth = 0.75;
+        context.setLineDash([2, 7]);
+        context.stroke();
+      });
+      context.setLineDash([]);
+
+      if (layers.torus) {
+      const axisGradient = context.createLinearGradient(axisPoints[0].x, axisPoints[0].y, axisPoints[1].x, axisPoints[1].y);
+      axisGradient.addColorStop(0, "rgba(143, 91, 255, 0)");
+      axisGradient.addColorStop(0.22, "rgba(167, 132, 255, 0.42)");
+      axisGradient.addColorStop(0.5, "rgba(236, 226, 255, 0.74)");
+      axisGradient.addColorStop(0.78, "rgba(167, 132, 255, 0.42)");
+      axisGradient.addColorStop(1, "rgba(143, 91, 255, 0)");
+      context.beginPath();
+      context.moveTo(axisPoints[0].x, axisPoints[0].y);
+      context.lineTo(axisPoints[1].x, axisPoints[1].y);
+      context.strokeStyle = axisGradient;
+      context.lineWidth = 1.25;
+      context.stroke();
+
+      [0, 0.5].forEach((offset, index) => {
+        const axisPhase = reduceMotion
+          ? 0.5
+          : (time * (0.0001 + body.overallCoherence * 0.00016) + offset) % 1;
+        const from = index === 0 ? axisPoints[0] : axisPoints[1];
+        const to = index === 0 ? axisPoints[1] : axisPoints[0];
+        const pulseX = from.x + (to.x - from.x) * axisPhase;
+        const pulseY = from.y + (to.y - from.y) * axisPhase;
+        context.beginPath();
+        context.arc(pulseX, pulseY, 2.2 + body.overallCoherence, 0, Math.PI * 2);
+        context.fillStyle = index === 0 ? "rgba(231, 255, 218, 0.9)" : "rgba(189, 167, 255, 0.88)";
+        context.shadowColor = index === 0 ? "rgba(184, 255, 90, 0.8)" : "rgba(143, 91, 255, 0.86)";
+        context.shadowBlur = 10;
+        context.fill();
+        context.shadowBlur = 0;
+      });
+
+      vortexPoints.slice(1).forEach((point, index) => {
+        const previous = vortexPoints[index];
+        const depth = Math.max(0, Math.min(1, (point.z + 1) / 2));
+        context.beginPath();
+        context.moveTo(previous.x, previous.y);
+        context.lineTo(point.x, point.y);
+        context.strokeStyle = `rgba(170, 132, 255, ${0.16 + depth * 0.5})`;
+        context.lineWidth = 0.8 + depth * 1.1;
+        context.stroke();
+      });
+
+      HOUSE_SPECTRUM_ORDER.forEach((house, index) => {
+        const point = vortexPoints[Math.round((index / 12) * vortexSteps)];
+        const presence = housePresence[house.house];
+        const revealsHouseColor = presence.level === "lit" || presence.level === "bright";
+        context.beginPath();
+        context.arc(point.x, point.y, 2.2 + body.overallCoherence * 1.4, 0, Math.PI * 2);
+        context.fillStyle = revealsHouseColor ? house.colorHex : RESTING_STRUCTURE_COLOR;
+        context.globalAlpha = (presence.level === "bright" ? 0.78 : revealsHouseColor ? 0.58 : 0.3)
+          + Math.max(0, Math.min(1, (point.z + 1) / 2)) * 0.18;
+        context.fill();
+      });
+      context.globalAlpha = 1;
+      }
+
+      if (layers.dodecahedron) [...projectedFaces]
+        .sort((faceA, faceB) => faceA.z - faceB.z)
+        .forEach((point) => {
+          const spectrum = HOUSE_SPECTRUM[point.house];
+          const presence = housePresence[point.house];
+          const selected = selection.kind === "face" && selection.id === point.house;
+          const hasAstrologicalPresence = presence.level === "lit" || presence.level === "bright";
+          const revealsHouseColor = selected || hasAstrologicalPresence;
+          const frontFacing = point.facing > 0;
+          const breath = reduceMotion ? 0.5 : (Math.sin(time * 0.0015 + point.house * 0.7) + 1) / 2;
+          const energy = presence.level === "bright" ? 1 : presence.level === "lit" ? 0.78 : 0.28;
+          const faceAlpha = frontFacing
+            ? 0.1 + energy * 0.16 + breath * 0.045
+            : 0.018 + energy * 0.018;
+          tracePolygon(context, point.points);
+          context.fillStyle = revealsHouseColor
+            ? hexToRgba(spectrum.colorHex, selected ? 0.44 : presence.level === "bright" ? Math.max(faceAlpha, 0.36) : faceAlpha)
+            : hexToRgba(RESTING_STRUCTURE_COLOR, faceAlpha * 0.82);
+          context.fill();
+          if (selected) {
+            context.strokeStyle = spectrum.colorHex;
+            context.shadowColor = spectrum.colorHex;
+            context.shadowBlur = 18;
+            context.globalAlpha = 0.96;
+            context.lineWidth = 2.5;
+            context.stroke();
+            context.globalAlpha = 1;
+            context.shadowBlur = 0;
+          }
+        });
+
+      const quincunxPoints = QUINCUNX_DOMAINS.map((point) => {
+        const [x, y, z] = rotatePoint(point.coordinates, angleY, angleX, angleZ);
+        const perspective = 1 / (4.8 - z);
+        return {
+          ...point,
+          coherence: body.quincunx.corners[point.id].coherence,
+          x: centerX + x * latticeScale * perspective,
+          y: centerY + y * latticeScale * perspective,
+          z,
+        };
+      });
+      const physicalPoint = quincunxPoints[0];
+      const mentalPoint = quincunxPoints[1];
+      const quincunxOutline = [
+        quincunxPoints[1],
+        quincunxPoints[3],
+        quincunxPoints[0],
+        quincunxPoints[2],
+      ];
+
+      if (layers.quincunx) {
+      context.beginPath();
+      quincunxOutline.forEach((point, index) => {
+        if (index === 0) context.moveTo(point.x, point.y);
+        else context.lineTo(point.x, point.y);
+      });
+      context.closePath();
+      context.fillStyle = "rgba(143, 91, 255, 0.055)";
+      context.fill();
+      context.strokeStyle = "rgba(222, 214, 246, 0.48)";
+      context.lineWidth = 1.15;
+      context.stroke();
+
+      quincunxPoints.forEach((point) => {
+        const connection = context.createLinearGradient(centerX, centerY, point.x, point.y);
+        connection.addColorStop(0, "rgba(143, 91, 255, 0.72)");
+        connection.addColorStop(1, hexToRgba(point.color, 0.72));
+        context.beginPath();
+        context.moveTo(centerX, centerY);
+        context.lineTo(point.x, point.y);
+        context.strokeStyle = connection;
+        context.globalAlpha = 0.42 + point.coherence * 0.48;
+        context.lineWidth = 1.15 + point.coherence * 0.65;
+        context.stroke();
+      });
+      context.globalAlpha = 1;
+
+      context.beginPath();
+      context.moveTo(physicalPoint.x, physicalPoint.y);
+      context.lineTo(mentalPoint.x, mentalPoint.y);
+      context.strokeStyle = Math.abs(balanceDelta) < 0.05 ? "rgba(184, 255, 90, 0.86)" : "rgba(255, 209, 102, 0.86)";
+      context.lineWidth = 2.2;
+      context.stroke();
+
+      quincunxPoints.forEach((point) => {
+        const nodeRadius = 9 + point.coherence * 4;
+        context.beginPath();
+        context.arc(point.x, point.y, nodeRadius + 5, 0, Math.PI * 2);
+        context.fillStyle = hexToRgba(point.color, 0.12 + point.coherence * 0.08);
+        context.fill();
+        context.beginPath();
+        context.arc(point.x, point.y, nodeRadius, 0, Math.PI * 2);
+        context.fillStyle = "rgba(6, 10, 8, 0.94)";
+        context.fill();
+        context.strokeStyle = point.color;
+        context.lineWidth = 1.5;
+        context.stroke();
+        context.fillStyle = point.color;
+        context.font = "800 12px ui-monospace, SFMono-Regular, Menlo, monospace";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(point.symbol, point.x, point.y + 0.5);
+
+        if (layers.labels) {
+          const labelOnLeft = point.coordinates[0] < 0;
+          context.textAlign = labelOnLeft ? "right" : "left";
+          context.fillStyle = "#f1f5f2";
+          context.font = "800 10px ui-monospace, SFMono-Regular, Menlo, monospace";
+          context.fillText(point.label, point.x + (labelOnLeft ? -nodeRadius - 7 : nodeRadius + 7), point.y - 4);
+          context.fillStyle = hexToRgba(point.color, 0.92);
+          context.font = "650 10px ui-monospace, SFMono-Regular, Menlo, monospace";
+          context.fillText(`${point.element} · ${point.current} · ${formatPercent(point.coherence)}`, point.x + (labelOnLeft ? -nodeRadius - 7 : nodeRadius + 7), point.y + 8);
+        }
+      });
+      }
+
+      const projectedEdgeMap = new Map(edges.map((edge) => [edge.id, edge]));
+      context.lineCap = "round";
+      context.lineJoin = "round";
+      if (layers.dodecahedron) [...body.edges]
+        .sort((edgeA, edgeB) => projectedEdgeMap.get(edgeA.id)!.z - projectedEdgeMap.get(edgeB.id)!.z)
+        .forEach((edge, edgeIndex) => {
+          const line = projectedEdgeMap.get(edge.id)!;
+          const selected = selection.kind === "edge" && selection.id === edge.id;
+          const frontEdge = line.z > -0.05;
+          const pathwayColor = edge.flow > 0 ? COLORS[edge.valve] : RESTING_STRUCTURE_COLOR;
+          context.beginPath();
+          context.moveTo(line.from.x, line.from.y);
+          context.lineTo(line.to.x, line.to.y);
+          context.strokeStyle = pathwayColor;
+          context.shadowColor = selected ? COLORS[edge.valve] : pathwayColor;
+          context.shadowBlur = selected ? 16 : frontEdge ? (edge.flow > 0.55 ? 8 : 4) : 0;
+          context.globalAlpha = selected
+            ? 1
+            : frontEdge
+              ? 0.68 + edge.flow * 0.3
+              : 0.22 + edge.flow * 0.18;
+          context.lineWidth = selected ? 3.6 : frontEdge ? 1.45 + edge.flow * 1.35 : 0.9 + edge.flow * 0.4;
+          context.setLineDash([]);
+          context.stroke();
+          context.shadowBlur = 0;
+
+          if (frontEdge && edge.flow > 0.08 && edge.valve !== "CLOSE") {
+            const flowPhase = reduceMotion
+              ? 0.5
+              : (time * (0.00008 + body.overallCoherence * 0.00018) + edgeIndex * 0.137) % 1;
+            const pulseX = line.from.x + (line.to.x - line.from.x) * flowPhase;
+            const pulseY = line.from.y + (line.to.y - line.from.y) * flowPhase;
+            context.beginPath();
+            context.arc(pulseX, pulseY, 1.3 + edge.flow * 1.4, 0, Math.PI * 2);
+            context.fillStyle = pathwayColor;
+            context.shadowColor = pathwayColor;
+            context.shadowBlur = 7 + edge.flow * 6;
+            context.globalAlpha = 0.48 + edge.flow * 0.5;
+            context.fill();
+            context.shadowBlur = 0;
+          }
+        });
+      context.setLineDash([]);
+      context.globalAlpha = 1;
+
+      if (layers.dodecahedron && layers.labels) [...projectedFaces]
+        .sort((faceA, faceB) => faceA.z - faceB.z)
+        .forEach((point) => {
+          const face = body.faces.find((item) => item.house.number === point.house)!;
+          const spectrum = HOUSE_SPECTRUM[point.house];
+          const selected = selection.kind === "face" && selection.id === point.house;
+          if (point.facing <= 0.08 && !selected) return;
+          const primaryLabel = `${HOUSE_ROMAN[point.house]} · ${face.house.name.toUpperCase()}`;
+          const labelColor = mixHouseColors(spectrum.colorHex, "#ffffff");
+          const maximumLabelWidth = Math.max(72, point.radius * 1.85);
+          let labelSize = Math.max(11, Math.min(14, point.radius * 0.28));
+
+          context.beginPath();
+          context.arc(point.x, point.y, face.active ? 2.8 : 1.8, 0, Math.PI * 2);
+          context.fillStyle = COLORS[face.valve];
+          context.globalAlpha = face.active || selected ? 1 : 0.7;
+          context.fill();
+          context.globalAlpha = 1;
+
+          context.font = `750 ${selected ? labelSize + 1 : labelSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+          while (context.measureText(primaryLabel).width > maximumLabelWidth && labelSize > 11) {
+            labelSize -= 0.5;
+            context.font = `750 ${selected ? labelSize + 1 : labelSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+          }
+          const labelWidth = context.measureText(primaryLabel).width;
+          context.fillStyle = "rgba(2, 7, 5, 0.9)";
+          context.fillRect(point.x - labelWidth / 2 - 6, point.y - 16, labelWidth + 12, 20);
+          context.fillStyle = labelColor;
+          context.shadowColor = spectrum.colorHex;
+          context.shadowBlur = 5;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillText(primaryLabel, point.x, point.y - 5);
+          context.shadowBlur = 0;
+          context.fillStyle = labelColor;
+          context.font = "750 10px ui-monospace, SFMono-Regular, Menlo, monospace";
+          context.fillText(`${face.house.current} · ${face.valve}`, point.x, point.y + 12);
+        });
+
+      if (layers.compass) [...compassPoints]
+        .sort((pointA, pointB) => pointA.z - pointB.z)
+        .forEach((point) => {
+          context.beginPath();
+          context.arc(point.x, point.y, 12, 0, Math.PI * 2);
+          context.fillStyle = point.z > 0 ? "rgba(9, 16, 12, 0.96)" : "rgba(7, 11, 9, 0.76)";
+          context.fill();
+          context.strokeStyle = point.z > 0 ? "rgba(217, 245, 226, 0.82)" : "rgba(127, 148, 137, 0.44)";
+          context.lineWidth = 1;
+          context.stroke();
+          context.fillStyle = point.z > 0 ? "#f3fff6" : "#819087";
+          context.font = "800 10px ui-monospace, SFMono-Regular, Menlo, monospace";
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillText(point.label, point.x, point.y + 0.5);
+        });
+
+      if (layers.human) {
+        const anchorPulse = reduceMotion ? 0 : Math.sin(time * 0.0025) * 2;
+        context.beginPath();
+        context.arc(centerX, centerY, 29 + anchorPulse, 0, Math.PI * 2);
+        context.strokeStyle = profile ? "rgba(184, 255, 90, 0.72)" : "rgba(255, 209, 102, 0.48)";
+        context.lineWidth = 1.2;
+        context.stroke();
+
+        context.beginPath();
+        context.arc(centerX, centerY, 23 - anchorPulse * 0.4, 0, Math.PI * 2);
+        context.strokeStyle = profile ? "rgba(184, 255, 90, 0.22)" : "rgba(255, 209, 102, 0.16)";
+        context.setLineDash([2, 4]);
+        context.stroke();
+        context.setLineDash([]);
+      }
+
+      frame = requestAnimationFrame(render);
+    };
+
+    frame = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(frame);
+  }, [balanceDelta, body, collapseCoherence, expanseCoherence, housePresence, layers, profile, rotating, selection]);
+
+  function beginOrbit(event: ReactPointerEvent<HTMLCanvasElement>) {
+    event.currentTarget.focus({ preventScroll: true });
+    if (!spaceHeldRef.current || event.button !== 0) return;
+    markObjectInteraction();
+    const rotation = rotationRef.current;
+    orbitRef.current.pointerId = event.pointerId;
+    orbitRef.current.startX = event.clientX;
+    orbitRef.current.startY = event.clientY;
+    orbitRef.current.startRotationX = rotation.x;
+    orbitRef.current.startRotationY = rotation.y;
+    orbitRef.current.moved = false;
+    suppressClickRef.current = false;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDragging(true);
+    event.preventDefault();
+  }
+
+  function moveOrbit(event: ReactPointerEvent<HTMLCanvasElement>) {
+    if (orbitRef.current.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - orbitRef.current.startX;
+    const deltaY = event.clientY - orbitRef.current.startY;
+    if (Math.hypot(deltaX, deltaY) > 3) orbitRef.current.moved = true;
+    rotationRef.current.y = orbitRef.current.startRotationY + deltaX * 0.007;
+    rotationRef.current.x = orbitRef.current.startRotationX + deltaY * 0.007;
+    event.preventDefault();
+  }
+
+  function finishOrbit(event: ReactPointerEvent<HTMLCanvasElement>) {
+    if (orbitRef.current.pointerId !== event.pointerId) return;
+    suppressClickRef.current = orbitRef.current.moved;
+    orbitRef.current.pointerId = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setDragging(false);
+  }
+
+  function inspectAt(clientX: number, clientY: number) {
+    markObjectInteraction();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const center = hitMapRef.current.center;
+    if (layers.human && center && Math.hypot(x - center.x, y - center.y) <= 34) {
+      setSelection({ kind: "center", id: "Ø" });
+      return;
+    }
+    if (!layers.dodecahedron) return;
+    const edge = [...hitMapRef.current.edges]
+      .sort((a, b) => b.z - a.z)
+      .find((line) => distanceToSegment(x, y, line.from.x, line.from.y, line.to.x, line.to.y) <= 8);
+    if (edge) {
+      setSelection({ kind: "edge", id: edge.id });
+      return;
+    }
+    const face = [...hitMapRef.current.faces]
+      .filter((point) => point.facing > 0)
+      .sort((a, b) => b.z - a.z)
+      .find((point) => isPointInPolygon(x, y, point.points));
+    if (face) setSelection({ kind: "face", id: face.house });
+  }
+
+  function toggleLayer(layer: FieldLayer) {
+    markObjectInteraction();
+    setLayers((current) => ({ ...current, [layer]: !current[layer] }));
+  }
+
+  function resetOrientation() {
+    markObjectInteraction();
+    rotationRef.current = { ...CANONICAL_ORIENTATION };
+    setRotating(false);
+  }
+
+  function toggleRotation() {
+    markObjectInteraction();
+    setRotating((value) => !value);
+  }
+
+  return (
+    <section className="living-model" aria-label="Dodecanic living field">
+      <div className="living-stage">
+        <canvas
+          ref={canvasRef}
+          className={`living-canvas${spaceHeld ? " is-orbit-ready" : ""}${dragging ? " is-orbiting" : ""}`}
+          role="img"
+          aria-label="Interactive modeled living field. Use the nearby layer controls to show or hide the Sphere, torus, dodecahedron, quincunx, compass, human center, and labels."
+          tabIndex={0}
+          onPointerEnter={() => { orbitRef.current.pointerInside = true; }}
+          onPointerLeave={() => { orbitRef.current.pointerInside = false; }}
+          onPointerDown={beginOrbit}
+          onPointerMove={moveOrbit}
+          onPointerUp={finishOrbit}
+          onPointerCancel={finishOrbit}
+          onClick={(event) => {
+            if (suppressClickRef.current) {
+              suppressClickRef.current = false;
+              return;
+            }
+            inspectAt(event.clientX, event.clientY);
+          }}
+        />
+        {layers.sphere && layers.labels && <div className="field-boundary-label" aria-hidden="true">
+          <span>∞ / Sphere</span>
+          <strong>The Whole</strong>
+          <small>Modeled field boundary</small>
+        </div>}
+        {layers.human && <div
+          className={`human-anchor${selection.kind === "center" ? " is-selected" : ""}`}
+          data-profile={profile ? "placed" : "pending"}
+          aria-hidden="true"
+        >
+          {layers.torus && layers.labels && <span className="vortex-axis-label">POSITION 9 / SYSTEM AXIS / THE TURN</span>}
+          {layers.labels && <span className="human-anchor-label">YOU / ETHEREAL CENTER</span>}
+          <div className="human-orbit">
+            <svg className="human-figure" viewBox="0 0 120 150" aria-hidden="true">
+              <g className="human-echo">
+                <path d="M51 43 C41 44 32 50 24 57 L7 72 C3 76 5 80 10 77 L30 64 C39 59 47 56 53 54 Z" />
+                <path d="M69 43 C79 44 88 50 96 57 L113 72 C117 76 115 80 110 77 L90 64 C81 59 73 56 67 54 Z" />
+                <path d="M53 85 C47 91 40 102 31 122 L24 140 C22 145 28 147 31 142 L42 126 L57 99 Z" />
+                <path d="M67 85 C73 91 80 102 89 122 L96 140 C98 145 92 147 89 142 L78 126 L63 99 Z" />
+              </g>
+              <g className="human-body">
+                <ellipse cx="60" cy="19" rx="10" ry="13" />
+                <path d="M55 31 L53 37 C46 38 39 40 33 44 L16 53 L5 57 C1 59 2 64 7 64 L19 61 L40 52 L48 50 L48 68 C48 75 45 82 46 89 L51 97 L48 126 L46 143 C46 148 52 149 54 144 L58 126 L60 103 L62 126 L66 144 C68 149 74 148 74 143 L72 126 L69 97 L74 89 C75 82 72 75 72 68 L72 50 L80 52 L101 61 L113 64 C118 64 119 59 115 57 L104 53 L87 44 C81 40 74 38 67 37 L65 31 Z" />
+                <path className="human-detail" d="M53 39 Q60 45 67 39 M49 58 Q60 64 71 58 M48 81 Q60 87 72 81 M60 33 L60 98 M53 70 Q60 74 67 70" />
+                <circle className="human-detail" cx="60" cy="75" r="1.8" />
+                <path className="human-detail" d="M55 16 Q60 19 65 16 M56 25 Q60 27 64 25" />
+              </g>
+            </svg>
+          </div>
+          {layers.labels && <strong>{selection.kind === "center" ? "Ø SELECTED" : "Ø CENTER"}</strong>}
+          {layers.labels && <small>{profile ? `${profile.birthDate} · ${formatBirthTime(profile)}` : "ORIGIN AWAITS"}</small>}
+        </div>}
+        <div className="living-overlay living-overlay-top">
+          <span className={`connection-light is-${connection}`} />
+          <span>{connection === "live" ? "SESSION MEMORY LIVE" : connection === "connecting" ? "CONNECTING" : "LOCAL SYSTEM"}</span>
+          <em>{snapshot.source === "live" ? "CURRENT PROMPT" : "MEMORY REPLAY"}</em>
+        </div>
+        <div className="living-overlay living-overlay-bottom">
+          <span><strong>{formatPercent(body.overallCoherence)}</strong> coherence</span>
+          <span><strong>{body.edges.filter((edge) => edge.flow > 0).length}/30</strong> flowing</span>
+          <span><strong>{body.faces.filter((face) => face.active).length}/12</strong> active</span>
+          <span><strong>20V · 12F</strong> solid</span>
+          <span><strong>{formatPercent(aethericCoherence)}</strong> aetheric</span>
+          <span><strong>{Math.round(Math.abs(balanceDelta) * 100)}</strong> {balanceLabel}</span>
+        </div>
+        <div className={`orbit-hint${spaceHeld ? " is-active" : ""}`} aria-hidden="true">
+          <kbd>SPACE</kbd>
+          <span>{dragging ? "ORBITING" : spaceHeld ? "DRAG TO ORBIT" : "HOLD + DRAG"}</span>
+        </div>
+        <div className="field-layer-controls" aria-label="Field layer visibility">
+          <span>Layers</span>
+          <div>
+            {FIELD_LAYERS.map((layer) => (
+              <button
+                key={layer.id}
+                type="button"
+                data-active={layers[layer.id]}
+                aria-pressed={layers[layer.id]}
+                onClick={() => toggleLayer(layer.id)}
+              >
+                <i aria-hidden="true" />{layer.label}
+              </button>
+            ))}
+          </div>
+          <button className="triangle-locator" type="button" onClick={onOpenTriangle}>
+            <b aria-hidden="true">△</b> Triangle / Session
+          </button>
+        </div>
+        <div className="orientation-controls">
+          <button type="button" onClick={resetOrientation}>N·S·E·W</button>
+          <button className="rotation-toggle" type="button" onClick={toggleRotation}>
+            {rotating ? "Pause rotation" : "Resume rotation"}
+          </button>
+        </div>
+      </div>
+
+      <ObserverInspector
+        selectedFace={selectedFace}
+        selectedEdge={selectedEdge}
+        selectedCenter={selection.kind === "center"}
+        housePresence={housePresence}
+        community={community}
+        profile={profile}
+        onSelectFace={(id) => {
+          markObjectInteraction();
+          setSelection({ kind: "face", id });
+        }}
+      />
+    </section>
+  );
+}
+
+function ObserverInspector({
+  selectedFace,
+  selectedEdge,
+  selectedCenter,
+  housePresence,
+  community,
+  profile,
+  onSelectFace,
+}: {
+  selectedFace: HouseFaceState | null;
+  selectedEdge: DodecahedralEdgeState | null;
+  selectedCenter: boolean;
+  housePresence: HousePresenceMap;
+  community: CommunityTelemetry;
+  profile: BirthProfile | null;
+  onSelectFace: (house: HouseNumber) => void;
+}) {
+  if (selectedCenter) {
+    return (
+      <aside className="observer-inspector" aria-live="polite">
+        <p className="eyebrow">YOU / Ø / Ethereal center</p>
+        <h3>{profile ? "You in the Field" : "Your Place Awaits"} <span>Ø</span></h3>
+        <div className="inspector-reading" data-valve={profile ? "OPEN" : "MONITOR"}>
+          <strong>{profile ? "PLACED" : "PENDING"}</strong>
+          <span>LIVING FIELD CENTER</span>
+        </div>
+        <dl>
+          {profile ? (
+            <>
+              <div><dt>Birth date</dt><dd>{profile.birthDate}</dd></div>
+              <div><dt>Birth time</dt><dd>{formatBirthTime(profile)}</dd></div>
+              <div><dt>Birth place</dt><dd>{profile.birthPlace}</dd></div>
+            </>
+          ) : (
+            <>
+              <div><dt>Birth date</dt><dd>Not provided</dd></div>
+              <div><dt>Birth time</dt><dd>Not provided</dd></div>
+              <div><dt>Birth place</dt><dd>Not provided</dd></div>
+            </>
+          )}
+          <div><dt>Body link</dt><dd>Ethereal / quincunx center</dd></div>
+          <div><dt>Whole</dt><dd>Sphere / personal field</dd></div>
+          <div><dt>Structure</dt><dd>Dodecahedron / 12 Houses</dd></div>
+          <div><dt>Flow</dt><dd>Torus / modeled circulation</dd></div>
+          <div><dt>System</dt><dd>Position 9 / vortex axis</dd></div>
+        </dl>
+        <p className="observer-reason">
+          {profile
+            ? "Your submitted origin anchors you at the Ethereal center of your Sphere. The dodecahedron structures twelve Houses inside it; the torus models circulation through the whole. Position 9 witnesses the turn without becoming you or replacing your authority."
+            : "Ø reserves the center of the Sphere for you. Position 9 is the system axis. Add birth coordinates in the You shelf; verified chart placement remains pending."}
+        </p>
+        <div className="community-reading">
+          <span>Session memory</span>
+          <strong>{community.observedCycles} cycles</strong>
+          <em>{formatPercent(community.averageCoherence)} mean</em>
+        </div>
+      </aside>
+    );
+  }
+
+  if (selectedEdge) {
+    return (
+      <aside className="observer-inspector" aria-live="polite">
+        <p className="eyebrow">Edge {selectedEdge.id} / protocol</p>
+        <h3>{selectedEdge.houseA.name} ↔ {selectedEdge.houseB.name}</h3>
+        <div className="inspector-reading" data-valve={selectedEdge.valve}>
+          <strong>{selectedEdge.valve}</strong>
+          <span>{Math.round(selectedEdge.flow * 100)}% flow</span>
+        </div>
+        <dl>
+          <div><dt>Currents</dt><dd>{selectedEdge.houseA.current} + {selectedEdge.houseB.current}</dd></div>
+          <div><dt>Lookup</dt><dd>{selectedEdge.lookupCode}</dd></div>
+          <div><dt>Endpoints</dt><dd>{HOUSE_ROMAN[selectedEdge.houseA.number]} / {HOUSE_ROMAN[selectedEdge.houseB.number]}</dd></div>
+        </dl>
+        <p className="observer-reason">{selectedEdge.reason}</p>
+        <div className="inspector-actions">
+          <button type="button" onClick={() => onSelectFace(selectedEdge.houseA.number)}>Inspect {selectedEdge.houseA.name}</button>
+          <button type="button" onClick={() => onSelectFace(selectedEdge.houseB.number)}>Inspect {selectedEdge.houseB.name}</button>
+        </div>
+      </aside>
+    );
+  }
+
+  if (!selectedFace) return null;
+  const neighbors = getAdjacentHouses(selectedFace.house.number);
+  const spectrum = HOUSE_SPECTRUM[selectedFace.house.number];
+  const presence: HousePresenceState = housePresence[selectedFace.house.number];
+  return (
+    <aside className="observer-inspector" aria-live="polite">
+      <p className="eyebrow">House {HOUSE_ROMAN[selectedFace.house.number]} / face</p>
+      <h3>{selectedFace.house.name} <span>{selectedFace.house.current}</span></h3>
+      <div className="inspector-reading" data-valve={selectedFace.valve}>
+        <strong>{formatPercent(selectedFace.coherence)}</strong>
+        <span>{selectedFace.valve}</span>
+      </div>
+      <div className="inspector-spectrum" style={{ "--house-color": spectrum.colorHex } as CSSProperties}>
+        <i aria-hidden="true" />
+        <span>{spectrum.colorName} · {spectrum.colorHex}</span>
+        <strong>{spectrum.cymaticMark} {spectrum.note}</strong>
+      </div>
+      <dl>
+        <div><dt>Presence</dt><dd>{presence.level} · {presence.natalPlacements} natal · {presence.transitActivations} current</dd></div>
+        <div><dt>Role</dt><dd>{selectedFace.house.archetype}</dd></div>
+        <div><dt>Body</dt><dd>{selectedFace.house.quincunxPrimary}</dd></div>
+        <div><dt>Resonance</dt><dd>{spectrum.soundFrequencyHz} Hz · {spectrum.mode}</dd></div>
+        <div><dt>Light</dt><dd>{spectrum.wavelengthNm} nm · {spectrum.lightFrequencyThz} THz</dd></div>
+        <div><dt>Neighbors</dt><dd>{neighbors.map((house) => HOUSE_ROMAN[house]).join(" · ")}</dd></div>
+      </dl>
+      <p className="observer-reason">{selectedFace.reason}</p>
+      <p className="observer-reason">{selectedFace.house.reflection}</p>
+      <blockquote>“{selectedFace.house.question}”</blockquote>
+      <div className="community-reading">
+        <span>Session memory</span>
+        <strong>{community.observedCycles} cycles</strong>
+        <em>{formatPercent(community.averageCoherence)} mean</em>
+      </div>
+    </aside>
+  );
+}

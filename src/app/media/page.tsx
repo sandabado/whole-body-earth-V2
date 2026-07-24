@@ -1,0 +1,9 @@
+import Link from "next/link";
+import { ObjectFrame } from "@/components/media/MediaFrames";
+import { MEDIA_ATLAS } from "@/lib/media-atlas";
+
+const MEDIA = [{ label: "Now playing", title: "∞ Love", detail: "Sandābādo · Album", image: MEDIA_ATLAS.studios.infinityLove, alt: "Sandābādo — ∞ Love album artwork" }, { label: "Field session", title: "Desert Studio", detail: "Music, film, and field recording", image: MEDIA_ATLAS.studios.desertSession, alt: "Desert recording session at Whole Body Studios" }, { label: "In the edit", title: "Objects Session", detail: "Moving image · Dispatch coming soon", image: MEDIA_ATLAS.studios.objectsSession, alt: "Whole Body Studios objects session" }];
+
+export default function MediaPage() {
+  return <main className="relative px-6 py-16 md:py-24"><div className="mx-auto max-w-[1200px]"><p className="font-mono text-[10px] uppercase tracking-[.16em] text-water">Whole Body media</p><h1 className="mt-4 font-display text-5xl font-medium text-bone md:text-6xl">Current. Truth. Moving image.</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-ghost">Music, films, studio dispatches, and the work moving through Whole Body Studios.</p><div className="mt-12 grid gap-5 md:grid-cols-3">{MEDIA.map((item) => <article key={item.title} className="group overflow-hidden border border-water/45 bg-void/28 backdrop-blur-md"><ObjectFrame src={item.image} alt={item.alt} sizes="(min-width: 768px) 33vw, 100vw"><p className="absolute bottom-4 left-4 font-mono text-[10px] uppercase tracking-[.13em] text-water">{item.label}</p></ObjectFrame><div className="p-5"><h2 className="font-display text-2xl font-medium text-bone">{item.title}</h2><p className="mt-2 text-sm text-ghost">{item.detail}</p></div></article>)}</div><Link href="/pillars/studios" className="mt-10 inline-block border border-water px-5 py-3 font-mono text-xs uppercase tracking-[.12em] text-water">Enter Whole Body Studios →</Link></div></main>;
+}

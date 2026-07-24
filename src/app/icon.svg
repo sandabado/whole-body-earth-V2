@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Whole Body Earth">
+  <defs>
+    <linearGradient id="earth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2d58c"/>
+      <stop offset="48%" stop-color="#d9a9e8"/>
+      <stop offset="100%" stop-color="#72d6c8"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#090b10"/>
+  <text x="32" y="44" text-anchor="middle" fill="url(#earth)" font-family="Georgia, 'Times New Roman', serif" font-size="47" font-weight="400">♁</text>
+</svg>
