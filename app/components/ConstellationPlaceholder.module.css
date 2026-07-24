@@ -17,6 +17,12 @@
     linear-gradient(135deg, #050505, #0d0914 54%, #050505);
 }
 
+.epicPage {
+  min-height: 100svh;
+  overflow: visible;
+  background: #000;
+}
+
 .sky {
   position: absolute;
   z-index: -3;
@@ -96,6 +102,16 @@
   -webkit-backdrop-filter: blur(12px) saturate(115%);
 }
 
+.epicHeader {
+  position: fixed;
+  z-index: 90;
+  top: 0;
+  right: 0;
+  left: 0;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent);
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -117,6 +133,14 @@
   width: min(1180px, calc(100% - 64px));
   margin: 0 auto;
   padding: clamp(88px, 15vh, 150px) 0 92px;
+}
+
+.epicMain {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .eyebrow {
@@ -195,6 +219,8 @@
 .awaiting p { margin: 0; color: #aaaab6; line-height: 1.7; }
 
 .footer {
+  position: relative;
+  z-index: 20;
   display: flex;
   justify-content: space-between;
   gap: 24px;
@@ -203,6 +229,34 @@
   color: #777785;
   font: 400 8px/1 var(--font-mono), monospace;
   letter-spacing: 0.14em;
+}
+
+.epicFooter {
+  background: #000;
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.clover {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(139, 111, 214, 0.36);
+  border-radius: 50%;
+  font-size: 17px;
+  animation: clover-breathe 3.8s ease-in-out infinite;
+}
+
+.clover:hover,
+.clover:focus-visible {
+  border-color: #8b6fd6;
+  outline: 1px solid #8b6fd6;
+  outline-offset: 4px;
 }
 
 .footer button {
@@ -218,6 +272,19 @@
   to { transform: translateY(-50%) rotate(360deg); }
 }
 
+@keyframes clover-breathe {
+  0%, 100% {
+    opacity: 0.58;
+    transform: scale(0.92);
+    box-shadow: 0 0 0 rgba(139, 111, 214, 0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+    box-shadow: 0 0 28px rgba(139, 111, 214, 0.28);
+  }
+}
+
 @media (max-width: 720px) {
   .header { height: 64px; padding: 0 18px; }
   .header > p { display: none; }
@@ -228,9 +295,11 @@
   .pillars em { grid-column: 3; padding-bottom: 12px; }
   .pillars i { grid-column: 4; grid-row: 1 / span 2; }
   .footer { align-items: flex-start; flex-direction: column; padding-inline: 20px; }
+  .footerActions { width: 100%; justify-content: space-between; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .geometry { animation: none; }
   .pillars a { transition: none; }
+  .clover { animation: none; }
 }
