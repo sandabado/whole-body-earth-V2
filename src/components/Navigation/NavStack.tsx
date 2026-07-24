@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import TopNav from "./TopNav";
 import MainNav, { getPillarNavigation, secondaryLinkColor, type PillarNavigation } from "./MainNav";
@@ -42,34 +42,15 @@ export default function NavStack() {
 }
 
 function EarthNavigation() {
-  const handlePillarJump = (
-    event: MouseEvent<HTMLAnchorElement>,
-    pillarId: string,
-  ) => {
-    if (
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey ||
-      event.button !== 0
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-    document.getElementById(pillarId)?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
-      block: "start",
-    });
-    window.history.pushState(null, "", `#${pillarId}`);
-  };
-
   return (
-    <header className="sticky top-0 z-[90] bg-void/95 backdrop-blur-md">
-      <TopNav />
-      <nav aria-label="The five pillars" className="bg-carbon/85">
+    <header className="earth-home-navigation pointer-events-none fixed inset-x-0 top-0 z-[90]">
+      <div className="pointer-events-auto">
+        <TopNav transparent />
+      </div>
+      <nav
+        aria-label="The five pillars"
+        className="pointer-events-auto border-b border-white/10 bg-black/10 backdrop-blur-sm"
+      >
         <Disclosure
           summary={<span className="flex items-center gap-2"><span className="alchemical-glyph text-base">♁</span> Explore the five pillars</span>}
           className="md:hidden"
@@ -87,8 +68,7 @@ function EarthNavigation() {
             {PILLAR_LIST.map((pillar) => (
               <Link
                 key={pillar.id}
-                href={`#${pillar.id}`}
-                onClick={(event) => handlePillarJump(event, pillar.id)}
+                href={pillar.href}
                 className="flex min-h-11 items-center gap-3 px-5 py-3 font-mono text-[10px] uppercase tracking-[.12em] transition-colors hover:bg-void/40"
                 style={{ color: pillar.color }}
               >
@@ -109,8 +89,7 @@ function EarthNavigation() {
           {PILLAR_LIST.map((pillar) => (
             <Link
               key={pillar.id}
-              href={`#${pillar.id}`}
-              onClick={(event) => handlePillarJump(event, pillar.id)}
+              href={pillar.href}
               className="group relative flex min-w-[8.5rem] flex-1 items-center justify-center gap-2 border-r px-4 py-3 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors first:border-l"
               style={{
                 color: pillar.color,

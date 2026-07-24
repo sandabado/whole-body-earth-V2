@@ -3,9 +3,15 @@
 import Link from "next/link";
 import AccountMenu from "./AccountMenu";
 
-export default function TopNav() {
+export default function TopNav({ transparent = false }: { transparent?: boolean }) {
   return (
-    <div className="border-b border-mercury bg-void/95 backdrop-blur-md">
+    <div
+      className={
+        transparent
+          ? "border-b border-white/10 bg-transparent"
+          : "border-b border-mercury bg-void/95 backdrop-blur-md"
+      }
+    >
       <nav
         className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-4 md:grid md:h-11 md:grid-cols-[1fr_auto_1fr] md:px-6"
         aria-label="Whole Body Earth navigation"

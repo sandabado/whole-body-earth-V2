@@ -29,9 +29,9 @@ export const metadata: Metadata = {
     icon: [{ url: "/icon.svg?v=2", type: "image/svg+xml", sizes: "any" }],
     shortcut: ["/icon.svg?v=2"],
   },
-  title: "Whole Body Earth — Five Pillars. One Whole Body.",
+  title: "Whole Body Earth — The Seven-Dimensional System",
   description:
-    "A network for sovereign creators. Five pillars, one living system.",
+    "A seven-dimensional operating system for sovereign creators. Five pillars, one living system.",
   keywords: [
     "Whole Body Earth",
     "Quincunx",
@@ -41,11 +41,27 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Whole Body Earth",
-    description: "Five pillars. One whole body. A network for sovereign creators.",
+    title: "Whole Body Earth — The Seven-Dimensional System",
+    description:
+      "A seven-dimensional operating system for sovereign creators. Five pillars, one living system.",
     url: "https://www.wholebody.earth",
     siteName: "Whole Body Earth",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "The Whole Body Earth quincunx awakening in a dark field",
+      },
+    ],
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Whole Body Earth — The Seven-Dimensional System",
+    description:
+      "A seven-dimensional operating system for sovereign creators. Five pillars, one living system.",
+    images: ["/og.png"],
   },
 };
 
