@@ -56,3 +56,44 @@ export const heroConfigs = sqliteTable("hero_configs", {
   updatedBy: text("updated_by"),
   version: integer("version").notNull().default(1),
 });
+
+export const waitlistEntries = sqliteTable("waitlist_entries", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  interest: text("interest"),
+  message: text("message"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const submissions = sqliteTable("submissions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  authorName: text("author_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  genre: text("genre").notNull(),
+  title: text("title").notNull(),
+  synopsis: text("synopsis").notNull(),
+  whyPress: text("why_press").notNull(),
+  portfolioUrl: text("portfolio_url").notNull(),
+  proposedImprint: text("proposed_imprint"),
+  wordCount: integer("word_count"),
+  shortBio: text("short_bio"),
+  previousPublications: text("previous_publications"),
+  consentOriginal: integer("consent_original", { mode: "boolean" }).notNull().default(false),
+  consentCopyright: integer("consent_copyright", { mode: "boolean" }).notNull().default(false),
+  consentNonexclusive: integer("consent_nonexclusive", { mode: "boolean" }).notNull().default(false),
+  consentFeedFirst: integer("consent_feed_first", { mode: "boolean" }).notNull().default(false),
+  status: text("status").notNull().default("PENDING"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const eventRegistrations = sqliteTable("event_registrations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventId: text("event_id").notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  consentTransactional: integer("consent_transactional", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

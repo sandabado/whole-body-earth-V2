@@ -175,7 +175,7 @@ export function HomePage() {
           <h1><span>INFRASTRUCTURE,</span><br /><em>NOT A LABEL.</em></h1>
           <p className="hero-deck">We finish records. Build campaigns. Place music. Press vinyl. The artist owns every part of the work.</p>
           <div className="hero-actions">
-            <Link className="button button--solid" href="/apply"><span>APPLY FOR PARTNERSHIP</span><b>↗</b></Link>
+            <Link className="button button--solid" href="/studios/apply"><span>APPLY FOR PARTNERSHIP</span><b>↗</b></Link>
             <a className="text-link" href="#model">SEE THE MODEL <span>↓</span></a>
           </div>
         </div>
@@ -229,7 +229,7 @@ export function HomePage() {
         <p className="eyebrow">THE DOOR IS OPEN / SELECTIVELY</p>
         <h2>THE RECORD IS YOURS.<br /><em>LET&apos;S BUILD WHAT IT NEEDS.</em></h2>
         <p>Not everyone who applies is chosen. We take artists who carry the frequency — and who are ready to own the responsibility with the work.</p>
-        <Link className="button button--solid button--large" href="/apply"><span>ENTER THE GATEWAY</span><b>↗</b></Link>
+        <Link className="button button--solid button--large" href="/studios/apply"><span>ENTER THE GATEWAY</span><b>↗</b></Link>
       </section>
     </>
   );

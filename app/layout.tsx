@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cinzel, DM_Mono, Inter } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
+import "./epic-home.css";
 import { SiteExperience } from "./components/SiteExperience";
 
 const display = Cinzel({

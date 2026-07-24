@@ -1,0 +1,8 @@
+"use client";
+import { useState } from "react";
+import PhaseBuilderEntrance from "../components/PhaseBuilderEntrance";
+
+export default function Apply() { const [sent, setSent] = useState(false); return <>
+  <PhaseBuilderEntrance gateway />
+  <div className="page-wrap apply-page" id="builder-application"><header className="page-hero"><p className="eyebrow">BUILDER INTAKE / PHASE 0</p><h1>APPLY TO BUILD</h1><p>This is an expression of interest, not an offer of housing or a timeline guarantee.</p></header>{sent ? <div className="form-success"><b>APPLICATION RECEIVED.</b><p>Your signal is in the queue. We will reach out when there is a relevant next step.</p></div> : <form className="apply-form" onSubmit={e=>{e.preventDefault();setSent(true)}}><label>NAME<input required name="name" /></label><label>EMAIL<input required type="email" name="email" /></label><label>PHONE<input name="phone" /></label><label>PRIMARY SKILLS<select required name="skills" defaultValue=""><option value="" disabled>Select one</option><option>Construction / Trades</option><option>Land / Water</option><option>Food Systems</option><option>Architecture / Engineering</option><option>Operations / Care</option><option>Other</option></select></label><label>WHY FOUNDATION?<textarea required name="why" rows={5} maxLength={1000} /></label><label>WHAT DO YOU NEED TO THRIVE?<textarea name="needs" rows={4} maxLength={500} /></label><label className="consent"><input required type="checkbox" /> <span>I understand Foundation is in Phase 0. No housing is available and no timeline is guaranteed.</span></label><button className="button primary" type="submit">Submit Application →</button></form>}</div>
+</>; }
