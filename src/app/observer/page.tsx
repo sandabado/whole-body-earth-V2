@@ -46,7 +46,7 @@ export default function ObserverLanding() {
   const domains = telemetry?.coherence.domains ?? {};
 
   return (
-    <main className="observer-landing">
+    <main className="observer-landing observer-emerge">
       <header className="observer-landing-hero">
         <p>POSITION 9 · OBSERVER PORTAL</p>
         <h1>ØDIN</h1>
@@ -66,12 +66,12 @@ export default function ObserverLanding() {
           <p>Interactive dodecahedral field — see the system breathe.</p>
           <strong>Coherence: {coherencePercent}%</strong>
         </Link>
-        <div aria-disabled="true">
-          <span>03 / NEXT PHASE</span>
+        <Link href="/observer/guild">
+          <span>03 / MEMBERSHIP</span>
           <h2>Sovereign Guild</h2>
           <p>$11.11/mo — readings, network, voting, and gatherings.</p>
-          <strong>Port follows after Reading</strong>
-        </div>
+          <strong>Enter the Guild →</strong>
+        </Link>
       </section>
 
       <section className="observer-status">

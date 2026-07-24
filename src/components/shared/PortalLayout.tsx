@@ -27,6 +27,8 @@ export function PortalLayout({
           <Link href="/observer">Overview</Link>
           <Link href="/observer/reading">Reading</Link>
           <Link href="/observer/quincunx">Quincunx</Link>
+          <Link href="/observer/guild">Guild</Link>
+          <Link href="/observer/account">Account</Link>
           <Link href="/">Whole Body Earth</Link>
         </nav>
         <small>{domain}</small>
