@@ -1,0 +1,43 @@
+:root {
+  --guardian-void: #050505;
+  --guardian-obsidian: #0d0914;
+  --guardian-surface: #15101f;
+  --guardian-line: #292934;
+  --guardian-bone: #ededed;
+  --guardian-ghost: #888894;
+  --guardian-violet: #8b6fd6;
+}
+
+.guardian-identity {
+  position: relative;
+  min-height: 100svh;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(139, 111, 214, .06), transparent 30rem),
+    var(--guardian-void);
+  isolation: isolate;
+}
+
+.guardian-identity::after {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  opacity: .05;
+  background:
+    radial-gradient(circle at 19% 23%, var(--guardian-bone) 0 .45px, transparent .7px),
+    radial-gradient(circle at 72% 61%, var(--guardian-violet) 0 .45px, transparent .75px);
+  background-size: 127px 131px, 181px 173px;
+  content: "";
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.guardian-identity ::selection {
+  background: var(--guardian-violet);
+  color: var(--guardian-void);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guardian-identity::after {
+    mix-blend-mode: normal;
+  }
+}
