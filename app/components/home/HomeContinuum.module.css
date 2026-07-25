@@ -473,14 +473,6 @@
   margin: 0 auto;
 }
 
-.pillarGlyph {
-  grid-area: glyph;
-  align-self: start;
-  justify-self: center;
-  font-size: clamp(8rem, 17vw, 15rem);
-  opacity: .9;
-}
-
 .chapterIndex {
   grid-area: index;
   color: color-mix(in srgb, var(--wb-accent) 78%, #8888a0);
@@ -493,6 +485,19 @@
   font: 400 clamp(4.2rem, 8.3vw, 8rem)/.82 var(--font-display), Cinzel, Georgia, serif;
   letter-spacing: -.055em;
   text-transform: uppercase;
+}
+
+.titleGlyph {
+  display: inline-block;
+  margin-right: .3em;
+  color: var(--wb-accent);
+  font: normal .29em/.9 "Times New Roman", serif;
+  letter-spacing: 0;
+  opacity: .88;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--wb-accent) 48%, transparent);
+  transform: translateY(-.16em);
+  -webkit-text-fill-color: var(--wb-accent);
+  -webkit-text-stroke: 0;
 }
 
 .pillarGeometry {
@@ -636,11 +641,6 @@
   animation: fire-breathe 5.8s ease-in-out infinite;
 }
 
-.presenceChapter .pillarGlyph {
-  color: var(--chapter-fire);
-  text-shadow: 0 0 78px rgba(232, 84, 42, .34);
-}
-
 .presenceChapter h2 {
   letter-spacing: -.035em;
 }
@@ -706,14 +706,6 @@
     "link link";
   grid-template-columns: 1fr 1fr;
   gap: 0 clamp(3rem, 8vw, 9rem);
-}
-
-.pressChapter .pillarGlyph {
-  align-self: center;
-  justify-self: end;
-  color: var(--chapter-air);
-  font-size: clamp(3.5rem, 7vw, 6rem);
-  text-shadow: 0 0 32px rgba(201, 162, 39, .26);
 }
 
 .pressChapter h2 {
@@ -810,14 +802,6 @@
   border-bottom: 2px solid var(--chapter-water);
 }
 
-.studiosChapter .pillarGlyph {
-  align-self: start;
-  justify-self: end;
-  color: var(--chapter-water);
-  font-size: clamp(6rem, 12vw, 11rem);
-  text-shadow: 0 0 58px rgba(43, 168, 160, .35);
-}
-
 .studiosChapter h2 {
   font-size: clamp(4.5rem, 10vw, 9.5rem);
   letter-spacing: -.07em;
@@ -891,14 +875,6 @@
     "link link link";
   grid-template-columns: .8fr .8fr .65fr;
   gap: 0 clamp(2rem, 6vw, 6rem);
-}
-
-.foundationChapter .pillarGlyph {
-  align-self: center;
-  justify-self: center;
-  color: var(--chapter-earth);
-  font-size: clamp(7rem, 14vw, 13rem);
-  filter: drop-shadow(0 0 28px rgba(132, 166, 110, .25));
 }
 
 .foundationChapter h2 {
@@ -979,14 +955,6 @@
   grid-template-columns: 1fr;
   justify-items: center;
   text-align: center;
-}
-
-.guardianChapter .pillarGlyph {
-  position: relative;
-  justify-self: center;
-  color: var(--chapter-ether);
-  font-size: clamp(6.5rem, 13vw, 11rem);
-  text-shadow: 0 0 70px rgba(139, 111, 214, .36);
 }
 
 .guardianChapter h2 {
@@ -1478,15 +1446,6 @@
     gap: 0 3rem;
   }
 
-  .pillarGlyph,
-  .pressChapter .pillarGlyph,
-  .studiosChapter .pillarGlyph,
-  .foundationChapter .pillarGlyph {
-    align-self: start;
-    justify-self: center;
-    font-size: clamp(5rem, 14vw, 9rem);
-  }
-
   .pillarSection h3 {
     margin-top: 3rem;
   }
@@ -1617,16 +1576,6 @@
     text-align: left;
   }
 
-  .pillarGlyph,
-  .pressChapter .pillarGlyph,
-  .studiosChapter .pillarGlyph,
-  .foundationChapter .pillarGlyph,
-  .guardianChapter .pillarGlyph {
-    justify-self: start;
-    margin-bottom: 2rem;
-    font-size: 5.5rem;
-  }
-
   .pillarSection h2,
   .pressChapter h2,
   .studiosChapter h2,
@@ -1666,10 +1615,6 @@
   .guardianChapter .pillarInner {
     justify-items: center;
     text-align: center;
-  }
-
-  .guardianChapter .pillarGlyph {
-    justify-self: center;
   }
 
   .calendarControls {
