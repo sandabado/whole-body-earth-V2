@@ -265,6 +265,7 @@ export function HomeContinuum() {
             })}
           </div>
         </div>
+        <Link href="/calendar" className={styles.sectionLink}>Open the calendar →</Link>
       </section>
 
       <section className={styles.pulseSection} aria-labelledby="pulse-title">
@@ -294,7 +295,7 @@ export function HomeContinuum() {
             return <motion.article key={item.title} initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.3}} transition={{duration:.65,delay:index*.08,ease:EASE}} style={{ "--wb-accent": pillar.color } as CSSProperties}><Link href={item.href}><i className="wb-glyph">{pillar.symbol}</i><p>{item.eyebrow}</p><h3>{item.title}</h3>{item.lines.map((line) => <span key={line}>{line}</span>)}<b>Explore →</b></Link></motion.article>;
           })}
         </div>
-        <Link href="/catalog" className={styles.sectionLink}>Enter the store →</Link>
+        <Link href="/store" className={styles.sectionLink}>Enter the store →</Link>
       </section>
 
       <section className={styles.guildSection} aria-labelledby="guild-title">
@@ -310,7 +311,7 @@ export function HomeContinuum() {
             return <Link key={role} href={`/apply?role=${encodeURIComponent(role)}`} style={{ "--wb-accent": pillar.color } as CSSProperties}><i className="wb-glyph">{pillar.symbol}</i><b>{role}</b><span>{pillar.name}</span><em>{location}</em><small>{basis}</small><strong>↗</strong></Link>;
           })}
         </motion.div>
-        <div className={styles.guildActions}><Link href="/apply">View Guild Network →</Link><Link href="/apply">Submit Application →</Link></div>
+        <div className={styles.guildActions}><Link href="/guild">View Guild Network →</Link><Link href="/apply">Submit Application →</Link></div>
       </section>
     </div>
   );

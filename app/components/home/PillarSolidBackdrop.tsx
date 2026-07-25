@@ -289,7 +289,7 @@ const SOLIDS: Record<PillarSolid, SolidDefinition> = {
     TETRAHEDRON_FACES,
     { x: -0.21, y: 0.31, z: 0.08 },
     2.2,
-    [0.2, 0.44],
+    [0.78, 0.38],
     0.38,
   ),
   press: makeSolid(
@@ -325,7 +325,7 @@ const SOLIDS: Record<PillarSolid, SolidDefinition> = {
     DODECAHEDRON_FACES,
     { x: 0.08, y: 0.14, z: 0.025 },
     0,
-    [0.5, 0.29],
+    [0.77, 0.34],
     0.34,
   ),
 };
