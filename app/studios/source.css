@@ -17,6 +17,77 @@
     var(--studios-void);
 }
 
+/*
+ * Pillar styles are emitted into one production stylesheet by vinext. Keep the
+ * Studios shell explicitly water-scoped so later Foundation, Presence, and
+ * Press rules cannot restyle this route.
+ */
+.site-experience--studios .site-header {
+  border-bottom-color: rgba(43, 168, 160, .2);
+  background:
+    linear-gradient(180deg, rgba(5, 10, 10, .56), rgba(5, 10, 10, .12) 72%, transparent);
+  backdrop-filter: none;
+}
+
+.site-experience--studios .site-header::after {
+  background: linear-gradient(90deg, transparent, var(--studios-water));
+}
+
+.site-experience--studios .brand-mark,
+.site-experience--studios .brand > span:nth-child(2) span {
+  color: var(--studios-water);
+}
+
+.site-experience--studios .brand-mark {
+  filter: drop-shadow(0 0 9px rgba(43, 168, 160, .52));
+}
+
+.site-experience--studios .nav-links a::after {
+  background: var(--studios-water);
+}
+
+.site-experience--studios .nav-links .nav-apply {
+  border-color: var(--studios-water);
+  color: var(--studios-water);
+}
+
+.site-experience--studios .nav-links .nav-apply:hover {
+  background: var(--studios-water);
+  color: var(--studios-void);
+}
+
+.site-experience--studios .eyebrow {
+  color: var(--studios-water);
+}
+
+.site-experience--studios .text-link {
+  color: var(--studios-ghost);
+}
+
+.site-experience--studios .text-link span {
+  color: var(--studios-water);
+}
+
+.site-experience--studios .button {
+  border-color: var(--studios-water);
+  color: var(--studios-water);
+}
+
+.site-experience--studios .button--solid {
+  background: var(--studios-water);
+  color: var(--studios-void);
+}
+
+/* Restore the full-width water veil after Foundation's hero grid rule. */
+.site-experience--studios .hero::before {
+  inset: 0;
+  width: auto;
+  border: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, .8) 0%, rgba(5, 5, 5, .45) 42%, rgba(5, 5, 5, .02) 78%);
+  transform: none;
+}
+
 .site-experience--studios .hud-card {
   border-color: color-mix(in srgb, var(--studios-water) 28%, var(--studios-mercury));
   background:
