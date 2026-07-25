@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ConstellationPlaceholder } from "./components/ConstellationPlaceholder";
+import { EpicHomeExperience } from "./components/home/EpicHomeExperience";
 
 export const metadata: Metadata = {
   title: "Whole Body Earth — Five Elements. One Body.",
@@ -32,5 +32,5 @@ export const metadata: Metadata = {
 };
 
 export default function WholeHome() {
-  return <ConstellationPlaceholder mode="whole" />;
+  return <EpicHomeExperience />;
 }

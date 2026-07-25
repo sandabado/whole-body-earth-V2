@@ -1,66 +1,34 @@
-/* Whole Body Earth hero framing.
-   The canvas animation remains the source of truth; this file only frames it. */
-
 .epic-home {
-  --epic-fire: #e8542a;
-  --epic-air: #c9a227;
-  --epic-water: #2ba8a0;
-  --epic-earth: #84a66e;
-  --epic-ether: #8b6fd6;
+  --epic-bg: #0a0a0a;
   position: relative;
   overflow: clip;
-  background: #000;
+  background: var(--epic-bg);
   color: #ededed;
-}
-
-.epic-home :focus-visible {
-  outline: 1px solid rgba(237, 237, 237, .8);
-  outline-offset: 6px;
-}
-
-.epic-home ::selection {
-  background: var(--epic-ether);
-  color: #050505;
+  font-family: var(--font-body), Inter, Arial, sans-serif;
 }
 
 html:has(.epic-home) {
-  background: #000;
+  background: var(--epic-bg);
   scroll-behavior: smooth;
+}
+
+.epic-home :focus-visible {
+  outline: 1px solid rgba(237, 237, 237, .86);
+  outline-offset: 5px;
+}
+
+.epic-home ::selection {
+  background: #ededed;
+  color: #0a0a0a;
 }
 
 .epic-home-hero {
   position: relative;
-  height: 165svh;
-}
-
-.epic-home-hero-sticky {
-  position: sticky;
-  inset-block-start: 0;
-  height: 100svh;
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
   overflow: hidden;
-  transform-origin: 50% 48%;
-}
-
-.epic-home-hero-sticky::before {
-  position: absolute;
-  z-index: 3;
-  inset: 6rem clamp(1.1rem, 3vw, 3rem) 1.75rem;
-  border-right: 1px solid rgba(237, 237, 237, .075);
-  border-left: 1px solid rgba(237, 237, 237, .075);
-  content: "";
-  pointer-events: none;
-}
-
-.epic-home-hero-sticky::after {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  background:
-    linear-gradient(90deg, transparent calc(50% - .5px), rgba(237, 237, 237, .045) 50%, transparent calc(50% + .5px)),
-    linear-gradient(180deg, transparent calc(50% - .5px), rgba(237, 237, 237, .035) 50%, transparent calc(50% + .5px));
-  content: "";
-  mask-image: radial-gradient(circle at 50% 50%, #000, transparent 67%);
-  pointer-events: none;
+  isolation: isolate;
 }
 
 .epic-home-canvas,
@@ -82,248 +50,112 @@ html:has(.epic-home) {
 .epic-home-vignette {
   z-index: 1;
   background:
-    radial-gradient(ellipse 46% 34% at 50% 50%, transparent 8%, rgba(0, 0, 0, .16) 66%, rgba(0, 0, 0, .72) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, .56), transparent 25%, transparent 69%, rgba(0, 0, 0, .86));
+    radial-gradient(circle at 50% 48%, rgba(0, 0, 0, .02), rgba(0, 0, 0, .42) 58%, rgba(0, 0, 0, .84) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, .42), transparent 30%, transparent 68%, #0a0a0a);
   pointer-events: none;
 }
 
-.epic-home-quincunx-labels {
+.epic-home-hero::before,
+.epic-home-hero::after {
   position: absolute;
-  z-index: 4;
-  inset: 0;
-  color: #8888a0;
-  font: 400 clamp(.48rem, .65vw, .58rem)/1 var(--font-mono), monospace;
-  letter-spacing: .16em;
+  z-index: 2;
+  content: "";
   pointer-events: none;
-  text-transform: uppercase;
 }
 
-.epic-home-quincunx-labels span {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  opacity: .72;
-  text-shadow: 0 0 16px currentColor;
+.epic-home-hero::before {
+  inset: 2rem;
+  border-right: 1px solid rgba(237, 237, 237, .06);
+  border-left: 1px solid rgba(237, 237, 237, .06);
 }
 
-.epic-home-quincunx-labels i {
-  font: normal 1.05rem/1 "Times New Roman", "Noto Sans Symbols 2", serif;
-}
-
-.epic-home-label-press {
-  top: 12%;
-  left: 50%;
-  color: var(--epic-air);
-  transform: translateX(-50%);
-}
-
-.epic-home-label-presence {
-  top: 49%;
-  left: clamp(2rem, 5vw, 5rem);
-  color: var(--epic-fire);
-  transform: rotate(-90deg) translateX(-50%);
-  transform-origin: 0 50%;
-}
-
-.epic-home-label-studios {
-  top: 49%;
-  right: clamp(2rem, 5vw, 5rem);
-  color: var(--epic-water);
-  transform: rotate(90deg) translateX(50%);
-  transform-origin: 100% 50%;
-}
-
-.epic-home-label-foundation {
-  bottom: 10%;
-  left: 50%;
-  color: var(--epic-earth);
-  transform: translateX(-50%);
-}
-
-.epic-home-label-guardian {
-  bottom: 18%;
-  left: 50%;
-  padding: .55rem .75rem;
-  border: 1px solid rgba(139, 111, 214, .28);
-  background: rgba(5, 5, 5, .34);
-  color: var(--epic-ether);
-  transform: translateX(-50%);
-  backdrop-filter: blur(10px);
+.epic-home-hero::after {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(237, 237, 237, .18), transparent);
 }
 
 .epic-home-hero-copy {
-  position: absolute;
-  z-index: 5;
-  inset: 0;
+  position: relative;
+  z-index: 3;
   display: flex;
+  width: min(58rem, calc(100% - 48px));
   align-items: center;
-  justify-content: center;
   flex-direction: column;
-  padding: 8rem 1.25rem 8rem;
-  pointer-events: none;
   text-align: center;
+  animation: epic-home-enter 900ms ease both;
 }
 
-.epic-home-kicker {
-  margin: 0;
-  color: rgba(139, 111, 214, .9);
-  font: 500 clamp(.54rem, .72vw, .64rem)/1.4 var(--font-mono), monospace;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-}
-
-.epic-home-kicker::before,
-.epic-home-kicker::after {
-  display: inline-block;
-  width: clamp(1.5rem, 5vw, 4.5rem);
-  height: 1px;
-  margin: 0 .9rem .2rem;
-  background: linear-gradient(90deg, transparent, rgba(139, 111, 214, .7));
-  content: "";
-}
-
-.epic-home-kicker::after {
-  background: linear-gradient(90deg, rgba(139, 111, 214, .7), transparent);
+.epic-home-mark {
+  display: grid;
+  width: 3.6rem;
+  height: 3.6rem;
+  margin-bottom: 1.35rem;
+  place-items: center;
+  border: 1px solid rgba(237, 237, 237, .18);
+  border-radius: 50%;
+  color: rgba(237, 237, 237, .88);
+  font: 400 1.65rem/1 "Times New Roman", serif;
+  box-shadow: 0 0 36px rgba(139, 111, 214, .16);
 }
 
 .epic-home-hero h1 {
-  margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
-  color: #ededed;
-  font: 500 clamp(3.25rem, 10.6vw, 9.4rem)/.78 var(--font-display), Cinzel, Georgia, serif;
-  letter-spacing: -.055em;
-  text-shadow: 0 18px 70px rgba(0, 0, 0, .88);
+  margin: 0;
+  font: 600 clamp(3.6rem, 10vw, 8.5rem)/.88 var(--font-body), Inter, Arial, sans-serif;
+  letter-spacing: -.075em;
 }
 
-.epic-home-hero h1 span {
-  display: block;
+.epic-home-hero-copy > p {
+  margin: 1.35rem 0 2.25rem;
+  color: #aaaab6;
+  font-size: clamp(.95rem, 1.6vw, 1.15rem);
+  letter-spacing: .015em;
 }
 
-.epic-home-hero h1 .epic-home-title-line {
-  white-space: nowrap;
-}
-
-.epic-home-hero h1 > span:last-child {
-  margin-top: .12em;
-  color: transparent;
-  font-weight: 400;
-  letter-spacing: .11em;
-  -webkit-text-stroke: 1px rgba(237, 237, 237, .88);
-  text-shadow:
-    0 0 38px rgba(139, 111, 214, .16),
-    0 18px 70px rgba(0, 0, 0, .88);
-}
-
-.epic-home-subtitle {
-  max-width: 43rem;
-  margin: 2rem 0 0;
-  color: rgba(237, 237, 237, .64);
-  font: 400 clamp(.62rem, 1vw, .78rem)/1.7 var(--font-mono), monospace;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-}
-
-.epic-home-scroll-cue {
-  position: absolute;
-  z-index: 6;
-  bottom: 2rem;
-  left: 50%;
-  display: flex;
+.epic-home-hero-copy > a {
+  display: inline-flex;
+  min-height: 3.15rem;
   align-items: center;
-  flex-direction: column;
+  justify-content: center;
   gap: .7rem;
-  color: rgba(237, 237, 237, .48);
-  font: .55rem var(--font-mono), monospace;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  transform: translateX(-50%);
-}
-
-.epic-home-scroll-cue:hover {
+  padding: 0 1.35rem;
+  border: 1px solid rgba(237, 237, 237, .68);
   color: #ededed;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
 }
 
-.epic-home-scroll-cue i {
-  position: relative;
-  width: 1px;
-  height: 3.25rem;
-  overflow: hidden;
-  background: rgba(237, 237, 237, .15);
+.epic-home-hero-copy > a:hover,
+.epic-home-hero-copy > a:focus-visible {
+  border-color: #ededed;
+  background: #ededed;
+  color: #0a0a0a;
 }
 
-.epic-home-scroll-cue i::after {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1px;
-  height: 1.2rem;
-  background: linear-gradient(180deg, #ededed, transparent);
-  box-shadow: 0 0 9px #ededed;
-  content: "";
-  animation: epic-scroll-signal 2.3s ease-in-out infinite;
-}
-
-@keyframes epic-scroll-signal {
-  0% { opacity: 0; transform: translateY(-1rem); }
-  24% { opacity: 1; }
-  75%, 100% { opacity: 0; transform: translateY(3.25rem); }
-}
-
-@media (max-width: 720px) {
-  .epic-home-hero-sticky::before {
-    inset: 5rem .9rem 1rem;
+@keyframes epic-home-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
+}
 
-  .epic-home-hero-copy {
-    justify-content: flex-end;
-    padding: 7rem 1.25rem 29svh;
+@media (max-width: 600px) {
+  .epic-home-hero::before {
+    inset: 1rem;
   }
 
   .epic-home-hero h1 {
-    font-size: clamp(3.1rem, 17vw, 6.3rem);
-    line-height: .84;
-  }
-
-  .epic-home-kicker::before,
-  .epic-home-kicker::after {
-    display: none;
-  }
-
-  .epic-home-label-presence,
-  .epic-home-label-studios {
-    top: 43%;
-  }
-
-  .epic-home-label-guardian {
-    bottom: 20%;
-  }
-
-  .epic-home-label-foundation {
-    bottom: 11%;
-  }
-
-  .epic-home-quincunx-labels span {
-    font-size: .43rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .epic-home-label-presence,
-  .epic-home-label-studios {
-    display: none;
-  }
-
-  .epic-home-label-press {
-    top: 11%;
-  }
-
-  .epic-home-label-guardian {
-    bottom: 19%;
+    font-size: clamp(3.35rem, 18vw, 5.2rem);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .epic-home-scroll-cue i::after {
+  .epic-home-hero-copy {
     animation: none;
   }
 }
