@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, DM_Mono, Inter } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, DM_Mono, Inter } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import "./design-system.css";
@@ -15,6 +15,13 @@ const display = Cinzel({
 const body = Inter({
   variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const editorial = Cormorant_Garamond({
+  variable: "--font-editorial",
+  subsets: ["latin"],
+  weight: ["400", "600"],
 });
 
 const mono = DM_Mono({
@@ -60,7 +67,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${display.variable} ${body.variable} ${mono.variable}`}
+        className={`${display.variable} ${body.variable} ${editorial.variable} ${mono.variable}`}
       >
         <SiteExperience>{children}</SiteExperience>
       </body>

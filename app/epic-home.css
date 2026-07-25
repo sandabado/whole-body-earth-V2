@@ -1,9 +1,13 @@
 .epic-home {
   --epic-bg: #0a0a0a;
+  --epic-surface: #0d0d0d;
+  --epic-border: #1e1e1e;
+  --epic-text: #ededed;
+  --epic-muted: #888896;
   position: relative;
   overflow: clip;
   background: var(--epic-bg);
-  color: #ededed;
+  color: var(--epic-text);
   font-family: var(--font-body), Inter, Arial, sans-serif;
 }
 
@@ -12,69 +16,57 @@ html:has(.epic-home) {
   scroll-behavior: smooth;
 }
 
+.epic-home main {
+  z-index: auto;
+}
+
 .epic-home :focus-visible {
   outline: 1px solid rgba(237, 237, 237, .86);
   outline-offset: 5px;
 }
 
 .epic-home ::selection {
-  background: #ededed;
-  color: #0a0a0a;
+  background: var(--epic-text);
+  color: var(--epic-bg);
 }
 
-.epic-home-hero {
+.epic-home > main > .water-hero {
   position: relative;
   display: grid;
   min-height: 100svh;
   place-items: center;
   overflow: hidden;
   isolation: isolate;
+  padding: 0;
+  border-bottom: 0;
 }
 
-.epic-home-canvas,
-.epic-home-vignette {
-  position: absolute;
-  inset: 0;
-}
-
-.epic-home-canvas {
-  z-index: 0;
-}
-
-.epic-home-canvas canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.epic-home-vignette {
+.epic-home > main > .water-hero::before {
   z-index: 1;
   background:
-    radial-gradient(circle at 50% 48%, rgba(0, 0, 0, .02), rgba(0, 0, 0, .42) 58%, rgba(0, 0, 0, .84) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, .42), transparent 30%, transparent 68%, #0a0a0a);
-  pointer-events: none;
+    radial-gradient(circle at 50% 45%, rgba(0, 0, 0, .02), rgba(0, 0, 0, .42) 60%, rgba(0, 0, 0, .86) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, .38), transparent 32%, transparent 66%, var(--epic-bg));
 }
 
-.epic-home-hero::before,
-.epic-home-hero::after {
+.epic-home > main > .water-hero::after {
   position: absolute;
   z-index: 2;
-  content: "";
-  pointer-events: none;
-}
-
-.epic-home-hero::before {
-  inset: 2rem;
-  border-right: 1px solid rgba(237, 237, 237, .06);
-  border-left: 1px solid rgba(237, 237, 237, .06);
-}
-
-.epic-home-hero::after {
   right: 0;
   bottom: 0;
   left: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(237, 237, 237, .18), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.epic-home-vignette {
+  position: absolute;
+  z-index: 2;
+  inset: 2rem;
+  border-right: 1px solid rgba(237, 237, 237, .06);
+  border-left: 1px solid rgba(237, 237, 237, .06);
+  pointer-events: none;
 }
 
 .epic-home-hero-copy {
@@ -97,44 +89,407 @@ html:has(.epic-home) {
   border: 1px solid rgba(237, 237, 237, .18);
   border-radius: 50%;
   color: rgba(237, 237, 237, .88);
-  font: 400 1.65rem/1 "Times New Roman", serif;
+  font: 400 1.65rem/1 var(--font-editorial), "Cormorant Garamond", serif;
   box-shadow: 0 0 36px rgba(139, 111, 214, .16);
 }
 
-.epic-home-hero h1 {
+.epic-home-hero-copy h1 {
   margin: 0;
-  font: 600 clamp(3.6rem, 10vw, 8.5rem)/.88 var(--font-body), Inter, Arial, sans-serif;
-  letter-spacing: -.075em;
+  font: 600 clamp(4.5rem, 12vw, 10rem)/.78 var(--font-editorial), "Cormorant Garamond", Georgia, serif;
+  letter-spacing: -.06em;
 }
 
 .epic-home-hero-copy > p {
-  margin: 1.35rem 0 2.25rem;
-  color: #aaaab6;
+  margin: 1.5rem 0 2.25rem;
+  color: #b2b2bd;
   font-size: clamp(.95rem, 1.6vw, 1.15rem);
   letter-spacing: .015em;
 }
 
-.epic-home-hero-copy > a {
+.epic-home-hero-copy > a,
+.epic-home-reading-inner > a {
   display: inline-flex;
-  min-height: 3.15rem;
+  min-height: 3.25rem;
   align-items: center;
   justify-content: center;
   gap: .7rem;
-  padding: 0 1.35rem;
-  border: 1px solid rgba(237, 237, 237, .68);
-  color: #ededed;
-  font-size: .7rem;
-  font-weight: 700;
-  letter-spacing: .11em;
+  padding: 0 1.4rem;
+  border: 1px solid rgba(237, 237, 237, .82);
+  color: var(--epic-text);
+  font-size: .69rem;
+  font-weight: 600;
+  letter-spacing: .1em;
   text-transform: uppercase;
   transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
 }
 
 .epic-home-hero-copy > a:hover,
-.epic-home-hero-copy > a:focus-visible {
-  border-color: #ededed;
-  background: #ededed;
-  color: #0a0a0a;
+.epic-home-hero-copy > a:focus-visible,
+.epic-home-reading-inner > a:hover,
+.epic-home-reading-inner > a:focus-visible {
+  border-color: var(--epic-text);
+  background: var(--epic-text);
+  color: var(--epic-bg);
+}
+
+.epic-home-section {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  background: var(--epic-bg);
+}
+
+.epic-home-section::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(237, 237, 237, .18), transparent);
+  content: "";
+}
+
+.epic-home-section::after {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  padding: 0 1rem;
+  background: var(--epic-bg);
+  color: rgba(237, 237, 237, .2);
+  content: attr(data-divider);
+  font: 400 1rem/1 var(--font-editorial), "Cormorant Garamond", serif;
+  transform: translate(-50%, -50%);
+}
+
+.epic-home-inner {
+  width: min(76rem, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.epic-home-activity {
+  min-height: 40svh;
+  padding: clamp(4rem, 7vw, 6rem) 0;
+}
+
+.epic-home-layers {
+  min-height: 60svh;
+  padding: clamp(4rem, 7vw, 6rem) 0;
+  background: #090909;
+}
+
+.epic-home-layers::after {
+  background: #090909;
+}
+
+.epic-home-reading {
+  min-height: 40svh;
+  padding: clamp(4rem, 7vw, 6rem) 0;
+  text-align: center;
+}
+
+.epic-home-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.epic-home-section-heading h2 {
+  max-width: 50rem;
+  margin: .8rem 0 0;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -.035em;
+}
+
+.epic-home-section-heading > a,
+.epic-home-layer-action {
+  color: var(--epic-muted);
+  font-size: .66rem;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transition: color 180ms ease;
+}
+
+.epic-home-section-heading > a:hover,
+.epic-home-section-heading > a:focus-visible,
+.epic-home-layer-action:hover,
+.epic-home-layer-action:focus-visible {
+  color: var(--epic-text);
+}
+
+.epic-home-live {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  color: #75d475;
+  font-size: .66rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.epic-home-live i {
+  width: .4rem;
+  height: .4rem;
+  border-radius: 50%;
+  background: #75d475;
+  box-shadow: 0 0 12px rgba(117, 212, 117, .8);
+  animation: epic-home-live-pulse 2s ease-in-out infinite;
+}
+
+.epic-home-feed {
+  border-top: 1px solid var(--epic-border);
+}
+
+.epic-home-feed > div {
+  display: grid;
+  min-height: 3.4rem;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--epic-border);
+}
+
+.epic-home-feed i {
+  color: var(--epic-muted);
+  font-size: 1.05rem;
+}
+
+.epic-home-feed p {
+  margin: 0;
+  color: #b9b9c3;
+  font-size: .86rem;
+}
+
+.epic-home-feed time {
+  color: #5d5d6d;
+  font-size: .68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.epic-home-layer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.epic-home-layer {
+  display: flex;
+  min-height: 24rem;
+  flex-direction: column;
+  padding: 1.5rem;
+  border: 1px solid var(--epic-border);
+  background: var(--epic-surface);
+}
+
+.epic-home-layer > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--epic-border);
+}
+
+.epic-home-layer > header span {
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.epic-home-layer > header small {
+  color: var(--epic-muted);
+  font-size: .68rem;
+}
+
+.epic-home-event-list,
+.epic-home-release-list {
+  flex: 1;
+}
+
+.epic-home-event-list > a,
+.epic-home-release-list > a {
+  display: grid;
+  align-items: center;
+  border-bottom: 1px solid var(--epic-border);
+  color: #b9b9c3;
+  transition: color 180ms ease, padding 180ms ease;
+}
+
+.epic-home-event-list > a {
+  min-height: 3rem;
+  grid-template-columns: 4rem 1.5rem 1fr auto;
+  gap: .6rem;
+}
+
+.epic-home-release-list > a {
+  min-height: 4rem;
+  grid-template-columns: 1.8rem 1fr auto;
+  gap: .8rem;
+}
+
+.epic-home-event-list > a:hover,
+.epic-home-event-list > a:focus-visible,
+.epic-home-release-list > a:hover,
+.epic-home-release-list > a:focus-visible {
+  padding-left: .35rem;
+  color: var(--epic-text);
+}
+
+.epic-home-event-list time {
+  color: #737382;
+  font-size: .64rem;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+
+.epic-home-event-list i,
+.epic-home-release-list i {
+  color: var(--epic-muted);
+  font-size: 1rem;
+}
+
+.epic-home-event-list span,
+.epic-home-release-list span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.epic-home-event-list b,
+.epic-home-release-list b {
+  overflow: hidden;
+  color: inherit;
+  font-size: .76rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.epic-home-event-list small,
+.epic-home-release-list small {
+  color: #686878;
+  font-size: .64rem;
+}
+
+.epic-home-event-list em,
+.epic-home-release-list em {
+  color: #686878;
+  font-style: normal;
+}
+
+.epic-home-layer-action {
+  width: max-content;
+  margin-top: 1.4rem;
+}
+
+.epic-home-reading-inner {
+  width: min(58rem, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.epic-home-reading-mark {
+  display: block;
+  margin-bottom: 1.2rem;
+  color: var(--guardian-primary);
+  font: 400 2rem/1 var(--font-editorial), "Cormorant Garamond", serif;
+  text-shadow: 0 0 28px rgba(139, 111, 214, .3);
+}
+
+.epic-home-reading-inner h2 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 5.4rem);
+  font-weight: 500;
+  line-height: .96;
+  letter-spacing: -.06em;
+}
+
+.epic-home-reading-inner p {
+  margin: 1.25rem 0 2rem;
+  color: var(--epic-muted);
+  font-size: .95rem;
+}
+
+.epic-home-reading-inner > a {
+  border-color: var(--epic-text);
+  background: var(--epic-text);
+  color: var(--epic-bg);
+}
+
+.epic-home-reading-inner > a:hover,
+.epic-home-reading-inner > a:focus-visible {
+  background: transparent;
+  color: var(--epic-text);
+}
+
+.epic-home-pillar-nav {
+  min-height: 10svh;
+  padding: 1.25rem 0;
+}
+
+.epic-home-pillar-row {
+  display: flex;
+  width: min(76rem, calc(100% - 48px));
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 auto;
+}
+
+.epic-home-pillar-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  color: var(--epic-muted);
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  transition: color 180ms ease;
+}
+
+.epic-home-pillar-row a:hover,
+.epic-home-pillar-row a:focus-visible {
+  color: var(--epic-text);
+}
+
+.epic-home-pillar-row i {
+  font-size: 1rem;
+}
+
+.epic-home-pillar-row [data-pillar="presence"] i { color: var(--presence-primary); }
+.epic-home-pillar-row [data-pillar="press"] i { color: var(--press-primary); }
+.epic-home-pillar-row [data-pillar="studios"] i { color: var(--studios-primary); }
+.epic-home-pillar-row [data-pillar="foundation"] i { color: var(--foundation-primary); }
+.epic-home-pillar-row [data-pillar="guardian"] i { color: var(--guardian-primary); }
+
+.epic-home[data-motion-ready="true"] [data-home-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.epic-home[data-motion-ready="true"] [data-home-reveal][data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.epic-home-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @keyframes epic-home-enter {
@@ -144,18 +499,86 @@ html:has(.epic-home) {
   }
 }
 
-@media (max-width: 600px) {
-  .epic-home-hero::before {
+@keyframes epic-home-live-pulse {
+  50% {
+    opacity: .35;
+    box-shadow: 0 0 3px rgba(117, 212, 117, .45);
+  }
+}
+
+@media (max-width: 760px) {
+  .epic-home-vignette {
     inset: 1rem;
   }
 
-  .epic-home-hero h1 {
-    font-size: clamp(3.35rem, 18vw, 5.2rem);
+  .epic-home-hero-copy h1 {
+    font-size: clamp(4rem, 22vw, 6.5rem);
+  }
+
+  .epic-home-activity,
+  .epic-home-layers,
+  .epic-home-reading {
+    min-height: auto;
+    padding: 5rem 0;
+  }
+
+  .epic-home-section-heading {
+    display: block;
+  }
+
+  .epic-home-section-heading > a {
+    display: inline-block;
+    margin-top: 1.2rem;
+  }
+
+  .epic-home-layer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .epic-home-layer {
+    min-height: 0;
+  }
+
+  .epic-home-pillar-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .epic-home-feed > div {
+    grid-template-columns: 1.5rem 1fr auto;
+    gap: .65rem;
+  }
+
+  .epic-home-feed p {
+    font-size: .78rem;
+  }
+
+  .epic-home-event-list > a {
+    grid-template-columns: 3.4rem 1.3rem 1fr auto;
+  }
+
+  .epic-home-event-list small {
+    display: none;
+  }
+
+  .epic-home-reading-inner > a {
+    width: 100%;
+    padding-inline: .8rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .epic-home-hero-copy {
+  .epic-home-hero-copy,
+  .epic-home-live i {
     animation: none;
+  }
+
+  .epic-home[data-motion-ready="true"] [data-home-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
