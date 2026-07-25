@@ -25,7 +25,7 @@ footer{border-top:1px solid var(--mercury);background:rgba(10,10,15,.96);padding
 
 /* Foundation is the Earth pillar: sage, soil, structure. */
 .site-header { background:rgba(5,6,4,.9); border-bottom-color:rgba(132,166,110,.24); }
-.hero::before { content:""; position:absolute; inset:12% 5% 7% auto; width:min(44vw,620px); border:1px solid rgba(132,166,110,.14); background:repeating-linear-gradient(0deg,transparent 0 59px,rgba(132,166,110,.055) 60px),repeating-linear-gradient(90deg,transparent 0 59px,rgba(132,166,110,.055) 60px); transform:perspective(800px) rotateY(-12deg); pointer-events:none; }
+.pillar-spine--foundation .hero::before { content:""; position:absolute; inset:12% 5% 7% auto; width:min(44vw,620px); border:1px solid rgba(132,166,110,.14); background:repeating-linear-gradient(0deg,transparent 0 59px,rgba(132,166,110,.055) 60px),repeating-linear-gradient(90deg,transparent 0 59px,rgba(132,166,110,.055) 60px); transform:perspective(800px) rotateY(-12deg); pointer-events:none; }
 .hud-card { background:linear-gradient(145deg,rgba(18,22,15,.96),rgba(11,13,9,.96)); }
 .hud-card strong { color:#dfe5d9; }
 .phase-list a:hover,.ray-list .current { background:rgba(132,166,110,.07); }
