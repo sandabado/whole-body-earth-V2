@@ -1,24 +1,22 @@
 "use client";
 
 import {
+  lazy,
+  Suspense,
   useEffect,
   useRef,
   useState,
   type CSSProperties,
+  type ComponentType,
+  type LazyExoticComponent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import styles from "./PillarShelf.module.css";
-import FoundationShelf from "./shelves/FoundationShelf";
-import GuardianShelf from "./shelves/GuardianShelf";
-import PresenceShelf from "./shelves/PresenceShelf";
-import PressShelf from "./shelves/PressShelf";
 import {
   SHELF_ACCENTS,
   type ActivePillar,
   type ShelfId,
 } from "./shelves/ShelfContent";
-import StudiosShelf from "./shelves/StudiosShelf";
-import WholeShelf from "./shelves/WholeShelf";
 
 export type { ActivePillar, ShelfId } from "./shelves/ShelfContent";
 
@@ -41,15 +39,53 @@ type DragState = {
 
 const CLOSE_DURATION_MS = 500;
 const DISMISS_THRESHOLD_PX = 100;
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])",
+].join(",");
 
-const shelfComponents: Record<ShelfId, () => React.ReactNode> = {
-  presence: () => <PresenceShelf />,
-  press: () => <PressShelf />,
-  studios: () => <StudiosShelf />,
-  foundation: () => <FoundationShelf />,
-  guardian: () => <GuardianShelf />,
-  whole: () => <WholeShelf />,
+type LazyShelfComponent = LazyExoticComponent<ComponentType>;
+
+const shelfComponents = {
+  presence: lazy(() => import("./shelves/PresenceShelf")),
+  press: lazy(() => import("./shelves/PressShelf")),
+  studios: lazy(() => import("./shelves/StudiosShelf")),
+  foundation: lazy(() => import("./shelves/FoundationShelf")),
+  guardian: lazy(() => import("./shelves/GuardianShelf")),
+  whole: lazy(() => import("./shelves/WholeShelf")),
+} satisfies Record<ShelfId, LazyShelfComponent>;
+
+const shelfNames: Record<ShelfId, string> = {
+  presence: "Presence",
+  press: "Press",
+  studios: "Studios",
+  foundation: "Foundation",
+  guardian: "Guardian",
+  whole: "NØW",
 };
+
+function focusableElements(dialog: HTMLDialogElement): HTMLElement[] {
+  return Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (element) =>
+      element.tabIndex >= 0
+      && !element.hidden
+      && element.getAttribute("aria-hidden") !== "true"
+      && element.getClientRects().length > 0,
+  );
+}
+
+function ShelfLoading({ pillar }: { pillar: ShelfId }) {
+  return (
+    <div className={styles.loading} role="status" aria-live="polite">
+      <h2 id="pillar-shelf-heading">Loading {shelfNames[pillar]} shelf</h2>
+      <span aria-hidden="true" />
+    </div>
+  );
+}
 
 function asShelfId(activePillar: ActivePillar | null): ShelfId | null {
   return activePillar && activePillar !== "none" ? activePillar : null;
@@ -67,6 +103,7 @@ export function PillarShelf({
   const [presented, setPresented] = useState(false);
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const dragRef = useRef<DragState | null>(null);
 
@@ -103,14 +140,49 @@ export function PillarShelf({
   }, [open, requestedPillar]);
 
   useEffect(() => {
-    if (!open || !mounted) return;
+    if (!mounted) return;
+
+    const dialog = dialogRef.current;
+    if (!dialog || dialog.open) return;
+
+    dialog.showModal();
+
+    return () => {
+      if (dialog.open) dialog.close();
+    };
+  }, [mounted]);
+
+  useEffect(() => {
+    if (!open || !mounted || !presented) return;
 
     const focusFrame = window.requestAnimationFrame(() => closeRef.current?.focus());
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key !== "Tab") return;
+
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+
+      const focusable = focusableElements(dialog);
+      if (focusable.length === 0) {
         event.preventDefault();
-        onClose();
+        dialog.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement;
+
+      if (!dialog.contains(activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
@@ -119,7 +191,7 @@ export function PillarShelf({
       window.cancelAnimationFrame(focusFrame);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [mounted, onClose, open]);
+  }, [mounted, open, presented]);
 
   const beginDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
@@ -168,13 +240,21 @@ export function PillarShelf({
   } as ShelfProperties;
 
   return (
-    <div
+    <dialog
+      ref={dialogRef}
+      id="whole-body-command-shelf"
       className={`${styles.root}${className ? ` ${className}` : ""}`}
       data-open={presented ? "true" : "false"}
       data-dragging={dragging ? "true" : "false"}
       data-pillar={renderedPillar}
       style={shelfStyle}
-      aria-hidden={presented ? undefined : true}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pillar-shelf-heading"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
     >
       <button
         type="button"
@@ -185,8 +265,6 @@ export function PillarShelf({
       />
       <div
         className={styles.sheet}
-        role="dialog"
-        aria-labelledby="pillar-shelf-heading"
       >
         <div
           className={styles.dragHandle}
@@ -207,9 +285,13 @@ export function PillarShelf({
         >
           <span aria-hidden="true">✕</span>
         </button>
-        <div className={styles.scrollRegion}>{Content()}</div>
+        <div className={styles.scrollRegion}>
+          <Suspense fallback={<ShelfLoading pillar={renderedPillar} />}>
+            <Content />
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 

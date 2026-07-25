@@ -20,6 +20,12 @@ function transitionDuration(): number {
 export function EpicHomeExperience() {
   const [shelfPillar, setShelfPillar] = useState<CommandPillar | null>(null);
   const [shelfOpen, setShelfOpen] = useState(false);
+  const [dialPreview, setDialPreview] = useState<
+    Exclude<ActivePillar, "none" | "whole"> | null
+  >(null);
+  const [dialTurnPillar, setDialTurnPillar] = useState<
+    Exclude<ActivePillar, "none" | "whole"> | null
+  >(null);
   const switchTimerRef = useRef<number | null>(null);
   const focusTimerRef = useRef<number | null>(null);
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -66,6 +72,7 @@ export function EpicHomeExperience() {
 
   const closeShelf = useCallback(() => {
     clearTimers();
+    setDialPreview(null);
     setShelfOpen(false);
     restoreTriggerFocus();
   }, [clearTimers, restoreTriggerFocus]);
@@ -97,11 +104,33 @@ export function EpicHomeExperience() {
   const activePillar: ActivePillar = shelfOpen && shelfPillar
     ? shelfPillar
     : "none";
+  const visualPillar: ActivePillar = dialPreview ?? activePillar;
 
   const selectDialPillar = useCallback((
     pillar: Exclude<ActivePillar, "none" | "whole">,
     trigger: HTMLButtonElement,
   ) => {
+    selectPillar(pillar, trigger);
+  }, [selectPillar]);
+
+  const previewDialPillar = useCallback((
+    pillar: Exclude<ActivePillar, "none" | "whole"> | null,
+  ) => {
+    setDialPreview(pillar);
+  }, []);
+
+  const startDialTurn = useCallback((
+    pillar: Exclude<ActivePillar, "none" | "whole">,
+  ) => {
+    setDialTurnPillar(pillar);
+  }, []);
+
+  const selectNavPillar = useCallback((
+    pillar: CommandPillar,
+    trigger: HTMLButtonElement,
+  ) => {
+    setDialPreview(null);
+    if (pillar !== "whole") setDialTurnPillar(pillar);
     selectPillar(pillar, trigger);
   }, [selectPillar]);
 
@@ -111,13 +140,13 @@ export function EpicHomeExperience() {
         <HeroEngine
           autoRotate
           siteSlug="studios"
-          activePillar={activePillar}
+          activePillar={visualPillar}
           ariaLabel="Whole Body Earth — five living pillars held in one constellation"
         >
           <div className="command-deck-vignette" aria-hidden="true" />
           <div className="command-deck-grain" aria-hidden="true" />
 
-          <TopNav activePillar={activePillar} onSelect={selectPillar} />
+          <TopNav activePillar={activePillar} onSelect={selectNavPillar} />
 
           <div className="command-deck-hero-content" aria-hidden={shelfOpen ? true : undefined}>
             <h1>Whole Body Earth</h1>
@@ -127,14 +156,24 @@ export function EpicHomeExperience() {
             </Link>
           </div>
 
-          <div className="command-deck-visual">
+          <div
+            className="command-deck-visual"
+            aria-hidden={shelfOpen ? true : undefined}
+            inert={shelfOpen ? true : undefined}
+          >
             <div className="command-deck-constellation">
-              <HeroQuincunx activePillar={activePillar} />
+              <HeroQuincunx
+                activePillar={visualPillar}
+                turnPillar={dialTurnPillar}
+              />
             </div>
             <div className="command-deck-dial-shell">
               <HermeticCrest
                 size={720}
-                activePillar={activePillar}
+                activePillar={visualPillar}
+                shelfOpen={shelfOpen}
+                onPillarPreview={previewDialPillar}
+                onPillarTurnStart={startDialTurn}
                 onPillarSelect={selectDialPillar}
               />
             </div>

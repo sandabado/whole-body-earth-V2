@@ -1,9 +1,9 @@
 .footer {
-  --footer-fire: #e8542a;
-  --footer-air: #c9a227;
-  --footer-water: #2ba8a0;
-  --footer-earth: #84a66e;
-  --footer-ether: #8b6fd6;
+  --footer-fire: var(--presence);
+  --footer-air: var(--press);
+  --footer-water: var(--studios);
+  --footer-earth: var(--foundation);
+  --footer-ether: var(--guardian);
   position: relative;
   z-index: 30;
   overflow: hidden;
@@ -37,7 +37,7 @@
 .title {
   margin: 0;
   color: #ededed;
-  font: 400 clamp(3.1rem, 7vw, 6.4rem)/.88 var(--font-display), Cinzel, Georgia, serif;
+  font: 400 clamp(3.1rem, 7vw, 6.4rem)/.88 var(--font-heading), "Cormorant Garamond", Georgia, serif;
   letter-spacing: -.055em;
   text-transform: uppercase;
 }
@@ -156,7 +156,8 @@
   position: relative;
   z-index: 1;
   color: var(--node-color);
-  font: normal 1.75rem/1 "Times New Roman", "Noto Sans Symbols 2", serif;
+  font: normal 1.75rem/1 "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", serif;
+  font-variant-emoji: text;
   text-shadow: 0 0 18px color-mix(in srgb, var(--node-color) 42%, transparent);
 }
 
@@ -232,7 +233,8 @@
 .pillarNav i {
   margin-right: .5rem;
   color: var(--node-color);
-  font: normal 1rem "Times New Roman", "Noto Sans Symbols 2", serif;
+  font: normal 1rem "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", serif;
+  font-variant-emoji: text;
 }
 
 .pillarNav .presenceLink { --node-color: var(--footer-fire); }

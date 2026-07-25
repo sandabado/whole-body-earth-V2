@@ -225,7 +225,7 @@
 .hero h1 {
   max-width: 65rem;
   margin: 0;
-  font: 400 clamp(4rem, 10vw, 9.8rem)/.82 var(--font-display), Cinzel, serif;
+  font: 400 clamp(4rem, 10vw, 9.8rem)/.82 var(--font-heading), "Cormorant Garamond", serif;
   letter-spacing: -.065em;
   text-transform: uppercase;
   text-wrap: balance;
@@ -336,7 +336,7 @@
 }
 
 .rowCopy strong {
-  font: 400 clamp(1.25rem, 2.2vw, 2rem)/1.05 var(--font-display), Cinzel, serif;
+  font: 400 clamp(1.25rem, 2.2vw, 2rem)/1.05 var(--font-heading), "Cormorant Garamond", serif;
   letter-spacing: -.02em;
 }
 

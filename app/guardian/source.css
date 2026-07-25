@@ -1,11 +1,11 @@
-:root {
-  --guardian-void: #050505;
+.guardian-identity {
+  --guardian-void: var(--void);
   --guardian-obsidian: #0d0914;
   --guardian-surface: #15101f;
   --guardian-line: #292934;
-  --guardian-bone: #ededed;
-  --guardian-ghost: #888894;
-  --guardian-violet: #8b6fd6;
+  --guardian-bone: var(--text-primary);
+  --guardian-ghost: var(--text-muted);
+  --guardian-violet: var(--guardian);
 }
 
 .guardian-identity {

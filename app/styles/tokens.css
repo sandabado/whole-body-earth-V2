@@ -1,0 +1,57 @@
+:root {
+  /* Canonical neutral system */
+  --void: #050505;
+  --obsidian: #0A0A0A;
+  --surface: #0F0F0F;
+  --border: #1E1E1E;
+  --text-primary: #F5F5F5;
+  --text-muted: #888888;
+  --text-dim: #444444;
+
+  /* Canonical Whole Body constellation */
+  --presence: #FF6B35;
+  --press: #C9A227;
+  --studios: #2E86AB;
+  --foundation: #84A66E;
+  --guardian: #6D4AFF;
+  --whole: #FF3366;
+
+  /* Compatibility aliases for established pillar components. */
+  --carbon: var(--obsidian);
+  --steel: var(--surface);
+  --bone: var(--text-primary);
+  --ghost: var(--text-muted);
+  --mercury: var(--border);
+  --water: var(--studios);
+  --presence-primary: var(--presence);
+  --press-primary: var(--press);
+  --studios-primary: var(--studios);
+  --foundation-primary: var(--foundation);
+  --guardian-primary: var(--guardian);
+
+  /* Shared Whole Body design-system aliases. */
+  --wb-void: var(--obsidian);
+  --wb-lift: var(--surface);
+  --wb-surface: var(--surface);
+  --wb-border: var(--border);
+  --wb-text: var(--text-primary);
+  --wb-muted: var(--text-muted);
+  --wb-dim: var(--text-dim);
+  --wb-fire: var(--presence);
+  --wb-air: var(--press);
+  --wb-water: var(--studios);
+  --wb-earth: var(--foundation);
+  --wb-earth-copper: #B87333;
+  --wb-ether: var(--guardian);
+  --wb-content: min(70rem, calc(100% - 48px));
+  --wb-section-space: clamp(6rem, 12vw, 11rem);
+
+  /* Legacy names resolve to the three canonical next/font families. */
+  --font-display: var(--font-heading);
+  --font-editorial: var(--font-heading);
+  --font-reading: var(--font-heading);
+  --font-data: var(--font-mono);
+  --wb-display: var(--font-heading), "Cormorant Garamond", Georgia, serif;
+  --wb-ui: var(--font-body), Inter, Arial, sans-serif;
+  --wb-mono: var(--font-mono), "JetBrains Mono", monospace;
+}

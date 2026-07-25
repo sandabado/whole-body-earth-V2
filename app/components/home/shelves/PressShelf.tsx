@@ -10,7 +10,7 @@ export function PressShelf() {
   return (
     <ShelfContent
       id="press"
-      symbol="🜁"
+      symbol="🜁︎"
       title="Whole Body Press"
       geometry="AIR · OCTAHEDRON · 8 FACES"
       about="Whole Body Press publishes texts rooted in wisdom traditions, somatic practice, ecological thinking, and creative rebellion. Each edition is crafted to last. Authors retain 100% of their IP; Press earns on production and placement—never ownership."

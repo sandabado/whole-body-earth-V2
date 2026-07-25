@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function GuardianHome() {
-  return <ConstellationPlaceholder mode="guardian" />;
+  return <ConstellationPlaceholder />;
 }

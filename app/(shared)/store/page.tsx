@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SharedLayerPage, type SharedLayerItem } from "../components/shared/SharedLayerPage";
+import { SharedLayerPage, type SharedLayerItem } from "../../components/shared/SharedLayerPage";
 
 export const metadata: Metadata = {
   title: { absolute: "Store — Whole Body Earth" },

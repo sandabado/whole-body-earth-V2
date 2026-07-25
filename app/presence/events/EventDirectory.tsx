@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {useMemo, useState} from "react";
 import {events} from "../components/data";
@@ -39,7 +40,12 @@ export function EventDirectory() {
         {visibleEvents.map((event) => (
           <article className="event-card event-card-rich" key={event.slug}>
             <Link className="image-wrap" href={`/presence/events/${event.slug}`} aria-label={`View ${event.title}`}>
-              <img src={event.image} alt="" loading="lazy" />
+              <Image
+                src={event.image}
+                alt=""
+                fill
+                sizes="(max-width: 520px) calc(100vw - 44px), (max-width: 760px) 50vw, 33vw"
+              />
               <span>{event.kind}</span>
             </Link>
             <div className="card-copy">

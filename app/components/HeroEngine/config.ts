@@ -13,9 +13,9 @@ export type ActivePillar =
 
 export const COMMAND_PILLAR_COLORS = {
   presence: "#FF6B35",
-  press: "#A8D8EA",
+  press: "#C9A227",
   studios: "#2E86AB",
-  foundation: "#8B6F47",
+  foundation: "#84A66E",
   guardian: "#6D4AFF",
   whole: "#FF3366",
 } as const satisfies Record<Exclude<ActivePillar, "none">, string>;

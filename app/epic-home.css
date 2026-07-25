@@ -44,7 +44,7 @@ body:has(.command-deck-home) {
   color: #fff;
 }
 
-.epic-home > main > .water-hero {
+.epic-home.command-deck-home > main > .water-hero {
   position: relative;
   display: block;
   width: 100%;
@@ -53,15 +53,15 @@ body:has(.command-deck-home) {
   padding: 0;
   overflow: hidden;
   border: 0;
-  background: var(--command-bg) !important;
+  background: var(--command-bg);
   isolation: isolate;
 }
 
 .epic-home > main > .water-hero::before {
   z-index: 1;
   background:
-    radial-gradient(circle at 50% 43%, rgba(5, 5, 5, .08), rgba(5, 5, 5, .32) 48%, rgba(5, 5, 5, .88) 100%),
-    linear-gradient(180deg, rgba(5, 5, 5, .48), transparent 20%, transparent 70%, rgba(5, 5, 5, .84));
+    radial-gradient(circle at 50% 45%, transparent 34%, rgba(5, 5, 5, .16) 76%, rgba(5, 5, 5, .36) 100%),
+    linear-gradient(180deg, rgba(5, 5, 5, .18), transparent 22%, transparent 74%, rgba(5, 5, 5, .32));
 }
 
 .command-deck-vignette,
@@ -74,8 +74,8 @@ body:has(.command-deck-home) {
 
 .command-deck-vignette {
   background:
-    linear-gradient(90deg, rgba(5, 5, 5, .72), transparent 18%, transparent 82%, rgba(5, 5, 5, .72)),
-    radial-gradient(circle at center, transparent 35%, rgba(5, 5, 5, .48) 100%);
+    linear-gradient(90deg, rgba(5, 5, 5, .28), transparent 13%, transparent 87%, rgba(5, 5, 5, .28)),
+    radial-gradient(circle at center, transparent 48%, rgba(5, 5, 5, .2) 100%);
 }
 
 .command-deck-grain {
@@ -88,12 +88,19 @@ body:has(.command-deck-home) {
 .command-deck-visual {
   position: absolute;
   z-index: 3;
-  inset: clamp(12.5rem, 25svh, 15rem) 0 clamp(1.75rem, 4svh, 3rem);
+  top: 50%;
+  left: 50%;
   display: grid;
+  width: 100%;
+  height: min(78svh, 55rem);
   place-items: center;
   opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
-  transform-origin: 50% 42%;
+  transform: translate3d(
+    -50%,
+    calc(-50% + clamp(2rem, 5svh, 4.5rem)),
+    0
+  ) scale(1);
+  transform-origin: 50% 50%;
   filter: blur(0);
   will-change: opacity, filter, transform;
   transition:
@@ -104,10 +111,11 @@ body:has(.command-deck-home) {
 
 .command-deck-constellation {
   position: absolute;
-  inset: -5% 0;
-  opacity: .48;
+  inset: -7% -18%;
+  opacity: .68;
   pointer-events: none;
-  transform: scale(1.08);
+  transform: scale(1.12);
+  mix-blend-mode: screen;
   transition: opacity var(--duration-dim) var(--ease-gentle), transform var(--duration-dim) var(--ease-meditative);
 }
 
@@ -122,14 +130,14 @@ body:has(.command-deck-home) {
 }
 
 .command-deck-home[data-shelf-open="true"] .command-deck-constellation {
-  opacity: .72;
-  transform: scale(1.14);
+  opacity: .8;
+  transform: scale(1.18);
 }
 
 .command-deck-home[data-shelf-open="true"] .command-deck-visual {
   opacity: .4;
   filter: blur(4px);
-  transform: translate3d(0, -24svh, 0) scale(.76);
+  transform: translate3d(-50%, calc(-50% - 24svh), 0) scale(.76);
 }
 
 .command-deck-hero-content {
@@ -222,12 +230,18 @@ body:has(.command-deck-home) {
 @media (max-width: 760px) {
   .command-deck-vignette {
     background:
-      radial-gradient(circle at 50% 39%, transparent 26%, rgba(5, 5, 5, .58) 100%),
-      linear-gradient(180deg, rgba(5, 5, 5, .35), transparent 18%, transparent 66%, rgba(5, 5, 5, .9));
+      radial-gradient(circle at 50% 42%, transparent 32%, rgba(5, 5, 5, .26) 100%),
+      linear-gradient(180deg, rgba(5, 5, 5, .18), transparent 20%, transparent 68%, rgba(5, 5, 5, .38));
   }
 
   .command-deck-visual {
-    inset: max(12rem, calc(env(safe-area-inset-top) + 11rem)) 0 max(1.5rem, env(safe-area-inset-bottom));
+    width: 100%;
+    height: min(72svh, 38rem);
+  }
+
+  .command-deck-constellation {
+    inset: -8% -28%;
+    opacity: .62;
   }
 
   .command-deck-dial-shell {
@@ -235,7 +249,7 @@ body:has(.command-deck-home) {
   }
 
   .command-deck-home[data-shelf-open="true"] .command-deck-visual {
-    transform: translate3d(0, -43svh, 0) scale(.46);
+    transform: translate3d(-50%, calc(-50% - 43svh), 0) scale(.46);
   }
 
   .command-deck-hero-content {
@@ -262,7 +276,11 @@ body:has(.command-deck-home) {
 
 @media (max-height: 650px) {
   .command-deck-visual {
-    inset-block: 10.7rem 1rem;
+    height: 68svh;
+  }
+
+  .command-deck-dial-shell {
+    width: min(52svh, calc(100vw - 2rem));
   }
 
   .command-deck-hero-content {
@@ -280,10 +298,10 @@ body:has(.command-deck-home) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .command-deck-visual,
-  .command-deck-hero-content,
-  .command-deck-hero-content > a {
-    animation: none !important;
-    transition-duration: .01ms !important;
+  .epic-home .command-deck-visual,
+  .epic-home .command-deck-hero-content,
+  .epic-home .command-deck-hero-content > a {
+    animation: none;
+    transition-duration: .01ms;
   }
 }

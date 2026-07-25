@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EpicHomeExperience } from "./components/home/EpicHomeExperience";
+import "./epic-home.css";
 
 export const metadata: Metadata = {
   title: "Whole Body Earth — Five Pillars. One Whole Body.",

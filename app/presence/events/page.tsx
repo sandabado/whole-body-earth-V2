@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {events} from "../components/data";
 import {EventDirectory} from "./EventDirectory";
@@ -8,9 +9,12 @@ export default function EventsPage() {
   return (
     <div className="page events-page">
       <header className="image-hero events-hero">
-        <img
+        <Image
           src={featured.image}
           alt="A small fire circle gathering in the high desert at dusk"
+          fill
+          sizes="100vw"
+          priority
         />
         <div className="event-hero-veil" aria-hidden="true" />
         <div className="events-hero-copy">
@@ -22,7 +26,12 @@ export default function EventsPage() {
 
       <section className="featured-event" aria-labelledby="featured-event-title">
         <Link href={`/presence/events/${featured.slug}`} className="featured-event-image" aria-label={`View ${featured.title}`}>
-          <img src={featured.image} alt={`Atmosphere for ${featured.title}`} />
+          <Image
+            src={featured.image}
+            alt={`Atmosphere for ${featured.title}`}
+            fill
+            sizes="(max-width: 1000px) 100vw, 58vw"
+          />
           <span className="event-badge">★ FEATURED RETREAT</span>
           <span className="availability-badge"><i aria-hidden="true" /> {featured.availability}</span>
         </Link>

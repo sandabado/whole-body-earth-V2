@@ -5,6 +5,7 @@ import {
   COMMAND_PILLAR_COLORS,
   type ActivePillar,
 } from "../HeroEngine/config";
+import styles from "./HeroQuincunx.module.css";
 type Vector3 = Readonly<{ x: number; y: number; z: number }>;
 type Point2 = Readonly<{ x: number; y: number }>;
 type Edge = readonly [from: number, to: number];
@@ -12,6 +13,14 @@ type Face = readonly number[];
 type RGB = readonly [red: number, green: number, blue: number];
 type QuincunxPosition = "top" | "left" | "right" | "bottom" | "center";
 type ElementPillar = Exclude<ActivePillar, "none" | "whole">;
+
+const PILLAR_TURN_SLOT: Record<ElementPillar, number> = {
+  presence: 0,
+  press: 1,
+  studios: 2,
+  foundation: 3,
+  guardian: 4,
+};
 
 interface SolidDefinition {
   name: string;
@@ -342,6 +351,7 @@ const SOLID_COLORS = {
   foundation: hexToRgb(COMMAND_PILLAR_COLORS.foundation),
   guardian: hexToRgb(COMMAND_PILLAR_COLORS.guardian),
 } satisfies Record<ElementPillar, RGB>;
+const WHOLE_COLOR = hexToRgb(COMMAND_PILLAR_COLORS.whole);
 
 // Array order also defines the semantic quincunx layout used by CONNECTIONS:
 // top, left, right, bottom, and the witnessing center.
@@ -455,7 +465,9 @@ function focusTargets(
   reducedMotion: boolean,
 ): number[] {
   if (isElementPillar(activePillar)) {
-    return SOLIDS.map((solid) => solid.pillar === activePillar ? 1 : 0.15);
+    return SOLIDS.map((solid) =>
+      solid.pillar === activePillar || solid.position === "center" ? 1 : 0.12
+    );
   }
 
   if (activePillar === "whole") {
@@ -467,6 +479,14 @@ function focusTargets(
   }
 
   return SOLIDS.map(() => 0.3);
+}
+
+function nextFullTurn(current: number, pillar: ElementPillar): number {
+  const step = TAU / 5;
+  const desired = PILLAR_TURN_SLOT[pillar] * step;
+  const normalized = ((current % TAU) + TAU) % TAU;
+  const alignment = (desired - normalized + TAU) % TAU;
+  return current + TAU + alignment;
 }
 
 function rgba([red, green, blue]: RGB, alpha: number): string {
@@ -556,6 +576,8 @@ function drawSolid(
   motionElapsed: number,
   reducedMotion: boolean,
   focusIntensity: number,
+  renderColor: RGB = solid.color,
+  rotationOverrideY: number | null = null,
 ): void {
   const pointReveal = smoothstep(solid.revealAt, solid.revealAt + 0.32, revealElapsed);
   const geometryReveal = smoothstep(solid.revealAt + 0.25, solid.revealAt + 1.45, revealElapsed);
@@ -572,14 +594,14 @@ function drawSolid(
     context,
     center,
     Math.max(12, radiusInPixels * (1.55 + pulse * 0.28)),
-    solid.color,
+    renderColor,
     pointReveal * focusIntensity * (0.08 + pulse * 0.035),
   );
   drawGlow(
     context,
     center,
     Math.max(2, 2.2 + geometryReveal * 2.6),
-    solid.color,
+    renderColor,
     pointReveal * focusIntensity * (0.82 - geometryReveal * 0.34),
   );
   context.restore();
@@ -592,7 +614,8 @@ function drawSolid(
     rotate(
       vertex,
       baseTilt + animationTime * solid.rotation.x + solid.phase * 0.08,
-      0.42 + animationTime * solid.rotation.y + solid.phase * 0.11,
+      rotationOverrideY
+        ?? 0.42 + animationTime * solid.rotation.y + solid.phase * 0.11,
       animationTime * solid.rotation.z,
     ),
   );
@@ -618,7 +641,7 @@ function drawSolid(
     });
     context.closePath();
     context.fillStyle = rgba(
-      solid.color,
+      renderColor,
       geometryReveal * focusIntensity * (0.025 + light * 0.105),
     );
     context.fill();
@@ -640,7 +663,7 @@ function drawSolid(
     const to = projectedVertices[edge[1]];
     const light = clamp((depth + 1) / 2);
     context.strokeStyle = rgba(
-      solid.color,
+      renderColor,
       geometryReveal * focusIntensity * (0.2 + light * 0.62),
     );
     context.lineWidth = 0.55 + light * 0.75;
@@ -718,30 +741,28 @@ function drawScene(
   motionElapsed: number,
   reducedMotion: boolean,
   focusLevels: readonly number[],
+  activePillar: ActivePillar,
+  dodecaTurn: number | null,
   opaqueBackground: boolean,
 ): void {
   context.clearRect(0, 0, width, height);
 
   const center = { x: width / 2, y: height / 2 };
-  const background = context.createRadialGradient(
-    center.x,
-    center.y,
-    0,
-    center.x,
-    center.y,
-    Math.max(width, height) * 0.72,
-  );
   if (opaqueBackground) {
+    const background = context.createRadialGradient(
+      center.x,
+      center.y,
+      0,
+      center.x,
+      center.y,
+      Math.max(width, height) * 0.72,
+    );
     background.addColorStop(0, "#090811");
     background.addColorStop(0.45, "#040407");
     background.addColorStop(1, "#000000");
-  } else {
-    background.addColorStop(0, "rgba(9, 8, 17, 0.16)");
-    background.addColorStop(0.48, "rgba(4, 4, 7, 0.06)");
-    background.addColorStop(1, "rgba(0, 0, 0, 0)");
+    context.fillStyle = background;
+    context.fillRect(0, 0, width, height);
   }
-  context.fillStyle = background;
-  context.fillRect(0, 0, width, height);
 
   const skyReveal = smoothstep(0.5, 4.2, revealElapsed);
   for (const star of STARFIELD) {
@@ -753,7 +774,13 @@ function drawScene(
     context.fill();
   }
 
-  const orbitRadius = Math.min(270, Math.max(36, Math.min(width * 0.31, height * 0.255)));
+  // The four elemental bodies are intentionally wider than the key itself:
+  // they form the surrounding constellation instead of disappearing beneath
+  // the dial's rings.
+  const orbitRadius = Math.min(
+    520,
+    Math.max(88, Math.min(width * 0.42, height * 0.38)),
+  );
   const positions = SOLIDS.map((solid) =>
     nodePosition(
       solid.position,
@@ -776,8 +803,15 @@ function drawScene(
 
   SOLIDS.forEach((solid, index) => {
     const baseRadius = solid.position === "center"
-      ? Math.min(82, Math.max(24, orbitRadius * 0.34))
-      : Math.min(58, Math.max(17, orbitRadius * 0.235));
+      ? Math.min(128, Math.max(36, orbitRadius * 0.36))
+      : Math.min(104, Math.max(30, orbitRadius * 0.27));
+    const renderColor = solid.position === "center"
+      ? activePillar === "whole"
+        ? WHOLE_COLOR
+        : isElementPillar(activePillar)
+          ? SOLID_COLORS[activePillar]
+          : SOLID_COLORS.guardian
+      : solid.color;
     drawSolid(
       context,
       solid,
@@ -788,27 +822,37 @@ function drawScene(
       motionElapsed,
       reducedMotion,
       focusLevels[index],
+      renderColor,
+      solid.position === "center" ? dodecaTurn : null,
     );
   });
 }
 
 type HeroQuincunxProps = {
   activePillar?: ActivePillar;
+  turnPillar?: ElementPillar | null;
   opaqueBackground?: boolean;
 };
 
 export function HeroQuincunx({
   activePillar = "none",
+  turnPillar = null,
   opaqueBackground = false,
 }: HeroQuincunxProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const activePillarRef = useRef<ActivePillar>(activePillar);
+  const turnPillarRef = useRef<ElementPillar | null>(turnPillar);
   const redrawRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     activePillarRef.current = activePillar;
     redrawRef.current?.();
   }, [activePillar]);
+
+  useEffect(() => {
+    turnPillarRef.current = turnPillar;
+    redrawRef.current?.();
+  }, [turnPillar]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -824,6 +868,12 @@ export function HeroQuincunx({
     let revealElapsed = reducedMotion ? STATIC_TIME : 0;
     let motionElapsed = reducedMotion ? STATIC_TIME : 0;
     let motionRate = isElementPillar(activePillarRef.current) ? 0.45 : 1;
+    let dodecaTurn: number | null = null;
+    let dodecaTarget = 0;
+    let dodecaTurnStart = 0;
+    let dodecaTurnElapsed = 0;
+    let dodecaIsTurning = false;
+    let lastTurnPillar: ElementPillar | null = null;
     let focusLevels = focusTargets(
       activePillarRef.current,
       motionElapsed,
@@ -847,8 +897,43 @@ export function HeroQuincunx({
       );
     };
 
+    const updateDodecaTurn = (delta: number, immediate = false) => {
+      const requestedPillar = turnPillarRef.current;
+      if (requestedPillar && requestedPillar !== lastTurnPillar) {
+        const currentTurn = dodecaTurn
+          ?? 0.42 + motionElapsed * SOLIDS[4].rotation.y;
+        dodecaTurnStart = currentTurn;
+        dodecaTurn = currentTurn;
+        dodecaTarget = nextFullTurn(currentTurn, requestedPillar);
+        dodecaTurnElapsed = 0;
+        dodecaIsTurning = true;
+        lastTurnPillar = requestedPillar;
+      }
+
+      if (!requestedPillar && dodecaTurn === null) return;
+
+      if (immediate) {
+        dodecaTurn = dodecaTarget;
+        dodecaIsTurning = false;
+        return;
+      }
+
+      if (!dodecaIsTurning) return;
+      dodecaTurnElapsed = Math.min(0.6, dodecaTurnElapsed + delta);
+      const progress = easeOutCubic(dodecaTurnElapsed / 0.6);
+      dodecaTurn =
+        dodecaTurnStart + (dodecaTarget - dodecaTurnStart) * progress;
+      if (dodecaTurnElapsed >= 0.6) {
+        dodecaTurn = dodecaTarget;
+        dodecaIsTurning = false;
+      }
+    };
+
     const render = () => {
-      if (reducedMotion) updateFocus(0, true);
+      if (reducedMotion) {
+        updateFocus(0, true);
+        updateDodecaTurn(0, true);
+      }
       drawScene(
         context,
         width,
@@ -857,6 +942,8 @@ export function HeroQuincunx({
         reducedMotion ? STATIC_TIME : motionElapsed,
         reducedMotion,
         focusLevels,
+        activePillarRef.current,
+        dodecaTurn,
         opaqueBackground,
       );
     };
@@ -909,6 +996,7 @@ export function HeroQuincunx({
         motionRate += (targetMotionRate - motionRate) * motionBlend;
         motionElapsed += delta * motionRate;
         updateFocus(delta);
+        updateDodecaTurn(delta);
       }
       lastFrameTime = time;
       lastRenderedAt = time;
@@ -1002,17 +1090,9 @@ export function HeroQuincunx({
       ref={canvasRef}
       role="img"
       data-active-pillar={activePillar}
+      data-opaque-background={opaqueBackground ? "true" : "false"}
       aria-label="The Whole Body Earth quincunx: Air and Press above, Fire and Presence left, Water and Studios right, Earth and Foundation below, and Ether and Guardian at the center."
-      className="h-full w-full"
-      style={{
-        background: opaqueBackground
-          ? "radial-gradient(circle at center, #090811 0%, #020204 52%, #000 100%)"
-          : "transparent",
-        display: "block",
-        height: "100%",
-        pointerEvents: "none",
-        width: "100%",
-      }}
+      className={styles.canvas}
     >
       A luminous quincunx of five Platonic solids representing the five Whole
       Body Earth pillars.

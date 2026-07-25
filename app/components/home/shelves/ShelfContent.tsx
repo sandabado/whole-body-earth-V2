@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import { COMMAND_PILLAR_COLORS } from "../../HeroEngine/config";
 import styles from "../PillarShelf.module.css";
 
 export type ShelfId =
@@ -17,16 +18,9 @@ export type ShelfStat = {
   value: string;
 };
 
-export const SHELF_ACCENTS: Record<ShelfId, string> = {
-  presence: "#FF6B35",
-  press: "#A8D8EA",
-  studios: "#2E86AB",
-  foundation: "#8B6F47",
-  guardian: "#6D4AFF",
-  whole: "#FF3366",
-};
+export const SHELF_ACCENTS = COMMAND_PILLAR_COLORS satisfies Record<ShelfId, string>;
 
-type ShelfContentProps = {
+export interface ShelfContentProps {
   id: Exclude<ShelfId, "whole">;
   symbol: string;
   title: string;
@@ -35,12 +29,14 @@ type ShelfContentProps = {
   stats: readonly ShelfStat[];
   href: string;
   cta: string;
-};
+}
 
 type AccentProperties = CSSProperties & {
   "--shelf-accent": string;
+  "--shelf-text-accent": string;
 };
 
+/** Renders the shared live-data summary and route CTA for a pillar shelf. */
 export function ShelfContent({
   id,
   symbol,
@@ -53,6 +49,9 @@ export function ShelfContent({
 }: ShelfContentProps) {
   const accentStyle = {
     "--shelf-accent": SHELF_ACCENTS[id],
+    "--shelf-text-accent": id === "guardian"
+      ? "color-mix(in srgb, var(--shelf-accent) 80%, var(--text-primary))"
+      : "var(--shelf-accent)",
   } as AccentProperties;
 
   return (
@@ -78,7 +77,11 @@ export function ShelfContent({
         ))}
       </dl>
 
-      <Link className={styles.pillarCta} href={href}>
+      <Link
+        className={styles.pillarCta}
+        href={href}
+        style={{ color: "var(--shelf-text-accent)" }}
+      >
         {cta} <span aria-hidden="true">→</span>
       </Link>
     </section>

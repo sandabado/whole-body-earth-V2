@@ -1,15 +1,18 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import type { ActivePillar } from "../HeroEngine/config";
+import {
+  COMMAND_PILLAR_COLORS,
+  type ActivePillar,
+} from "../HeroEngine/config";
 import styles from "./TopNav.module.css";
 
 export type CommandPillar = Exclude<ActivePillar, "none">;
 
-type TopNavProps = {
+export interface TopNavProps {
   activePillar: ActivePillar;
   onSelect: (pillar: CommandPillar, trigger: HTMLButtonElement) => void;
-};
+}
 
 const commands: ReadonlyArray<{
   id: CommandPillar;
@@ -18,26 +21,29 @@ const commands: ReadonlyArray<{
   symbol: string;
   color: string;
 }> = [
-  { id: "presence", label: "Presence", navLabel: "Presence", symbol: "🜂", color: "#FF6B35" },
-  { id: "press", label: "Press", navLabel: "Press", symbol: "🜁", color: "#A8D8EA" },
-  { id: "studios", label: "Studios", navLabel: "Studios", symbol: "🜄", color: "#2E86AB" },
-  { id: "foundation", label: "Foundation", navLabel: "Foundation", symbol: "🜃", color: "#8B6F47" },
-  { id: "guardian", label: "Guardian", navLabel: "Guardian", symbol: "⊙", color: "#6D4AFF" },
-  { id: "whole", label: "Whole — live activity and calendar", navLabel: "NØW", symbol: "⏺︎", color: "#FF3366" },
+  { id: "presence", label: "Presence", navLabel: "Presence", symbol: "\u{1F702}\u{FE0E}", color: COMMAND_PILLAR_COLORS.presence },
+  { id: "press", label: "Press", navLabel: "Press", symbol: "\u{1F701}\u{FE0E}", color: COMMAND_PILLAR_COLORS.press },
+  { id: "studios", label: "Studios", navLabel: "Studios", symbol: "\u{1F704}\u{FE0E}", color: COMMAND_PILLAR_COLORS.studios },
+  { id: "foundation", label: "Foundation", navLabel: "Foundation", symbol: "\u{1F703}\u{FE0E}", color: COMMAND_PILLAR_COLORS.foundation },
+  { id: "guardian", label: "Guardian", navLabel: "Guardian", symbol: "⊙", color: COMMAND_PILLAR_COLORS.guardian },
+  { id: "whole", label: "NØW", navLabel: "NØW", symbol: "⏺︎", color: COMMAND_PILLAR_COLORS.whole },
 ];
 
+/** Opens each pillar's command shelf from the persistent homepage bottom rail. */
 export function TopNav({ activePillar, onSelect }: TopNavProps) {
   return (
     <nav className={styles.nav} aria-label="Open a Whole Body pillar shelf">
       <ul className={styles.rail}>
         {commands.map((command) => {
           const active = activePillar === command.id;
+          const isLiveCommand = command.id === "whole";
+
           return (
-            <li key={command.id}>
+            <li key={command.id} className={styles.item}>
               <button
                 id={`command-nav-${command.id}`}
                 type="button"
-                className={`${styles.command} ${command.id === "whole" ? styles.record : ""}`}
+                className={`${styles.command} ${isLiveCommand ? styles.record : ""}`}
                 style={{ "--command-color": command.color } as CSSProperties}
                 data-command={command.id}
                 data-active={active ? "true" : "false"}
@@ -46,7 +52,14 @@ export function TopNav({ activePillar, onSelect }: TopNavProps) {
                 aria-controls="whole-body-command-shelf"
                 onClick={(event) => onSelect(command.id, event.currentTarget)}
               >
-                <span className={styles.symbol} aria-hidden="true">{command.symbol}</span>
+                <span
+                  className={styles.symbol}
+                  role={isLiveCommand ? "img" : undefined}
+                  aria-label={isLiveCommand ? "System live indicator" : undefined}
+                  aria-hidden={isLiveCommand ? undefined : true}
+                >
+                  {command.symbol}
+                </span>
                 <span className={styles.label}>{command.navLabel}</span>
               </button>
             </li>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {useMemo, useState} from "react";
 import {practitioners} from "../components/data";
@@ -53,7 +54,12 @@ export function PractitionerDirectory() {
         {visiblePractitioners.map((person) => (
           <article className="keeper-card" key={person.slug}>
             <Link href={`/presence/practitioners/${person.slug}`} className="keeper-card-image" aria-label={`View ${person.name}'s profile`}>
-              <img src={person.image} alt="" />
+              <Image
+                src={person.image}
+                alt=""
+                fill
+                sizes="(max-width: 520px) calc(100vw - 44px), (max-width: 760px) 50vw, 33vw"
+              />
               <span className="keeper-availability"><i aria-hidden="true" /> ACCEPTING BETA REQUESTS</span>
             </Link>
             <div className="keeper-card-copy">

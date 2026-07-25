@@ -10,7 +10,7 @@ export function FoundationShelf() {
   return (
     <ShelfContent
       id="foundation"
-      symbol="🜃"
+      symbol="🜃︎"
       title="Whole Body Foundation"
       geometry="EARTH · CUBE · 6 FACES"
       about="Whole Body Foundation acquires land and builds permanent infrastructure for the constellation. Water, food, shelter, and gathering systems arrive in a sequence the ground can support."

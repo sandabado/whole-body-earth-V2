@@ -10,7 +10,7 @@ export function StudiosShelf() {
   return (
     <ShelfContent
       id="studios"
-      symbol="🜄"
+      symbol="🜄︎"
       title="Whole Body Studios"
       geometry="WATER · ICOSAHEDRON · 20 FACES"
       about="We finish records, build campaigns, place music, and press vinyl. The artist owns every part of the work; Studios earns on the services it performs, never on ownership."

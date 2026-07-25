@@ -4,11 +4,11 @@ import styles from "../PillarShelf.module.css";
 import { SHELF_ACCENTS, type ShelfId } from "./ShelfContent";
 
 const upcoming = [
-  { date: "Aug 03", symbol: "🜂", title: "Presence Circle", meta: "Virtual", pillar: "presence" },
-  { date: "Aug 07", symbol: "🜄", title: "Ground Drop", meta: "Vinyl", pillar: "studios" },
-  { date: "Aug 12", symbol: "🜁", title: "Review Opens", meta: "Press", pillar: "press" },
-  { date: "Aug 19", symbol: "🜃", title: "Site Survey", meta: "Morongo Valley", pillar: "foundation" },
-  { date: "Aug 26", symbol: "🜂", title: "Retreat Close", meta: "Presence", pillar: "presence" },
+  { date: "Aug 03", symbol: "🜂︎", title: "Presence Circle", meta: "Virtual", pillar: "presence" },
+  { date: "Aug 07", symbol: "🜄︎", title: "Ground Drop", meta: "Vinyl", pillar: "studios" },
+  { date: "Aug 12", symbol: "🜁︎", title: "Review Opens", meta: "Press", pillar: "press" },
+  { date: "Aug 19", symbol: "🜃︎", title: "Site Survey", meta: "Morongo Valley", pillar: "foundation" },
+  { date: "Aug 26", symbol: "🜂︎", title: "Retreat Close", meta: "Presence", pillar: "presence" },
 ] as const satisfies ReadonlyArray<{
   date: string;
   symbol: string;
@@ -18,10 +18,10 @@ const upcoming = [
 }>;
 
 const activity = [
-  { symbol: "🜂", message: "Maya joined Circle", time: "2m ago", pillar: "presence" },
-  { symbol: "🜄", message: "Ground reached 4k plays", time: "1h ago", pillar: "studios" },
-  { symbol: "🜁", message: "Vol. III entered review", time: "3h ago", pillar: "press" },
-  { symbol: "🜃", message: "Site report uploaded", time: "6h ago", pillar: "foundation" },
+  { symbol: "🜂︎", message: "Maya joined Circle", time: "2m ago", pillar: "presence" },
+  { symbol: "🜄︎", message: "Ground reached 4k plays", time: "1h ago", pillar: "studios" },
+  { symbol: "🜁︎", message: "Vol. III entered review", time: "3h ago", pillar: "press" },
+  { symbol: "🜃︎", message: "Site report uploaded", time: "6h ago", pillar: "foundation" },
   { symbol: "⊙", message: "Vetting complete", time: "1d ago", pillar: "guardian" },
 ] as const satisfies ReadonlyArray<{
   symbol: string;

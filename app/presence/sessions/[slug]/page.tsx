@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {notFound} from "next/navigation";
 import {practitioners} from "../../components/data";
@@ -34,7 +35,13 @@ export default async function SessionRequestPage({
       <section className="booking booking-rich" aria-labelledby="booking-title">
         <div className="booking-context">
           <figure>
-            <img src={person.image} alt={`Portrait of ${person.name}`} />
+            <Image
+              src={person.image}
+              alt={`Portrait of ${person.name}`}
+              fill
+              sizes="(max-width: 760px) 100vw, (max-width: 1000px) 43vw, 34vw"
+              priority
+            />
             <figcaption>{person.title} · {person.location}</figcaption>
           </figure>
           <p className="eyebrow">PRIVATE SESSION</p>

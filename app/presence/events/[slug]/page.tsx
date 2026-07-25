@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {notFound} from "next/navigation";
 import {events} from "../../components/data";
@@ -20,7 +21,13 @@ export default async function EventDetail({params}: {params: Promise<{slug: stri
       </nav>
 
       <header className="detail-hero event-detail-hero">
-        <img src={event.image} alt={`Atmosphere for ${event.title} in ${event.location}`} />
+        <Image
+          src={event.image}
+          alt={`Atmosphere for ${event.title} in ${event.location}`}
+          fill
+          sizes="100vw"
+          priority
+        />
         <div className="event-hero-veil" aria-hidden="true" />
         <div className="event-detail-hero-copy">
           <p className="eyebrow">{event.kind} · {event.date}</p>
@@ -158,7 +165,13 @@ export default async function EventDetail({params}: {params: Promise<{slug: stri
         <div className={`event-gallery-grid event-gallery-${event.images.length}`}>
           {event.images.map((image, index) => (
             <figure key={`${image}-${index}`}>
-              <img src={image} alt={`${event.title}, atmosphere ${index + 1}`} loading="lazy" />
+              <Image
+                src={image}
+                alt={`${event.title}, atmosphere ${index + 1}`}
+                width={1600}
+                height={1067}
+                sizes="(max-width: 760px) 84vw, 33vw"
+              />
             </figure>
           ))}
         </div>

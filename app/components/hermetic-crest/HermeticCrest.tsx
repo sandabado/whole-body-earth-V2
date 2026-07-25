@@ -26,6 +26,13 @@ interface HermeticCrestProps {
   };
   className?: string;
   activePillar?: ActivePillar;
+  shelfOpen?: boolean;
+  onPillarPreview?: (
+    pillar: Exclude<ActivePillar, "none" | "whole"> | null,
+  ) => void;
+  onPillarTurnStart?: (
+    pillar: Exclude<ActivePillar, "none" | "whole">,
+  ) => void;
   onPillarSelect?: (
     pillar: Exclude<ActivePillar, "none" | "whole">,
     trigger: HTMLButtonElement,
@@ -40,6 +47,7 @@ type CrestStyle = CSSProperties & {
   "--field-speed": string;
   "--node-speed": string;
   "--active-color": string;
+  "--target-turn": string;
 };
 
 type PointerSample = {
@@ -49,10 +57,12 @@ type PointerSample = {
 };
 
 const ELEMENTS = [
-  { id: "air", command: "press", label: "AIR", pillar: "PRESS", symbol: "🜁", x: 250, y: 103, color: COMMAND_PILLAR_COLORS.press },
-  { id: "fire", command: "presence", label: "FIRE", pillar: "PRESENCE", symbol: "🜂", x: 103, y: 250, color: COMMAND_PILLAR_COLORS.presence },
-  { id: "water", command: "studios", label: "WATER", pillar: "STUDIOS", symbol: "🜄", x: 397, y: 250, color: COMMAND_PILLAR_COLORS.studios },
-  { id: "earth", command: "foundation", label: "EARTH", pillar: "FOUNDATION", symbol: "🜃", x: 250, y: 397, color: COMMAND_PILLAR_COLORS.foundation },
+  // U+FE0E forces monochrome text presentation. Without it, some production
+  // browsers substitute colored emoji glyphs that ignore the SVG fill color.
+  { id: "air", command: "press", label: "AIR", pillar: "PRESS", symbol: "🜁︎", x: 250, y: 103, color: COMMAND_PILLAR_COLORS.press },
+  { id: "fire", command: "presence", label: "FIRE", pillar: "PRESENCE", symbol: "🜂︎", x: 103, y: 250, color: COMMAND_PILLAR_COLORS.presence },
+  { id: "water", command: "studios", label: "WATER", pillar: "STUDIOS", symbol: "🜄︎", x: 397, y: 250, color: COMMAND_PILLAR_COLORS.studios },
+  { id: "earth", command: "foundation", label: "EARTH", pillar: "FOUNDATION", symbol: "🜃︎", x: 250, y: 397, color: COMMAND_PILLAR_COLORS.foundation },
   { id: "ether", command: "guardian", label: "ETHER", pillar: "GUARDIAN", symbol: "⊙", x: 250, y: 250, color: COMMAND_PILLAR_COLORS.guardian },
 ] as const;
 
@@ -68,17 +78,17 @@ const PILLAR_TO_ELEMENT: Partial<Record<ActivePillar, ElementId>> = {
 
 const DODECAGON = Array.from({ length: 12 }, (_, index) => {
   const angle = (index * Math.PI * 2) / 12 - Math.PI / 2;
-  return `${250 + Math.cos(angle) * 142},${250 + Math.sin(angle) * 142}`;
+  return `${(250 + Math.cos(angle) * 142).toFixed(3)},${(250 + Math.sin(angle) * 142).toFixed(3)}`;
 }).join(" ");
 
 const INNER_DODECAGON = Array.from({ length: 12 }, (_, index) => {
   const angle = (index * Math.PI * 2) / 12 - Math.PI / 2 + Math.PI / 12;
-  return `${250 + Math.cos(angle) * 119},${250 + Math.sin(angle) * 119}`;
+  return `${(250 + Math.cos(angle) * 119).toFixed(3)},${(250 + Math.sin(angle) * 119).toFixed(3)}`;
 }).join(" ");
 
 const GUARDIAN_DODECAGON = Array.from({ length: 12 }, (_, index) => {
   const angle = (index * Math.PI * 2) / 12 - Math.PI / 2;
-  return `${250 + Math.cos(angle) * 73},${250 + Math.sin(angle) * 73}`;
+  return `${(250 + Math.cos(angle) * 73).toFixed(3)},${(250 + Math.sin(angle) * 73).toFixed(3)}`;
 }).join(" ");
 
 export default function HermeticCrest({
@@ -87,6 +97,9 @@ export default function HermeticCrest({
   layerControls = {},
   className,
   activePillar = "none",
+  shelfOpen = false,
+  onPillarPreview,
+  onPillarTurnStart,
   onPillarSelect,
 }: HermeticCrestProps) {
   const [phase, setPhase] = useState<CrestPhase>("locked");
@@ -114,11 +127,14 @@ export default function HermeticCrest({
     ?? PILLAR_TO_ELEMENT[activePillar]
     ?? dialSelection;
   const activeElement = ELEMENTS.find((element) => element.id === selectedElement);
-  const activeColor = hoveredElement
-    ? activeElement?.color
-    : activePillar === "none"
+  const activeColor = activeElement?.color
+    ?? (activePillar === "none"
       ? COMMAND_PILLAR_COLORS.guardian
-      : COMMAND_PILLAR_COLORS[activePillar];
+      : COMMAND_PILLAR_COLORS[activePillar]);
+  const targetIndex = Math.max(
+    0,
+    ELEMENTS.findIndex((element) => element.id === selectedElement),
+  );
   const crestStyle: CrestStyle = {
     "--crest-size": `${size}px`,
     "--outer-speed": `${outerSpeed}s`,
@@ -127,6 +143,7 @@ export default function HermeticCrest({
     "--field-speed": `${fieldPulseSpeed}s`,
     "--node-speed": `${fieldPulseSpeed * 3}s`,
     "--active-color": activeColor ?? COMMAND_PILLAR_COLORS.guardian,
+    "--target-turn": `${360 + targetIndex * 72}deg`,
   };
 
   useEffect(() => {
@@ -164,6 +181,16 @@ export default function HermeticCrest({
     }
   }, [activePillar]);
 
+  useEffect(() => {
+    const previewElement = ELEMENTS.find((element) =>
+      element.id === (
+        hoveredElement
+        ?? (phase === "turning" ? dialSelection : null)
+      )
+    );
+    onPillarPreview?.(previewElement?.command ?? null);
+  }, [dialSelection, hoveredElement, onPillarPreview, phase]);
+
   const selectElement = (
     element: (typeof ELEMENTS)[number],
     trigger: HTMLButtonElement,
@@ -172,9 +199,10 @@ export default function HermeticCrest({
     setDialSelection(element.id);
     setHoveredElement(element.id);
     setPhase("turning");
+    onPillarTurnStart?.(element.command);
     const unlockDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ? 0
-      : 1_050;
+      : 600;
     timerRef.current = window.setTimeout(() => {
       setPhase("open");
       onPillarSelect?.(element.command, trigger);
@@ -272,9 +300,9 @@ export default function HermeticCrest({
               <stop offset="1" stopColor="#213e36" />
             </linearGradient>
             <radialGradient id={glowId}>
-              <stop offset="0" stopColor="#9b7fff" stopOpacity=".9" />
-              <stop offset=".35" stopColor="#6d4aff" stopOpacity=".38" />
-              <stop offset="1" stopColor="#6d4aff" stopOpacity="0" />
+              <stop offset="0" stopColor="var(--active-color)" stopOpacity=".94" />
+              <stop offset=".35" stopColor="var(--active-color)" stopOpacity=".42" />
+              <stop offset="1" stopColor="var(--active-color)" stopOpacity="0" />
             </radialGradient>
             <path id={mottoPathId} d="M 110 388 Q 250 472 390 388" fill="none" />
           </defs>
@@ -296,7 +324,7 @@ export default function HermeticCrest({
                   x2="250"
                   y2="57"
                   transform={`rotate(${index * 6} 250 250)`}
-                  stroke={index % 5 === 0 ? "#d4af37" : "#7b6b3e"}
+                  stroke={index % 5 === 0 ? "var(--active-color)" : "#7b6b3e"}
                   strokeWidth={index % 5 === 0 ? "1.2" : ".55"}
                   opacity={index % 5 === 0 ? ".7" : ".38"}
                 />
@@ -304,20 +332,20 @@ export default function HermeticCrest({
             </g>
 
             <g className={styles.mandala}>
-              <polygon points={DODECAGON} fill="none" stroke="#c9a227" strokeWidth="1" opacity=".38" />
-              <polygon points={INNER_DODECAGON} fill="none" stroke="#c9a227" strokeWidth=".7" strokeDasharray="3 7" opacity=".34" />
+              <polygon points={DODECAGON} fill="none" stroke="var(--active-color)" strokeWidth="1" opacity=".5" />
+              <polygon points={INNER_DODECAGON} fill="none" stroke="var(--active-color)" strokeWidth=".7" strokeDasharray="3 7" opacity=".42" />
               {Array.from({ length: 12 }, (_, index) => (
-                <line key={index} x1="250" y1="250" x2="250" y2="108" transform={`rotate(${index * 30} 250 250)`} stroke="#c9a227" strokeWidth=".45" opacity=".18" />
+                <line key={index} x1="250" y1="250" x2="250" y2="108" transform={`rotate(${index * 30} 250 250)`} stroke="var(--active-color)" strokeWidth=".45" opacity=".24" />
               ))}
             </g>
 
             <g className={styles.quincunxGeometry}>
               <polygon points="250,103 397,250 250,397 103,250" fill="none" stroke="#ededed" strokeWidth=".7" opacity=".2" />
-              <line className={styles.currentLine} x1="250" y1="250" x2="250" y2="103" style={{ "--current-color": "#A8D8EA" } as CSSProperties} />
-              <line className={styles.currentLine} x1="250" y1="250" x2="103" y2="250" style={{ "--current-color": "#FF6B35" } as CSSProperties} />
-              <line className={styles.currentLine} x1="250" y1="250" x2="397" y2="250" style={{ "--current-color": "#2E86AB" } as CSSProperties} />
+              <line className={styles.currentLine} x1="250" y1="250" x2="250" y2="103" style={{ "--current-color": COMMAND_PILLAR_COLORS.press } as CSSProperties} />
+              <line className={styles.currentLine} x1="250" y1="250" x2="103" y2="250" style={{ "--current-color": COMMAND_PILLAR_COLORS.presence } as CSSProperties} />
+              <line className={styles.currentLine} x1="250" y1="250" x2="397" y2="250" style={{ "--current-color": COMMAND_PILLAR_COLORS.studios } as CSSProperties} />
               <line className={styles.currentLine} x1="250" y1="250" x2="250" y2="397" style={{ "--current-color": COMMAND_PILLAR_COLORS.foundation } as CSSProperties} />
-              <polygon points={GUARDIAN_DODECAGON} fill="none" stroke="#6D4AFF" strokeWidth=".8" opacity=".34" />
+              <polygon points={GUARDIAN_DODECAGON} fill="none" stroke="var(--active-color)" strokeWidth=".9" opacity=".62" />
             </g>
 
             <g className={styles.elementNodes}>
@@ -330,7 +358,7 @@ export default function HermeticCrest({
                   style={{
                     "--node-color": element.color,
                     "--node-delay": `${index * 80}ms`,
-                    "--node-unlock-delay": `${700 + index * 140}ms`,
+                    "--node-unlock-delay": `${180 + index * 55}ms`,
                   } as CSSProperties}
                 >
                   <circle r={element.id === "ether" ? 46 : 25} />
@@ -360,10 +388,10 @@ export default function HermeticCrest({
               ))}
               <g className={styles.aperture}>
                 {Array.from({ length: 5 }, (_, index) => (
-                  <path key={index} d="M250 207 L271 235 L258 253 L232 236 Z" transform={`rotate(${index * 72} 250 250)`} fill="#17131f" stroke="#8b6fd6" strokeWidth=".7" opacity=".96" />
+                  <path key={index} d="M250 207 L271 235 L258 253 L232 236 Z" transform={`rotate(${index * 72} 250 250)`} fill="#17131f" stroke="var(--active-color)" strokeWidth=".7" opacity=".96" />
                 ))}
               </g>
-              <circle className={styles.observerCore} cx="250" cy="250" r="13" fill="#6d4aff" />
+              <circle className={styles.observerCore} cx="250" cy="250" r="13" fill="var(--active-color)" />
             </g>
 
             <g className={styles.keyFollower}>
@@ -398,6 +426,8 @@ export default function HermeticCrest({
               "--control-size": element.id === "ether" ? "18%" : "12%",
             } as CSSProperties}
             aria-label={`Open ${element.pillar.toLowerCase()} shelf`}
+            aria-controls="whole-body-command-shelf"
+            aria-expanded={shelfOpen && activePillar === element.command}
             onFocus={() => setHoveredElement(element.id)}
             onBlur={() => setHoveredElement(null)}
             onClick={(event) => selectElement(element, event.currentTarget)}

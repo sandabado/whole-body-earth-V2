@@ -6,18 +6,22 @@ const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 
 test("ships the fullscreen Whole Body Earth command deck", async () => {
-  const [page, home, nav, shelf, layout, packageJson] = await Promise.all([
+  const [page, home, nav, shelf, layout, studiosLayout, packageJson] = await Promise.all([
     source("app/page.tsx"),
     source("app/components/home/EpicHomeExperience.tsx"),
     source("app/components/home/TopNav.tsx"),
     source("app/components/home/PillarShelf.tsx"),
     source("app/layout.tsx"),
+    source("app/studios/layout.tsx"),
     source("package.json"),
   ]);
 
-  assert.match(layout, /Whole Body Studios/);
+  assert.match(layout, /Whole Body Earth/);
+  assert.doesNotMatch(layout, /SiteExperience|Whole Body Studios/);
+  assert.match(studiosLayout, /<SiteExperience>\{children\}<\/SiteExperience>/);
+  assert.match(studiosLayout, /Whole Body Studios/);
   assert.match(page, /<EpicHomeExperience \/>/);
-  assert.match(home, /<HeroQuincunx activePillar=\{activePillar\}/);
+  assert.match(home, /<HeroQuincunx[\s\S]*activePillar=\{visualPillar\}/);
   assert.match(home, /<HermeticCrest/);
   assert.match(home, /onPillarSelect=\{selectDialPillar\}/);
   assert.match(home, /<TopNav activePillar=\{activePillar\}/);
@@ -25,8 +29,10 @@ test("ships the fullscreen Whole Body Earth command deck", async () => {
   assert.match(home, /Five pillars\. One whole body\./);
   assert.match(home, /href="\/reading"/);
   assert.doesNotMatch(home, /WholeBodyFooter|ElementZones|HomeContinuum/);
-  for (const symbol of ["🜂", "🜁", "🜄", "🜃", "⊙", "⏺"])
-    assert.match(nav, new RegExp(symbol));
+  for (const command of ["presence", "press", "studios", "foundation", "guardian", "whole"])
+    assert.match(nav, new RegExp(`id: "${command}"`));
+  assert.match(nav, /symbol: "⊙"/);
+  assert.match(nav, /symbol: "⏺/);
   assert.match(nav, /styles\.label/);
   assert.match(nav, /navLabel: "Foundation"/);
   assert.match(nav, /navLabel: "NØW"/);
@@ -46,7 +52,7 @@ test("uses the reusable Water engine with active-pillar focus and hydration-safe
 
   assert.match(home, /<HeroEngine/);
   assert.match(home, /siteSlug="studios"/);
-  assert.match(home, /activePillar=\{activePillar\}/);
+  assert.match(home, /activePillar=\{visualPillar\}/);
   assert.match(engine, /lazy\(\(\) => import\("\.\/WaterCanvas"\)\)/);
   assert.match(engine, /CanvasBoundary/);
   assert.match(engine, /capability\.reducedMotion/);
@@ -87,15 +93,26 @@ test("centralizes live configuration with a protected editor", async () => {
   assert.match(docs, /without a deployment/);
 });
 
-test("preserves the pillar route spine and client-stable studio status", async () => {
-  const shell = await source("app/components/SiteExperience.tsx");
-  for (const route of ["/studios", "/foundation", "/presence", "/press"]) {
+test("isolates the Studios shell while preserving shared-route footer behavior", async () => {
+  const [rootLayout, studiosLayout, sharedLayout, shell] = await Promise.all([
+    source("app/layout.tsx"),
+    source("app/studios/layout.tsx"),
+    source("app/(shared)/layout.tsx"),
+    source("app/components/SiteExperience.tsx"),
+  ]);
+
+  assert.doesNotMatch(rootLayout, /SiteExperience/);
+  assert.match(studiosLayout, /<SiteExperience>\{children\}<\/SiteExperience>/);
+  assert.match(sharedLayout, /<WholeBodyFooter \/>/);
+  for (const route of ["/studios", "/studios/catalog", "/studios/about", "/studios/contact"]) {
     assert.match(shell, new RegExp(route));
   }
-  assert.match(shell, /current !== "studios"/);
-  assert.match(shell, /pathname !== "\/"/);
+  assert.doesNotMatch(shell, /pathname\.startsWith\("\/(foundation|presence|press)"\)/);
+  assert.doesNotMatch(shell, /current !== "studios"/);
   assert.match(shell, /<WholeBodyFooter \/>/);
   assert.match(shell, /useState\("SYSTEMS — STANDING BY"\)/);
+  assert.match(shell, /accent: "#2E86AB"/);
+  assert.match(shell, /rgb: "46,134,171"/);
   assert.doesNotMatch(shell, /const studioStatus = hour/);
 });
 

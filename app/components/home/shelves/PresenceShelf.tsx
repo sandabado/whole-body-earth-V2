@@ -10,7 +10,7 @@ export function PresenceShelf() {
   return (
     <ShelfContent
       id="presence"
-      symbol="🜂"
+      symbol="🜂︎"
       title="Whole Body Presence"
       geometry="FIRE · TETRAHEDRON · 4 FACES"
       about="Embodied practice, open fire, and gatherings built for integration—not performance. Presence is a place to become honest again, held by real people in real rooms through work the body can recognize."
