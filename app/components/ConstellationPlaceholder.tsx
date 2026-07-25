@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { EpicHomeExperience } from "./home/EpicHomeExperience";
 import { ProductSwitcher } from "./ProductSwitcher";
+import { WholeBodyFooter } from "./WholeBodyFooter";
 import styles from "./ConstellationPlaceholder.module.css";
 
 type Mode = "whole" | "guardian";
@@ -23,7 +23,7 @@ export function ConstellationPlaceholder({ mode }: { mode: Mode }) {
           <div className={styles.sky} aria-hidden="true" />
           <div className={styles.geometry} aria-hidden="true">
             <i /><i /><i /><i /><i />
-            <span>☉</span>
+            <span>⊙</span>
           </div>
         </>
       ) : null}
@@ -32,7 +32,7 @@ export function ConstellationPlaceholder({ mode }: { mode: Mode }) {
         className={`${styles.header} ${guardian ? "" : styles.epicHeader}`}
       >
         <button type="button" className={styles.brand} onClick={() => setSwitcherOpen(true)} aria-haspopup="dialog" aria-expanded={switcherOpen}>
-          <span aria-hidden="true">{guardian ? "☉" : "◎"}</span>
+          <span aria-hidden="true">{guardian ? "⊙" : "✦"}</span>
           <b>WHOLE BODY <em>/{guardian ? "GUARDIAN" : "EARTH"}</em></b>
           <small aria-hidden="true">••<br />••</small>
         </button>
@@ -64,25 +64,7 @@ export function ConstellationPlaceholder({ mode }: { mode: Mode }) {
         </main>
       )}
 
-      <footer
-        className={`${styles.footer} ${guardian ? "" : styles.epicFooter}`}
-      >
-        <span>FIVE PILLARS. ONE WHOLE BODY.</span>
-        <div className={styles.footerActions}>
-          {!guardian ? (
-            <Link
-              href="/observer/reading"
-              className={styles.clover}
-              aria-label="Decode your Whole Body"
-            >
-              🍀
-            </Link>
-          ) : null}
-          <button type="button" onClick={() => setSwitcherOpen(true)}>
-            OPEN CONSTELLATION ↗
-          </button>
-        </div>
-      </footer>
+      <WholeBodyFooter />
 
       <ProductSwitcher current={guardian ? "guardian" : "whole"} open={switcherOpen} onClose={() => setSwitcherOpen(false)} />
     </div>

@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { ConstellationPlaceholder } from "./components/ConstellationPlaceholder";
 
 export const metadata: Metadata = {
-  title: "Whole Body Earth — A Seven-Dimensional Operating System",
+  title: "Whole Body Earth — Five Elements. One Body.",
   description:
-    "A seven-dimensional operating system for sovereign creators. Five bodies, five elements, five pillars, one whole system.",
+    "Five elements. One body. A living constellation for sovereign creators.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Whole Body Earth — A Seven-Dimensional Operating System",
+    title: "Whole Body Earth — Five Elements. One Body.",
     description:
-      "Five bodies. Five elements. Five pillars. One whole system.",
+      "Five elements. One body. Living now.",
     url: "/",
     siteName: "Whole Body Earth",
     images: [
@@ -24,9 +24,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Whole Body Earth — A Seven-Dimensional Operating System",
+    title: "Whole Body Earth — Five Elements. One Body.",
     description:
-      "Five bodies. Five elements. Five pillars. One whole system.",
+      "Five elements. One body. Living now.",
     images: ["/og-earth.png"],
   },
 };

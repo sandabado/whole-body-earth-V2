@@ -1,0 +1,45 @@
+:root {
+  --wb-void: #0a0a0a;
+  --wb-lift: #121212;
+  --wb-surface: #1a1a1a;
+  --wb-border: #222222;
+  --wb-text: #f5f5f5;
+  --wb-muted: #888888;
+  --wb-dim: #444444;
+  --wb-fire: #ff6b35;
+  --wb-air: #a8d8ea;
+  --wb-water: #2e86ab;
+  --wb-earth: #c18c2b;
+  --wb-ether: #6d4aff;
+  --wb-content: min(70rem, calc(100% - 48px));
+  --wb-section-space: clamp(6rem, 12vw, 11rem);
+  --wb-display: var(--font-alchemical-display), "Cormorant Garamond", Georgia, serif;
+  --wb-ui: var(--font-body), Inter, Arial, sans-serif;
+  --wb-mono: var(--font-alchemical-mono), var(--font-mono), monospace;
+}
+
+.wb-glyph {
+  color: var(--wb-accent, var(--wb-text));
+  font-family: "Times New Roman", "Noto Sans Symbols 2", serif;
+  font-style: normal;
+  font-variant-emoji: text;
+  line-height: 1;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--wb-accent, white) 28%, transparent);
+}
+
+.wb-surface {
+  background: var(--wb-surface);
+  border: 1px solid var(--wb-border);
+}
+
+.wb-data {
+  font-family: var(--wb-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+  :root {
+    --wb-content: calc(100% - 40px);
+    --wb-section-space: 6rem;
+  }
+}

@@ -40,49 +40,49 @@ const products: Product[] = [
     name: "WHOLE",
     element: "ALL ELEMENTS",
     description: "Root",
-    glyph: "◎",
+    glyph: "✦",
     href: "/",
-    accent: "#EDEDED",
-  },
-  {
-    id: "foundation",
-    index: "01",
-    name: "FOUNDATION",
-    element: "EARTH",
-    description: "The ground",
-    glyph: "🜃",
-    href: "/foundation",
-    accent: "#22C55E",
-  },
-  {
-    id: "studios",
-    index: "02",
-    name: "STUDIOS",
-    element: "WATER",
-    description: "The signal",
-    glyph: "🜄",
-    href: "/studios",
-    accent: "#2BA8A0",
+    accent: "#F5F5F5",
   },
   {
     id: "presence",
-    index: "03",
+    index: "01",
     name: "PRESENCE",
     element: "FIRE",
     description: "The gathering",
     glyph: "🜂",
     href: "/presence",
-    accent: "#E8542A",
+    accent: "#FF6B35",
   },
   {
     id: "press",
-    index: "04",
+    index: "02",
     name: "PRESS",
     element: "AIR",
     description: "The word",
     glyph: "🜁",
     href: "/press",
-    accent: "#C9A227",
+    accent: "#A8D8EA",
+  },
+  {
+    id: "studios",
+    index: "03",
+    name: "STUDIOS",
+    element: "WATER",
+    description: "The signal",
+    glyph: "🜄",
+    href: "/studios",
+    accent: "#2E86AB",
+  },
+  {
+    id: "foundation",
+    index: "04",
+    name: "FOUNDATION",
+    element: "EARTH",
+    description: "The ground",
+    glyph: "🜃",
+    href: "/foundation",
+    accent: "#C18C2B",
   },
   {
     id: "guardian",
@@ -90,9 +90,9 @@ const products: Product[] = [
     name: "GUARDIAN",
     element: "ETHER",
     description: "The agreements",
-    glyph: "☉",
+    glyph: "⊙",
     href: "/guardian",
-    accent: "#7C3AED",
+    accent: "#6D4AFF",
   },
 ];
 
@@ -249,7 +249,7 @@ export function ProductSwitcher({
 
           <p className={styles.mantra}>
             SO IT IS BUILT. SO IT HOLDS. SO IT IS.{" "}
-            <span aria-hidden="true">🍀</span>
+            <span aria-hidden="true">✦</span>
           </p>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ProductSwitcher } from "./ProductSwitcher";
+import { WholeBodyFooter } from "./WholeBodyFooter";
 
 const edges: [number, number][] = [];
 const phi = (1 + Math.sqrt(5)) / 2;
@@ -183,23 +184,6 @@ const siteConfig = {
   press: { name: "PRESS", glyph: "🜁", accent: "#c9a227", rgb: "201,162,39" },
 } as const;
 
-function Footer({ glyph }: { glyph: string }) {
-  return (
-    <footer className="site-footer">
-      <div>
-        <p className="footer-glyph">{glyph}</p>
-        <p className="footer-oath" aria-label="So It Is Built. So It Holds. So It Is.">
-          SO IT <span data-alt="FORGED">BUILT</span>. SO IT <span data-alt="ENDURES">HOLDS</span>. SO IT <span data-alt="REMAINS">IS</span>. 🍀
-        </p>
-      </div>
-      <div className="footer-meta">
-        <p>WHOLE BODY GUILD LLC · CALIFORNIA</p>
-        <div><Link href="/studios/privacy">PRIVACY</Link><Link href="/studios/terms">TERMS</Link></div>
-      </div>
-    </footer>
-  );
-}
-
 export function SiteExperience({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const current = pathname.startsWith("/studios")
@@ -318,7 +302,8 @@ export function SiteExperience({ children }: { children: ReactNode }) {
   };
 
   if (current !== "studios") {
-    return <>{children}</>;
+    const standaloneSharedPage = current === null && pathname !== "/" && !pathname.startsWith("/guardian") && !pathname.startsWith("/admin");
+    return <>{children}{standaloneSharedPage ? <WholeBodyFooter /> : null}</>;
   }
 
   return (
@@ -366,7 +351,7 @@ export function SiteExperience({ children }: { children: ReactNode }) {
       />
       {secret && <div className="secret-marquee">THE FREQUENCY WAS NEVER LOST. IT WAS HELD IN THE BODY.</div>}
       <main>{children}</main>
-      <Footer glyph={activeSite.glyph} />
+      <WholeBodyFooter />
     </div>
   );
 }

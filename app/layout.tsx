@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Cinzel, DM_Mono, Inter } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, DM_Mono, Inter, JetBrains_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
+import "./design-system.css";
 import "./epic-home.css";
 import { SiteExperience } from "./components/SiteExperience";
 
@@ -20,6 +21,18 @@ const mono = DM_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["300", "400", "500"],
+});
+
+const alchemicalDisplay = Cormorant_Garamond({
+  variable: "--font-alchemical-display",
+  subsets: ["latin"],
+  weight: ["400", "600"],
+});
+
+const alchemicalMono = JetBrains_Mono({
+  variable: "--font-alchemical-mono",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -59,7 +72,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${display.variable} ${body.variable} ${mono.variable}`}
+        className={`${display.variable} ${body.variable} ${mono.variable} ${alchemicalDisplay.variable} ${alchemicalMono.variable}`}
       >
         <SiteExperience>{children}</SiteExperience>
       </body>
