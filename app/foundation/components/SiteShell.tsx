@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { WholeBodyFooter } from "@/app/components/WholeBodyFooter";
 import { ProductSwitcher } from "../../components/ProductSwitcher";
 import { CubeBackground } from "./CubeBackground";
 
@@ -35,6 +36,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
     </header>
     <ProductSwitcher current="foundation" open={switcher} onClose={() => setSwitcher(false)} />
     <main>{children}</main>
-    <footer><div className="status-line"><i /> SYSTEM STATUS: PHASE 0 · LAND SEARCH ACTIVE</div><p>SO IT IS BUILT. SO IT HOLDS. SO IT IS. 🍀</p><div className="footer-links"><Link href="/foundation/apply">APPLY</Link><Link href="/foundation/support">SUPPORT</Link><Link href="/foundation/contact">CONTACT</Link><Link href="/studios">WHOLEBODY.STUDIOS</Link></div><small>WHOLEBODY.FOUNDATION · WHOLE BODY GUILD LLC · CALIFORNIA · 🜃 EARTH</small></footer>
+    <WholeBodyFooter />
   </>;
 }

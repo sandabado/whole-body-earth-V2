@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { WholeBodyFooter } from "@/app/components/WholeBodyFooter";
 import { CubeBackground } from "./CubeBackground";
 import { ProductSwitcher } from "./ProductSwitcher";
 
@@ -63,15 +64,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
       onClose={() => setSwitcherOpen(false)}
     />
     <main>{children}</main>
-    <footer>
-      <div className="status-line"><i/> SYSTEM STATUS: ONLINE · AIR CARRIES THE SIGNAL</div>
-      <p>SO IT IS BUILT. SO IT HOLDS. SO IT IS. 🍀</p>
-      <blockquote>“The book is the moment the signal locks into permanence.”</blockquote>
-      <div className="footer-links">
-        <Link href="/press/catalog">CATALOG</Link><Link href="/press/authors">AUTHORS</Link><Link href="/press/events">EVENTS</Link><Link href="/press/craft">CRAFT</Link><Link href="/press/submit">SUBMIT</Link><Link href="/press/contact">CONTACT</Link>
-      </div>
-      <div className="footer-legal"><Link href="/press/legal/privacy">PRIVACY</Link><Link href="/press/legal/terms">TERMS</Link><a href="https://wholebody.earth">WHOLEBODY.EARTH</a></div>
-      <small>WHOLEBODY.PRESS · COPYRIGHT © 2026 WHOLE BODY GUILD LLC · 🜁 AIR</small>
-    </footer>
+    <WholeBodyFooter />
   </>;
 }
