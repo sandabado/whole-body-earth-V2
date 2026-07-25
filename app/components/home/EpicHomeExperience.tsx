@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { WholeBodyFooter } from "../WholeBodyFooter";
 import HeroEngine from "../HeroEngine/HeroEngine";
+import HermeticCrest from "../hermetic-crest/HermeticCrest";
 import { ElementZones } from "./ElementZones";
 
 const activity = [
@@ -108,7 +109,7 @@ export function EpicHomeExperience() {
           <div className="epic-home-vignette" aria-hidden="true" />
           <div className="epic-home-grain" aria-hidden="true" />
           <div className="epic-home-hero-copy">
-            <span className="epic-home-mark" aria-hidden="true">⊙</span>
+            <HermeticCrest className="epic-home-key" size={380} />
             <h1 id="epic-home-title">Whole Body</h1>
             <p>Five elements. One body. Living now.</p>
             <Link href="#reading">Take the Reading <span aria-hidden="true">→</span></Link>

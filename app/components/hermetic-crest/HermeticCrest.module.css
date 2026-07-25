@@ -1,0 +1,405 @@
+.crest {
+  --crest-size: 320px;
+  --outer-speed: 150s;
+  --calibration-speed: 102s;
+  --mandala-speed: 110s;
+  --field-speed: 6s;
+  --node-speed: 18s;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  position: relative;
+  display: grid;
+  width: min(var(--crest-size), 100%);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #d4af37;
+  cursor: pointer;
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.crest::before,
+.crest::after {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.crest::before {
+  width: 72%;
+  background: radial-gradient(circle, rgba(109, 74, 255, .12), rgba(5, 5, 5, .42) 49%, transparent 70%);
+  filter: blur(12px);
+  opacity: .64;
+  transition: opacity 700ms ease, transform 1.2s cubic-bezier(.2, .8, .2, 1);
+}
+
+.crest::after {
+  width: 88%;
+  border: 1px solid rgba(201, 162, 39, .08);
+  box-shadow: 0 0 54px rgba(109, 74, 255, .08), inset 0 0 45px rgba(5, 5, 5, .68);
+  opacity: .45;
+}
+
+.svgShell {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  filter:
+    drop-shadow(0 2px 1px rgba(0, 0, 0, .9))
+    drop-shadow(0 0 18px rgba(109, 74, 255, .1));
+  transform: perspective(760px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform 280ms cubic-bezier(.2, .8, .2, 1), filter 350ms ease;
+  will-change: transform;
+}
+
+.svgShell svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.interfaceLabel,
+.coordinate,
+.status {
+  position: absolute;
+  z-index: 4;
+  font: 500 clamp(.42rem, 1vw, .5rem)/1 var(--font-data), "JetBrains Mono", monospace;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.interfaceLabel {
+  top: 11%;
+  left: -2%;
+  color: rgba(201, 162, 39, .52);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.coordinate {
+  top: 11%;
+  right: -2%;
+  color: rgba(139, 111, 214, .58);
+  writing-mode: vertical-rl;
+}
+
+.status {
+  bottom: -1.25rem;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  color: rgba(212, 175, 55, .72);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  transition: color 300ms ease;
+}
+
+.status i {
+  width: .32rem;
+  height: .32rem;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 8px rgba(212, 175, 55, .72);
+  animation: statusPulse 2.8s ease-in-out infinite;
+}
+
+.instrument {
+  opacity: 0;
+  transform: scale(.92) rotate(-2deg);
+  transform-origin: 250px 250px;
+  transition: opacity 1.1s ease, transform 1.6s cubic-bezier(.16, 1, .3, 1);
+}
+
+.entered .instrument {
+  opacity: 1;
+  transform: scale(1) rotate(0);
+}
+
+.fieldGlow {
+  opacity: .26;
+  transform: scale(.78);
+  transform-origin: 250px 250px;
+  transition: opacity 900ms ease, transform 1.4s cubic-bezier(.2, .8, .2, 1);
+}
+
+.outerMechanism,
+.calibrationRing,
+.mandala {
+  transform-box: view-box;
+  transform-origin: 250px 250px;
+}
+
+.entered[data-animate="true"][data-running="true"] .outerMechanism {
+  animation: outerRotation var(--outer-speed) linear infinite;
+}
+
+.entered[data-animate="true"][data-running="true"] .calibrationRing {
+  animation: calibrationRotation var(--calibration-speed) linear infinite reverse;
+}
+
+.entered[data-animate="true"][data-running="true"] .mandala {
+  animation: mandalaRotation var(--mandala-speed) linear infinite reverse;
+}
+
+.serpentBody {
+  stroke-dasharray: 1430;
+  stroke-dashoffset: 1430;
+  transition: stroke-dashoffset 2.8s cubic-bezier(.4, 0, .2, 1) .15s;
+}
+
+.entered .serpentBody { stroke-dashoffset: 0; }
+
+.serpentHead {
+  opacity: 0;
+  transform: translate(-3px, 3px);
+  transition: opacity 700ms ease 2.1s, transform 900ms cubic-bezier(.2, .8, .2, 1) 2.1s;
+}
+
+.entered .serpentHead { opacity: 1; transform: translate(0, 0); }
+
+.quincunxGeometry line {
+  stroke: rgba(237, 237, 237, .24);
+  stroke-width: .7;
+  stroke-dasharray: 3 7;
+  transition: stroke 450ms ease, opacity 450ms ease;
+}
+
+.elementNode {
+  --node-color: #ededed;
+  --node-delay: 0ms;
+  --node-unlock-delay: 700ms;
+  opacity: .7;
+  transition: opacity 400ms ease var(--node-delay);
+}
+
+.elementNode > circle:first-child {
+  fill: rgba(5, 5, 5, .82);
+  stroke: var(--node-color);
+  stroke-width: 1;
+  opacity: .72;
+  transition: opacity 500ms ease, stroke-width 500ms ease, filter 500ms ease;
+}
+
+.nodeOrbit {
+  fill: none;
+  stroke: var(--node-color);
+  stroke-width: .55;
+  stroke-dasharray: 2 5;
+  opacity: .45;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.entered[data-animate="true"][data-running="true"] .nodeOrbit {
+  animation: nodeOrbit var(--node-speed) linear infinite;
+}
+
+.elementNode text {
+  fill: var(--node-color);
+  font: 400 19px/1 "Times New Roman", "Noto Sans Symbols 2", serif;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--node-color) 32%, transparent));
+}
+
+.elementNode .nodeLabel {
+  font: 500 6px/1 var(--font-data), "JetBrains Mono", monospace;
+  letter-spacing: 1.4px;
+  opacity: .62;
+}
+
+.observerNode text {
+  font-size: 29px;
+}
+
+.observerNode > circle:first-child {
+  fill: rgba(11, 8, 17, .9);
+  opacity: .94;
+}
+
+.lockMechanism,
+.keyAssembly,
+.aperture {
+  transform-box: view-box;
+  transform-origin: 250px 250px;
+}
+
+.lockPin {
+  --pin-delay: 420ms;
+  opacity: .85;
+  transform-box: fill-box;
+  transform-origin: center top;
+  transition: opacity 360ms ease var(--pin-delay), transform 620ms cubic-bezier(.2, .8, .2, 1) var(--pin-delay);
+}
+
+.aperture {
+  transition: transform 1.05s cubic-bezier(.2, .8, .2, 1);
+}
+
+.observerCore {
+  filter: drop-shadow(0 0 8px #6d4aff);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 450ms ease, transform 650ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.entered[data-animate="true"][data-running="true"] .observerCore {
+  animation: observerBreath var(--field-speed) ease-in-out infinite;
+}
+
+.keyAssembly {
+  transition: transform 900ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.inscriptions text {
+  fill: rgba(212, 175, 55, .58);
+  font: 500 6px/1 var(--font-data), "JetBrains Mono", monospace;
+  letter-spacing: 1.7px;
+}
+
+.crest:hover .svgShell,
+.crest:focus-visible .svgShell {
+  filter:
+    drop-shadow(0 3px 1px rgba(0, 0, 0, .9))
+    drop-shadow(0 0 24px rgba(109, 74, 255, .2));
+}
+
+.crest:hover::before,
+.crest:focus-visible::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.07);
+}
+
+.crest:focus-visible::after {
+  border-color: rgba(237, 237, 237, .52);
+  box-shadow: 0 0 0 4px rgba(5, 5, 5, .92), 0 0 0 5px rgba(201, 162, 39, .45), 0 0 54px rgba(109, 74, 255, .16);
+}
+
+.crest[data-phase="turning"] .keyAssembly {
+  animation: keyTurn 2.65s cubic-bezier(.32, .02, .16, 1) both;
+}
+
+.crest[data-phase="turning"] .aperture,
+.crest[data-phase="open"] .aperture {
+  transform: rotate(18deg) scale(1.08);
+}
+
+.crest[data-phase="turning"] .lockPin,
+.crest[data-phase="open"] .lockPin {
+  opacity: .16;
+  transform: scaleY(.14);
+}
+
+.crest[data-phase="turning"] .elementNode {
+  opacity: 1;
+  transition-delay: var(--node-unlock-delay);
+}
+
+.crest[data-phase="turning"] .elementNode > circle:first-child {
+  filter: drop-shadow(0 0 8px var(--node-color));
+  transition-delay: var(--node-unlock-delay);
+}
+
+.crest[data-phase="turning"] .observerCore,
+.crest[data-phase="open"] .observerCore {
+  opacity: .32;
+  transform: scale(.5);
+}
+
+.crest[data-phase="open"] .keyAssembly {
+  transform: rotate(24deg);
+}
+
+.crest[data-phase="open"] .fieldGlow {
+  opacity: .78;
+  transform: scale(1.14);
+}
+
+.crest[data-phase="open"] .quincunxGeometry line {
+  stroke: rgba(139, 111, 214, .82);
+  stroke-dasharray: 7 5;
+  animation: currentFlow 1.8s linear infinite;
+}
+
+.crest[data-phase="open"] .elementNode {
+  opacity: 1;
+}
+
+.crest[data-phase="open"] .elementNode > circle:first-child {
+  stroke-width: 1.6;
+  opacity: 1;
+  filter: drop-shadow(0 0 10px var(--node-color));
+}
+
+.crest[data-phase="open"] .status {
+  color: #9b7fff;
+}
+
+.crest[data-phase="open"] .status i {
+  background: #8b6fd6;
+  box-shadow: 0 0 12px #6d4aff;
+}
+
+.crest[data-running="false"] .keyAssembly,
+.crest[data-running="false"] .quincunxGeometry line,
+.crest[data-running="false"] .status i {
+  animation-play-state: paused;
+}
+
+@keyframes outerRotation { to { transform: rotate(360deg); } }
+@keyframes calibrationRotation { to { transform: rotate(360deg); } }
+@keyframes mandalaRotation { to { transform: rotate(360deg); } }
+@keyframes nodeOrbit { to { transform: rotate(360deg); } }
+@keyframes observerBreath { 50% { opacity: .62; transform: scale(.82); filter: drop-shadow(0 0 16px #6d4aff); } }
+@keyframes statusPulse { 50% { opacity: .28; transform: scale(.68); } }
+@keyframes currentFlow { to { stroke-dashoffset: -24; } }
+@keyframes keyTurn {
+  0% { transform: rotate(0); }
+  18% { transform: rotate(-4deg); }
+  68% { transform: rotate(28deg); }
+  84% { transform: rotate(21deg); }
+  100% { transform: rotate(24deg); }
+}
+
+@media (max-width: 640px) {
+  .interfaceLabel,
+  .coordinate { display: none; }
+  .status { bottom: -.9rem; font-size: .42rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crest,
+  .svgShell,
+  .instrument,
+  .serpentBody,
+  .serpentHead,
+  .fieldGlow,
+  .elementNode,
+  .elementNode > circle,
+  .aperture,
+  .keyAssembly,
+  .observerCore,
+  .status i,
+  .quincunxGeometry line {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+  .instrument { opacity: 1; transform: none; }
+  .serpentBody { stroke-dashoffset: 0; }
+  .serpentHead { opacity: 1; transform: none; }
+  .svgShell { transform: none; }
+}
