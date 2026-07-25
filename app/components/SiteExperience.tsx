@@ -308,7 +308,7 @@ export function SiteExperience({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className={`site-experience site-experience--${current}`}
+      className={`site-experience site-experience--${current} pillar-spine pillar-spine--${current}`}
       style={{
         "--water": activeSite.accent,
         "--active-rgb": activeSite.rgb,

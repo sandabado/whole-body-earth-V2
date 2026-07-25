@@ -15,7 +15,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const closeSwitcher = useCallback(() => setSwitcherOpen(false), []);
 
   return (
-    <>
+    <div className="pillar-spine pillar-spine--presence">
       {pathname !== "/presence" && pathname !== "/presence/" ? (
         <>
           <FireBackground />
@@ -34,6 +34,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
       />
       <main id="main-content" tabIndex={-1}>{children}</main>
       <Footer />
-    </>
+    </div>
   );
 }

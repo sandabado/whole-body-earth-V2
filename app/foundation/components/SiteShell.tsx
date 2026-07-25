@@ -21,21 +21,23 @@ export function SiteShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", closeMenu);
   }, []);
 
-  return <>
-    <CubeBackground />
-    <div className="grain" aria-hidden="true" />
-    <header className="site-header">
-      <button className="brand" onClick={() => setSwitcher(true)} aria-label="Open Whole Body constellation">
-        <b>🜃</b><span>WHOLE BODY<span>/FOUNDATION</span></span><small>••<br />••</small>
-      </button>
-      <nav className={menu ? "nav-links open" : "nav-links"} aria-label="Primary navigation">
-        {links.map(([href, label]) => <Link key={href} href={href} className={pathname === href ? "active" : ""} onClick={() => setMenu(false)}>{label}</Link>)}
-        <Link href="/foundation/apply" className="nav-apply" onClick={() => setMenu(false)}>Apply to Build</Link>
-      </nav>
-      <div className="header-tools"><span className="site-status"><i />LAND SEARCH ACTIVE</span><button onClick={() => setMenu(!menu)} aria-expanded={menu}>MENU</button></div>
-    </header>
-    <ProductSwitcher current="foundation" open={switcher} onClose={() => setSwitcher(false)} />
-    <main>{children}</main>
-    <WholeBodyFooter />
-  </>;
+  return (
+    <div className="pillar-spine pillar-spine--foundation">
+      <CubeBackground />
+      <div className="grain" aria-hidden="true" />
+      <header className="site-header">
+        <button className="brand" onClick={() => setSwitcher(true)} aria-label="Open Whole Body constellation">
+          <b>🜃</b><span>WHOLE BODY<span>/FOUNDATION</span></span><small>••<br />••</small>
+        </button>
+        <nav className={menu ? "nav-links open" : "nav-links"} aria-label="Primary navigation">
+          {links.map(([href, label]) => <Link key={href} href={href} className={pathname === href ? "active" : ""} onClick={() => setMenu(false)}>{label}</Link>)}
+          <Link href="/foundation/apply" className="nav-apply" onClick={() => setMenu(false)}>Apply to Build</Link>
+        </nav>
+        <div className="header-tools"><span className="site-status"><i />LAND SEARCH ACTIVE</span><button className="menu-toggle" onClick={() => setMenu(!menu)} aria-expanded={menu}>MENU</button></div>
+      </header>
+      <ProductSwitcher current="foundation" open={switcher} onClose={() => setSwitcher(false)} />
+      <main>{children}</main>
+      <WholeBodyFooter />
+    </div>
+  );
 }

@@ -44,3 +44,299 @@
     --wb-section-space: 6rem;
   }
 }
+
+/*
+ * PILLAR SPINE
+ * One production-safe header system. Route wrappers own the accent so bundled
+ * pillar styles cannot recolor a neighboring world.
+ */
+.pillar-spine {
+  --spine-accent: var(--wb-text);
+  --spine-rgb: 237, 237, 237;
+  --spine-void: #050505;
+  min-height: 100vh;
+}
+
+.pillar-spine--studios {
+  --spine-accent: var(--wb-water);
+  --spine-rgb: 43, 168, 160;
+}
+
+.pillar-spine--foundation {
+  --spine-accent: var(--wb-earth);
+  --spine-rgb: 132, 166, 110;
+}
+
+.pillar-spine--press {
+  --spine-accent: var(--wb-air);
+  --spine-rgb: 201, 162, 39;
+}
+
+.pillar-spine--presence {
+  --spine-accent: var(--wb-fire);
+  --spine-rgb: 232, 84, 42;
+  --header: 72px;
+}
+
+.pillar-spine .site-header {
+  position: fixed;
+  z-index: 80;
+  inset: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) auto minmax(190px, 1fr);
+  height: 72px;
+  align-items: center;
+  gap: 20px;
+  padding: 0 clamp(18px, 2.7vw, 42px);
+  border-bottom: 1px solid rgba(var(--spine-rgb), .18);
+  background:
+    linear-gradient(180deg, rgba(5, 5, 5, .68), rgba(5, 5, 5, .18) 72%, transparent);
+  backdrop-filter: blur(12px) saturate(115%);
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
+}
+
+.pillar-spine .site-header::after {
+  content: "";
+  position: absolute;
+  right: clamp(18px, 2.7vw, 42px);
+  bottom: -1px;
+  width: 72px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--spine-accent));
+}
+
+.pillar-spine .brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-self: start;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--wb-text);
+  font: 500 10px/1 var(--wb-mono);
+  letter-spacing: .12em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pillar-spine .brand > b,
+.pillar-spine .brand-mark {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: var(--spine-accent);
+  font: 400 22px/1 var(--wb-display);
+  filter: drop-shadow(0 0 10px rgba(var(--spine-rgb), .55));
+}
+
+.pillar-spine .brand > span:nth-child(2) {
+  color: var(--wb-text);
+  font: 500 10px/1 var(--wb-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pillar-spine .brand > span:nth-child(2) span {
+  color: var(--spine-accent);
+}
+
+.pillar-spine .brand > small,
+.pillar-spine .brand-grid {
+  margin-left: 2px;
+  color: var(--wb-muted);
+  font: 400 7px/5px var(--wb-mono);
+}
+
+.pillar-spine .nav-links {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-self: center;
+  gap: clamp(14px, 1.8vw, 28px);
+}
+
+.pillar-spine .nav-links a {
+  position: relative;
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  padding: 0;
+  color: var(--wb-muted);
+  font: 400 9px/1 var(--wb-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transition: color .22s ease;
+}
+
+.pillar-spine .nav-links a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 18px;
+  left: 0;
+  width: auto;
+  height: 1px;
+  background: var(--spine-accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .26s ease;
+}
+
+.pillar-spine .nav-links a:hover,
+.pillar-spine .nav-links a:focus-visible,
+.pillar-spine .nav-links a.active {
+  color: var(--wb-text);
+}
+
+.pillar-spine .nav-links a:hover::after,
+.pillar-spine .nav-links a:focus-visible::after,
+.pillar-spine .nav-links a.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.pillar-spine .nav-links .nav-apply {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--spine-accent);
+  color: var(--spine-accent);
+}
+
+.pillar-spine .nav-links .nav-apply::after {
+  display: none;
+}
+
+.pillar-spine .nav-links .nav-apply:hover,
+.pillar-spine .nav-links .nav-apply:focus-visible {
+  background: var(--spine-accent);
+  color: var(--spine-void);
+}
+
+.pillar-spine .header-tools {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-self: end;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.pillar-spine .studio-status,
+.pillar-spine .site-status,
+.pillar-spine .press-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--wb-muted);
+  font: 400 7px/1 var(--wb-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pillar-spine .studio-status i,
+.pillar-spine .site-status i,
+.pillar-spine .press-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--spine-accent);
+  box-shadow: 0 0 10px var(--spine-accent);
+}
+
+.pillar-spine .sound-toggle,
+.pillar-spine .menu-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--wb-muted);
+  font: 500 8px/1 var(--wb-mono);
+  letter-spacing: .1em;
+  cursor: pointer;
+}
+
+.pillar-spine .sound-toggle:hover,
+.pillar-spine .sound-toggle--on,
+.pillar-spine .menu-toggle:hover {
+  color: var(--spine-accent);
+}
+
+.pillar-spine .menu-toggle {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .pillar-spine .studio-status,
+  .pillar-spine .site-status,
+  .pillar-spine .press-status {
+    display: none;
+  }
+
+  .pillar-spine .nav-links {
+    gap: 14px;
+  }
+
+  .pillar-spine .nav-links a {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 900px) {
+  .pillar-spine .site-header {
+    grid-template-columns: 1fr auto;
+    padding-inline: 18px;
+  }
+
+  .pillar-spine .site-header::after {
+    right: 18px;
+    width: 48px;
+  }
+
+  .pillar-spine .brand-grid,
+  .pillar-spine .brand > small {
+    display: none;
+  }
+
+  .pillar-spine .nav-links {
+    position: fixed;
+    inset: 72px 0 auto;
+    display: none;
+    height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 12px 20px 25px;
+    border-bottom: 1px solid rgba(var(--spine-rgb), .22);
+    background: rgba(5, 5, 5, .98);
+    backdrop-filter: blur(18px);
+  }
+
+  .pillar-spine .nav-links.open,
+  .pillar-spine .nav-links.nav-links--open {
+    display: flex;
+  }
+
+  .pillar-spine .nav-links a {
+    min-height: 50px;
+    place-items: center start;
+    border-bottom: 1px solid rgba(42, 42, 56, .72);
+  }
+
+  .pillar-spine .nav-links a::after {
+    display: none;
+  }
+
+  .pillar-spine .nav-links .nav-apply {
+    min-height: 44px;
+    margin-top: 15px;
+    place-items: center;
+  }
+
+  .pillar-spine .header-tools .menu-toggle {
+    display: block;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

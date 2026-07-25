@@ -32,38 +32,40 @@ export function SiteShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", close);
   }, []);
 
-  return <>
-    {pathname !== "/press" && pathname !== "/press/" && <CubeBackground />}
-    <div className="grain" aria-hidden="true" />
-    <header className="site-header">
-      <button
-        className="brand"
-        type="button"
-        onClick={() => setSwitcherOpen(true)}
-        aria-label="Open Whole Body product switcher"
-        aria-haspopup="dialog"
-        aria-expanded={switcherOpen}
-        aria-controls="constellation-dialog"
-      >
-        <span className="brand-mark">🜁</span>
-        <span>WHOLE BODY<span>/PRESS</span></span>
-        <span className="brand-grid" aria-hidden="true">••<br />••</span>
-      </button>
-      <nav className={menuOpen ? "nav-links nav-links--open open" : "nav-links"} aria-label="Primary navigation">
-        {links.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} className={pathname === href ? "active" : ""} onClick={() => setMenuOpen(false)}>{label}</Link>)}
-        <Link className="nav-apply" href="/press/submit" onClick={() => setMenuOpen(false)}>Submit</Link>
-      </nav>
-      <div className="header-tools">
-        <span className="press-status"><i />FIRST EDITIONS — 2027</span>
-        <button className="menu-toggle" onClick={() => setMenuOpen(value => !value)} aria-expanded={menuOpen}>MENU</button>
-      </div>
-    </header>
-    <ProductSwitcher
-      current="press"
-      open={switcherOpen}
-      onClose={() => setSwitcherOpen(false)}
-    />
-    <main>{children}</main>
-    <WholeBodyFooter />
-  </>;
+  return (
+    <div className="pillar-spine pillar-spine--press">
+      {pathname !== "/press" && pathname !== "/press/" && <CubeBackground />}
+      <div className="grain" aria-hidden="true" />
+      <header className="site-header">
+        <button
+          className="brand"
+          type="button"
+          onClick={() => setSwitcherOpen(true)}
+          aria-label="Open Whole Body product switcher"
+          aria-haspopup="dialog"
+          aria-expanded={switcherOpen}
+          aria-controls="constellation-dialog"
+        >
+          <span className="brand-mark">🜁</span>
+          <span>WHOLE BODY<span>/PRESS</span></span>
+          <span className="brand-grid" aria-hidden="true">••<br />••</span>
+        </button>
+        <nav className={menuOpen ? "nav-links nav-links--open open" : "nav-links"} aria-label="Primary navigation">
+          {links.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} className={pathname === href ? "active" : ""} onClick={() => setMenuOpen(false)}>{label}</Link>)}
+          <Link className="nav-apply" href="/press/submit" onClick={() => setMenuOpen(false)}>Submit</Link>
+        </nav>
+        <div className="header-tools">
+          <span className="press-status"><i />FIRST EDITIONS — 2027</span>
+          <button className="menu-toggle" onClick={() => setMenuOpen(value => !value)} aria-expanded={menuOpen}>MENU</button>
+        </div>
+      </header>
+      <ProductSwitcher
+        current="press"
+        open={switcherOpen}
+        onClose={() => setSwitcherOpen(false)}
+      />
+      <main>{children}</main>
+      <WholeBodyFooter />
+    </div>
+  );
 }
