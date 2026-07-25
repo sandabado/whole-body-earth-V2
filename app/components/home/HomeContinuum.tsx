@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useMemo, useState, type CSSProperties } from "react";
 import styles from "./HomeContinuum.module.css";
+import { PillarSolidBackdrop } from "./PillarSolidBackdrop";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -211,10 +212,13 @@ export function HomeContinuum() {
             style={{ "--wb-accent": pillar.color } as CSSProperties}
             aria-labelledby={`pillar-${pillar.id}`}
           >
+            <PillarSolidBackdrop pillar={pillar.id} />
             <div className={styles.pillarInner}>
-              <i className={`${styles.pillarGlyph} wb-glyph`} aria-hidden="true">{pillar.symbol}</i>
               <p className={styles.chapterIndex}>{String(index + 3).padStart(2, "0")} · {pillar.element} / {pillar.geometry}</p>
-              <h2 id={`pillar-${pillar.id}`}>{pillar.name}</h2>
+              <h2 id={`pillar-${pillar.id}`}>
+                <i className={`${styles.titleGlyph} wb-glyph`} aria-hidden="true">{pillar.symbol}</i>
+                {pillar.name}
+              </h2>
               <p className={styles.pillarGeometry}>{pillar.element} · {pillar.geometry} · {pillar.faces}</p>
               <h3>{pillar.title}</h3>
               <div className={styles.pillarCopy}>{pillar.copy.map((line) => <p key={line}>{line}</p>)}</div>

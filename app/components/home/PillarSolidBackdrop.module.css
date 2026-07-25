@@ -1,0 +1,22 @@
+.backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 90%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 90%, transparent);
+}
+
+.backdrop canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: .88;
+}
+
+@media (max-width: 700px) {
+  .backdrop canvas {
+    opacity: .62;
+  }
+}
