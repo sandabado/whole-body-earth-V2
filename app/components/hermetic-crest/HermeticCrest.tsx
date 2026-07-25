@@ -26,7 +26,10 @@ interface HermeticCrestProps {
   };
   className?: string;
   activePillar?: ActivePillar;
-  onUnlock?: (trigger: HTMLButtonElement) => void;
+  onPillarSelect?: (
+    pillar: Exclude<ActivePillar, "none" | "whole">,
+    trigger: HTMLButtonElement,
+  ) => void;
 }
 
 type CrestStyle = CSSProperties & {
@@ -40,17 +43,17 @@ type CrestStyle = CSSProperties & {
 };
 
 type PointerSample = {
-  target: HTMLButtonElement;
+  target: HTMLDivElement;
   horizontal: number;
   vertical: number;
 };
 
 const ELEMENTS = [
-  { id: "air", label: "AIR", pillar: "PRESS", symbol: "🜁", x: 250, y: 103, color: COMMAND_PILLAR_COLORS.press },
-  { id: "fire", label: "FIRE", pillar: "PRESENCE", symbol: "🜂", x: 103, y: 250, color: COMMAND_PILLAR_COLORS.presence },
-  { id: "water", label: "WATER", pillar: "STUDIOS", symbol: "🜄", x: 397, y: 250, color: COMMAND_PILLAR_COLORS.studios },
-  { id: "earth", label: "EARTH", pillar: "FOUNDATION", symbol: "🜃", x: 250, y: 397, color: COMMAND_PILLAR_COLORS.foundation },
-  { id: "ether", label: "ETHER", pillar: "GUARDIAN", symbol: "⊙", x: 250, y: 250, color: COMMAND_PILLAR_COLORS.guardian },
+  { id: "air", command: "press", label: "AIR", pillar: "PRESS", symbol: "🜁", x: 250, y: 103, color: COMMAND_PILLAR_COLORS.press },
+  { id: "fire", command: "presence", label: "FIRE", pillar: "PRESENCE", symbol: "🜂", x: 103, y: 250, color: COMMAND_PILLAR_COLORS.presence },
+  { id: "water", command: "studios", label: "WATER", pillar: "STUDIOS", symbol: "🜄", x: 397, y: 250, color: COMMAND_PILLAR_COLORS.studios },
+  { id: "earth", command: "foundation", label: "EARTH", pillar: "FOUNDATION", symbol: "🜃", x: 250, y: 397, color: COMMAND_PILLAR_COLORS.foundation },
+  { id: "ether", command: "guardian", label: "ETHER", pillar: "GUARDIAN", symbol: "⊙", x: 250, y: 250, color: COMMAND_PILLAR_COLORS.guardian },
 ] as const;
 
 type ElementId = (typeof ELEMENTS)[number]["id"];
@@ -84,17 +87,19 @@ export default function HermeticCrest({
   layerControls = {},
   className,
   activePillar = "none",
-  onUnlock,
+  onPillarSelect,
 }: HermeticCrestProps) {
   const [phase, setPhase] = useState<CrestPhase>("locked");
   const [hoveredElement, setHoveredElement] = useState<ElementId | null>(null);
+  const [dialSelection, setDialSelection] = useState<ElementId | null>(null);
   const [entered, setEntered] = useState(false);
   const [running, setRunning] = useState(true);
-  const crestRef = useRef<HTMLButtonElement>(null);
+  const crestRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number | null>(null);
   const pointerFrameRef = useRef<number | null>(null);
   const pointerBoundsRef = useRef<DOMRect | null>(null);
   const pointerSampleRef = useRef<PointerSample | null>(null);
+  const previousActivePillarRef = useRef(activePillar);
   const instanceId = useId().replaceAll(":", "");
   const metalId = `${instanceId}-metal`;
   const patinaId = `${instanceId}-patina`;
@@ -105,7 +110,9 @@ export default function HermeticCrest({
     mandalaSpeed = 110,
     fieldPulseSpeed = 6,
   } = layerControls;
-  const selectedElement = hoveredElement ?? PILLAR_TO_ELEMENT[activePillar] ?? null;
+  const selectedElement = hoveredElement
+    ?? PILLAR_TO_ELEMENT[activePillar]
+    ?? dialSelection;
   const activeElement = ELEMENTS.find((element) => element.id === selectedElement);
   const activeColor = hoveredElement
     ? activeElement?.color
@@ -148,29 +155,40 @@ export default function HermeticCrest({
     };
   }, [animate]);
 
-  const turnKey = () => {
-    if (phase === "turning") return;
-    if (phase === "open") {
+  useEffect(() => {
+    const previousPillar = previousActivePillarRef.current;
+    previousActivePillarRef.current = activePillar;
+    if (previousPillar !== "none" && activePillar === "none") {
       setPhase("locked");
-      return;
+      setDialSelection(null);
     }
+  }, [activePillar]);
+
+  const selectElement = (
+    element: (typeof ELEMENTS)[number],
+    trigger: HTMLButtonElement,
+  ) => {
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    setDialSelection(element.id);
+    setHoveredElement(element.id);
     setPhase("turning");
     const unlockDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ? 0
-      : 2_650;
+      : 1_050;
     timerRef.current = window.setTimeout(() => {
       setPhase("open");
-      if (crestRef.current) onUnlock?.(crestRef.current);
+      onPillarSelect?.(element.command, trigger);
+      timerRef.current = null;
     }, unlockDuration);
   };
 
-  const enter = (event: PointerEvent<HTMLButtonElement>) => {
+  const enter = (event: PointerEvent<HTMLDivElement>) => {
     if (!animate || event.pointerType === "touch") return;
     pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
     move(event);
   };
 
-  const move = (event: PointerEvent<HTMLButtonElement>) => {
+  const move = (event: PointerEvent<HTMLDivElement>) => {
     if (!animate || event.pointerType === "touch") return;
     const bounds = pointerBoundsRef.current ?? event.currentTarget.getBoundingClientRect();
     const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
@@ -194,7 +212,7 @@ export default function HermeticCrest({
     });
   };
 
-  const reset = (event: PointerEvent<HTMLButtonElement>) => {
+  const reset = (event: PointerEvent<HTMLDivElement>) => {
     if (pointerFrameRef.current !== null) window.cancelAnimationFrame(pointerFrameRef.current);
     pointerFrameRef.current = null;
     pointerBoundsRef.current = null;
@@ -207,30 +225,28 @@ export default function HermeticCrest({
   };
 
   const status = phase === "turning"
-    ? "Unlocking the five fields"
+    ? `Unlocking ${ELEMENTS.find((element) => element.id === dialSelection)?.pillar ?? "the field"}`
     : hoveredElement && activeElement
       ? `${activeElement.label} / ${activeElement.pillar}`
       : activePillar !== "none" && activePillar !== "whole"
         ? `${activePillar.toUpperCase()} / FIELD ACTIVE`
         : activePillar === "whole"
-          ? "Whole field / live constellation"
+        ? "Whole field / live constellation"
       : phase === "open"
         ? "Field open / hover a house"
-        : "Turn the ancient key";
+        : "Choose a field / turn the key";
 
   return (
-    <button
+    <div
       ref={crestRef}
-      type="button"
       className={`${styles.crest} ${entered ? styles.entered : ""} ${className ?? ""}`}
       style={crestStyle}
       data-phase={phase}
       data-active-element={selectedElement ?? (activePillar === "whole" ? "whole" : "none")}
       data-animate={animate ? "true" : "false"}
       data-running={animate && running ? "true" : "false"}
-      aria-label={phase === "open" ? "Close the Whole Body field" : "Turn the ancient key and open the Whole Body field"}
-      aria-pressed={phase === "open"}
-      onClick={turnKey}
+      role="group"
+      aria-label="Whole Body ancient key — choose one of five pillar fields"
       onPointerEnter={enter}
       onPointerMove={move}
       onPointerLeave={reset}
@@ -369,7 +385,26 @@ export default function HermeticCrest({
           </g>
         </svg>
       </span>
+      <span className={styles.nodeControls}>
+        {ELEMENTS.map((element) => (
+          <button
+            key={element.id}
+            type="button"
+            className={styles.nodeControl}
+            style={{
+              "--control-x": `${(element.x / 500) * 100}%`,
+              "--control-y": `${(element.y / 500) * 100}%`,
+              "--control-color": element.color,
+              "--control-size": element.id === "ether" ? "18%" : "12%",
+            } as CSSProperties}
+            aria-label={`Open ${element.pillar.toLowerCase()} shelf`}
+            onFocus={() => setHoveredElement(element.id)}
+            onBlur={() => setHoveredElement(null)}
+            onClick={(event) => selectElement(element, event.currentTarget)}
+          />
+        ))}
+      </span>
       <span className={styles.status} aria-live="polite"><i aria-hidden="true" />{status}</span>
-    </button>
+    </div>
   );
 }

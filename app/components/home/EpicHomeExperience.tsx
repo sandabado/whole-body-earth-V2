@@ -98,8 +98,11 @@ export function EpicHomeExperience() {
     ? shelfPillar
     : "none";
 
-  const unlockWholeField = useCallback((trigger: HTMLButtonElement) => {
-    selectPillar("whole", trigger);
+  const selectDialPillar = useCallback((
+    pillar: Exclude<ActivePillar, "none" | "whole">,
+    trigger: HTMLButtonElement,
+  ) => {
+    selectPillar(pillar, trigger);
   }, [selectPillar]);
 
   return (
@@ -116,6 +119,14 @@ export function EpicHomeExperience() {
 
           <TopNav activePillar={activePillar} onSelect={selectPillar} />
 
+          <div className="command-deck-hero-content" aria-hidden={shelfOpen ? true : undefined}>
+            <h1>Whole Body Earth</h1>
+            <p>Five pillars. One whole body.</p>
+            <Link href="/reading" tabIndex={shelfOpen ? -1 : undefined}>
+              Get Your Whole Body Design Reading <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+
           <div className="command-deck-visual">
             <div className="command-deck-constellation">
               <HeroQuincunx activePillar={activePillar} />
@@ -124,17 +135,9 @@ export function EpicHomeExperience() {
               <HermeticCrest
                 size={720}
                 activePillar={activePillar}
-                onUnlock={unlockWholeField}
+                onPillarSelect={selectDialPillar}
               />
             </div>
-          </div>
-
-          <div className="command-deck-hero-content" aria-hidden={shelfOpen ? true : undefined}>
-            <h1>Whole Body Earth</h1>
-            <p>Five pillars. One whole body.</p>
-            <Link href="/reading" tabIndex={shelfOpen ? -1 : undefined}>
-              Get Your Whole Body Design Reading <span aria-hidden="true">→</span>
-            </Link>
           </div>
 
           <PillarShelf

@@ -88,7 +88,7 @@ body:has(.command-deck-home) {
 .command-deck-visual {
   position: absolute;
   z-index: 3;
-  inset: max(4rem, env(safe-area-inset-top)) 0 clamp(10.5rem, 22svh, 13rem);
+  inset: clamp(12.5rem, 25svh, 15rem) 0 clamp(1.75rem, 4svh, 3rem);
   display: grid;
   place-items: center;
   opacity: 1;
@@ -117,7 +117,7 @@ body:has(.command-deck-home) {
   width: min(62svh, 43rem, calc(100vw - 2rem));
 }
 
-.command-deck-dial-shell > button {
+.command-deck-dial-shell > div {
   width: 100%;
 }
 
@@ -135,8 +135,9 @@ body:has(.command-deck-home) {
 .command-deck-hero-content {
   position: absolute;
   z-index: 5;
+  top: max(5.4rem, calc(env(safe-area-inset-top) + 4.5rem));
   right: 1.5rem;
-  bottom: max(1.75rem, env(safe-area-inset-bottom));
+  bottom: auto;
   left: 1.5rem;
   display: flex;
   align-items: center;
@@ -226,7 +227,7 @@ body:has(.command-deck-home) {
   }
 
   .command-deck-visual {
-    inset: max(4.4rem, env(safe-area-inset-top)) 0 clamp(10.75rem, 24svh, 12rem);
+    inset: max(12rem, calc(env(safe-area-inset-top) + 11rem)) 0 max(1.5rem, env(safe-area-inset-bottom));
   }
 
   .command-deck-dial-shell {
@@ -234,12 +235,12 @@ body:has(.command-deck-home) {
   }
 
   .command-deck-home[data-shelf-open="true"] .command-deck-visual {
-    transform: translate3d(0, -33svh, 0) scale(.56);
+    transform: translate3d(0, -43svh, 0) scale(.46);
   }
 
   .command-deck-hero-content {
+    top: max(4.9rem, calc(env(safe-area-inset-top) + 4.35rem));
     right: 1rem;
-    bottom: max(1.25rem, env(safe-area-inset-bottom));
     left: 1rem;
   }
 
@@ -261,11 +262,11 @@ body:has(.command-deck-home) {
 
 @media (max-height: 650px) {
   .command-deck-visual {
-    inset-block: 3.65rem 9.5rem;
+    inset-block: 10.7rem 1rem;
   }
 
   .command-deck-hero-content {
-    bottom: max(.7rem, env(safe-area-inset-bottom));
+    top: max(4.45rem, calc(env(safe-area-inset-top) + 4rem));
   }
 
   .command-deck-hero-content p {

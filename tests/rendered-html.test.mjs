@@ -19,6 +19,7 @@ test("ships the fullscreen Whole Body Earth command deck", async () => {
   assert.match(page, /<EpicHomeExperience \/>/);
   assert.match(home, /<HeroQuincunx activePillar=\{activePillar\}/);
   assert.match(home, /<HermeticCrest/);
+  assert.match(home, /onPillarSelect=\{selectDialPillar\}/);
   assert.match(home, /<TopNav activePillar=\{activePillar\}/);
   assert.match(home, /<PillarShelf/);
   assert.match(home, /Five pillars\. One whole body\./);
