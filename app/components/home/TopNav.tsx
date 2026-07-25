@@ -23,7 +23,7 @@ const commands: ReadonlyArray<{
   { id: "studios", label: "Studios", navLabel: "Studios", symbol: "🜄", color: "#2E86AB" },
   { id: "foundation", label: "Foundation", navLabel: "Foundation", symbol: "🜃", color: "#8B6F47" },
   { id: "guardian", label: "Guardian", navLabel: "Guardian", symbol: "⊙", color: "#6D4AFF" },
-  { id: "whole", label: "Whole — live activity and calendar", navLabel: "Whole", symbol: "⏺︎", color: "#FF3366" },
+  { id: "whole", label: "Whole — live activity and calendar", navLabel: "NØW", symbol: "⏺︎", color: "#FF3366" },
 ];
 
 export function TopNav({ activePillar, onSelect }: TopNavProps) {
