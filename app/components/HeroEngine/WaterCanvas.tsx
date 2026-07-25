@@ -14,12 +14,13 @@ type WaterCanvasProps = {
   config: HeroConfig;
   pixelRatio: number;
   tier: DeviceTier;
+  autoRotate: boolean;
   onReady: () => void;
 };
 
-type WaterPlaneProps = Pick<WaterCanvasProps, "config" | "tier" | "onReady">;
+type WaterPlaneProps = Pick<WaterCanvasProps, "config" | "tier" | "autoRotate" | "onReady">;
 
-function WaterPlane({ config, tier, onReady }: WaterPlaneProps) {
+function WaterPlane({ config, tier, autoRotate, onReady }: WaterPlaneProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const elapsedRef = useRef(0);
   const framesRef = useRef(0);
@@ -44,10 +45,11 @@ function WaterPlane({ config, tier, onReady }: WaterPlaneProps) {
     uCurlNoiseAmplitude: { value: config.curlNoiseAmplitude },
     uCameraDriftSpeed: { value: config.cameraDriftSpeed },
     uCameraRotationDegrees: { value: config.cameraRotationDegrees },
+    uAutoRotate: { value: autoRotate ? 1 : 0 },
     uPointerInfluenceStrength: { value: config.pointerInfluenceStrength },
     uScrollAccelerationMultiplier: { value: config.scrollAccelerationMultiplier },
     uWhiteHotFlare: { value: 0 },
-  }), [config, size.height, size.width]);
+  }), [autoRotate, config, size.height, size.width]);
 
   useEffect(() => {
     nextFlareRef.current = elapsedRef.current + config.ambientFlareIntervalMs / 1000;
@@ -102,7 +104,7 @@ function WaterPlane({ config, tier, onReady }: WaterPlaneProps) {
   );
 }
 
-export default function WaterCanvas({ config, pixelRatio, tier, onReady }: WaterCanvasProps) {
+export default function WaterCanvas({ config, pixelRatio, tier, autoRotate, onReady }: WaterCanvasProps) {
   return (
     <Canvas
       dpr={pixelRatio}
@@ -111,7 +113,7 @@ export default function WaterCanvas({ config, pixelRatio, tier, onReady }: Water
       gl={{ antialias: tier === "high", alpha: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => { gl.setClearColor(new THREE.Color(config.colorBase), 0); }}
     >
-      <WaterPlane config={config} tier={tier} onReady={onReady} />
+      <WaterPlane config={config} tier={tier} autoRotate={autoRotate} onReady={onReady} />
     </Canvas>
   );
 }

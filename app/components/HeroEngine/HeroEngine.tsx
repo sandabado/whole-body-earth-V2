@@ -20,6 +20,7 @@ type HeroEngineProps = {
   siteSlug: string;
   children: ReactNode;
   ariaLabel: string;
+  autoRotate?: boolean;
 };
 
 type HeroStyle = CSSProperties & {
@@ -50,7 +51,7 @@ class CanvasBoundary extends Component<{
   }
 }
 
-export default function HeroEngine({ siteSlug, children, ariaLabel }: HeroEngineProps) {
+export default function HeroEngine({ siteSlug, children, ariaLabel, autoRotate = false }: HeroEngineProps) {
   const { config, loading: configLoading, source, version } = useHeroConfig(siteSlug);
   const capability = useDeviceCapability();
   const [canvasReady, setCanvasReady] = useState(false);
@@ -97,6 +98,7 @@ export default function HeroEngine({ siteSlug, children, ariaLabel }: HeroEngine
                   config={config}
                   pixelRatio={requestedPixelRatio}
                   tier={capability.tier}
+                  autoRotate={autoRotate}
                   onReady={onCanvasReady}
                 />
               </div>

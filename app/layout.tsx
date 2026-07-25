@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, Cormorant_Garamond, DM_Mono, Inter } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, DM_Mono, Inter, JetBrains_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import "./design-system.css";
@@ -28,6 +28,12 @@ const mono = DM_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["300", "400", "500"],
+});
+
+const data = JetBrains_Mono({
+  variable: "--font-data",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -67,7 +73,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${display.variable} ${body.variable} ${editorial.variable} ${mono.variable}`}
+        className={`${display.variable} ${body.variable} ${editorial.variable} ${mono.variable} ${data.variable}`}
       >
         <SiteExperience>{children}</SiteExperience>
       </body>

@@ -15,6 +15,7 @@ const waterFragmentShader = /* glsl */ `
   uniform float uCurlNoiseAmplitude;
   uniform float uCameraDriftSpeed;
   uniform float uCameraRotationDegrees;
+  uniform float uAutoRotate;
   uniform float uPointerInfluenceStrength;
   uniform float uScrollAccelerationMultiplier;
   uniform float uWhiteHotFlare;
@@ -55,7 +56,9 @@ const waterFragmentShader = /* glsl */ `
     vec2 centered = uv - 0.5;
     centered.x *= uResolution.x / max(uResolution.y, 1.0);
 
-    float rotation = radians(uCameraRotationDegrees) * sin(uTime * (0.16 + uCameraDriftSpeed * 350.0));
+    float rotation =
+      radians(uCameraRotationDegrees) * sin(uTime * (0.16 + uCameraDriftSpeed * 350.0)) +
+      uAutoRotate * uTime * 0.018;
     mat2 cameraTurn = mat2(cos(rotation), -sin(rotation), sin(rotation), cos(rotation));
     centered = cameraTurn * centered;
 

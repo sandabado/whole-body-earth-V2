@@ -6,25 +6,25 @@ import { WholeBodyFooter } from "../WholeBodyFooter";
 import HeroEngine from "../HeroEngine/HeroEngine";
 
 const activity = [
-  { symbol: "🜂", message: "Presence Circle opened twelve seats for the August gathering.", time: "2m" },
-  { symbol: "🜁", message: "Press moved Living Earth Vol. III into editorial review.", time: "1h" },
-  { symbol: "🜄", message: "Studios completed the latest Feed First artist payout.", time: "3h" },
-  { symbol: "🜃", message: "Foundation added the Glory Peak site survey to the build record.", time: "6h" },
-  { symbol: "⊙", message: "Guardian completed a constellation coherence check.", time: "1d" },
+  { symbol: "🜂", message: "Presence Circle opened twelve seats for the August gathering.", time: "2m", tone: "presence", live: true },
+  { symbol: "🜁", message: "Press moved Living Earth Vol. III into editorial review.", time: "1h", tone: "press", live: true },
+  { symbol: "🜄", message: "Studios completed the latest Feed First artist payout.", time: "3h", tone: "studios", live: true },
+  { symbol: "🜃", message: "Foundation added the Glory Peak site survey to the build record.", time: "6h", tone: "foundation", live: true },
+  { symbol: "⊙", message: "Guardian completed a constellation coherence check.", time: "1d", tone: "guardian", live: false },
 ] as const;
 
 const events = [
-  { date: "Aug 03", title: "Presence Circle", meta: "Virtual · 7pm", href: "/presence/events", symbol: "🜂" },
-  { date: "Aug 07", title: "Ground vinyl preorder", meta: "Worldwide · Midnight", href: "/studios/catalog", symbol: "🜄" },
-  { date: "Aug 12", title: "Vol. III review opens", meta: "Reading room · 9am", href: "/press/events", symbol: "🜁" },
-  { date: "Aug 19", title: "Glory Peak site survey", meta: "Morongo Valley · 8am", href: "/foundation/the-land", symbol: "🜃" },
-  { date: "Aug 22", title: "Guardian consultation", meta: "Private session", href: "/guardian", symbol: "⊙" },
+  { date: "Aug 03", title: "Presence Circle", meta: "Virtual · 7pm", href: "/presence/events", symbol: "🜂", tone: "presence" },
+  { date: "Aug 07", title: "Ground vinyl preorder", meta: "Worldwide · Midnight", href: "/studios/catalog", symbol: "🜄", tone: "studios" },
+  { date: "Aug 12", title: "Vol. III review opens", meta: "Reading room · 9am", href: "/press/events", symbol: "🜁", tone: "press" },
+  { date: "Aug 19", title: "Glory Peak site survey", meta: "Morongo Valley · 8am", href: "/foundation/the-land", symbol: "🜃", tone: "foundation" },
+  { date: "Aug 22", title: "Guardian consultation", meta: "Private session", href: "/guardian", symbol: "⊙", tone: "guardian" },
 ] as const;
 
 const releases = [
-  { title: "Living Earth Vol. 1", meta: "Digital + vinyl", href: "/studios/catalog", symbol: "🜄" },
-  { title: "The Living Earth Codex", meta: "Five-volume collection", href: "/press/catalog", symbol: "🜁" },
-  { title: "Glory Peak Blueprint", meta: "Phase one release", href: "/foundation/the-build", symbol: "🜃" },
+  { title: "Living Earth Vol. 1", meta: "Digital + vinyl", href: "/studios/catalog", symbol: "🜄", tone: "studios" },
+  { title: "The Living Earth Codex", meta: "Five-volume collection", href: "/press/catalog", symbol: "🜁", tone: "press" },
+  { title: "Glory Peak Blueprint", meta: "Phase one release", href: "/foundation/the-build", symbol: "🜃", tone: "foundation" },
 ] as const;
 
 const pillars = [
@@ -46,33 +46,66 @@ export function EpicHomeExperience() {
     const elements = Array.from(root.querySelectorAll<HTMLElement>("[data-home-reveal]"));
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    let observer: IntersectionObserver | null = null;
+
     if (reducedMotion || !("IntersectionObserver" in window)) {
       elements.forEach((element) => {
         element.dataset.visible = "true";
       });
-      return;
+    } else {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            (entry.target as HTMLElement).dataset.visible = "true";
+            observer?.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.14, rootMargin: "0px 0px -8% 0px" },
+      );
+      elements.forEach((element) => observer?.observe(element));
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          (entry.target as HTMLElement).dataset.visible = "true";
-          observer.unobserve(entry.target);
+    const parallaxCleanups: Array<() => void> = [];
+    if (!reducedMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      root.querySelectorAll<HTMLElement>(".epic-home-layer").forEach((tile) => {
+        let frame = 0;
+        const reset = () => {
+          tile.style.setProperty("--parallax-x", "0deg");
+          tile.style.setProperty("--parallax-y", "0deg");
+        };
+        const move = (event: PointerEvent) => {
+          window.cancelAnimationFrame(frame);
+          frame = window.requestAnimationFrame(() => {
+            const rect = tile.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width - 0.5;
+            const y = (event.clientY - rect.top) / rect.height - 0.5;
+            tile.style.setProperty("--parallax-x", `${(-y * 2.4).toFixed(2)}deg`);
+            tile.style.setProperty("--parallax-y", `${(x * 2.4).toFixed(2)}deg`);
+          });
+        };
+        tile.addEventListener("pointermove", move);
+        tile.addEventListener("pointerleave", reset);
+        parallaxCleanups.push(() => {
+          window.cancelAnimationFrame(frame);
+          tile.removeEventListener("pointermove", move);
+          tile.removeEventListener("pointerleave", reset);
         });
-      },
-      { threshold: 0.14, rootMargin: "0px 0px -8% 0px" },
-    );
+      });
+    }
 
-    elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
+    return () => {
+      observer?.disconnect();
+      parallaxCleanups.forEach((cleanup) => cleanup());
+    };
   }, []);
 
   return (
     <div ref={homeRef} className="epic-home">
       <main>
-        <HeroEngine siteSlug="studios" ariaLabel="Whole Body — five elements moving as one living system">
+        <HeroEngine autoRotate siteSlug="studios" ariaLabel="Whole Body — five elements moving as one living system">
           <div className="epic-home-vignette" aria-hidden="true" />
+          <div className="epic-home-grain" aria-hidden="true" />
           <div className="epic-home-hero-copy">
             <span className="epic-home-mark" aria-hidden="true">⊙</span>
             <h1 id="epic-home-title">Whole Body</h1>
@@ -93,9 +126,12 @@ export function EpicHomeExperience() {
             <div className="epic-home-feed">
               {activity.map((item) => (
                 <div key={item.message}>
-                  <i className="wb-glyph" aria-hidden="true">{item.symbol}</i>
+                  <i className="wb-glyph" data-pillar={item.tone} aria-hidden="true">{item.symbol}</i>
                   <p>{item.message}</p>
-                  <time>{item.time}</time>
+                  <span className="epic-home-feed-status" aria-label={item.live ? "Live update" : "Awaiting refresh"}>
+                    <i data-status={item.live ? "live" : "delayed"} aria-hidden="true" />
+                    <time>{item.time}</time>
+                  </span>
                 </div>
               ))}
             </div>
@@ -112,7 +148,7 @@ export function EpicHomeExperience() {
                   {events.map((event) => (
                     <Link key={`${event.date}-${event.title}`} href={event.href}>
                       <time>{event.date}</time>
-                      <i className="wb-glyph" aria-hidden="true">{event.symbol}</i>
+                      <i className="wb-glyph" data-pillar={event.tone} aria-hidden="true">{event.symbol}</i>
                       <span><b>{event.title}</b><small>{event.meta}</small></span>
                       <em aria-hidden="true">↗</em>
                     </Link>
@@ -126,7 +162,7 @@ export function EpicHomeExperience() {
                 <div className="epic-home-release-list">
                   {releases.map((release) => (
                     <Link key={release.title} href={release.href}>
-                      <i className="wb-glyph" aria-hidden="true">{release.symbol}</i>
+                      <i className="wb-glyph" data-pillar={release.tone} aria-hidden="true">{release.symbol}</i>
                       <span><b>{release.title}</b><small>{release.meta}</small></span>
                       <em aria-hidden="true">↗</em>
                     </Link>
