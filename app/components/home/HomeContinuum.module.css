@@ -461,16 +461,16 @@
   display: grid;
   width: min(76rem, calc(100% - 48px));
   grid-template-areas:
-    "glyph index"
-    "glyph name"
-    "glyph meta"
-    "glyph statement"
-    "glyph copy"
-    ". stats"
-    ". link";
-  grid-template-columns: minmax(12rem, .65fr) minmax(0, 1.35fr);
+    "index index"
+    "name name"
+    "meta meta"
+    "statement copy"
+    "stats stats"
+    "link link";
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, .82fr);
   column-gap: clamp(3rem, 8vw, 9rem);
   margin: 0 auto;
+  text-align: left;
 }
 
 .chapterIndex {
@@ -520,7 +520,10 @@
 
 .pillarCopy {
   grid-area: copy;
+  align-self: end;
   max-width: 44rem;
+  padding-left: clamp(1.5rem, 3vw, 3rem);
+  border-left: 1px solid color-mix(in srgb, var(--wb-accent) 32%, transparent);
   color: #9292a2;
   font-size: clamp(.94rem, 1.25vw, 1.08rem);
   line-height: 1.75;
@@ -626,15 +629,15 @@
   inset: 0;
   opacity: .34;
   background:
-    repeating-radial-gradient(circle at 22% 68%, transparent 0 3px, rgba(255, 255, 255, .025) 4px, transparent 7px),
-    radial-gradient(ellipse at 19% 68%, rgba(232, 84, 42, .28), transparent 25rem);
+    repeating-radial-gradient(circle at 78% 48%, transparent 0 3px, rgba(255, 255, 255, .025) 4px, transparent 7px),
+    radial-gradient(ellipse at 78% 48%, rgba(232, 84, 42, .28), transparent 25rem);
   mix-blend-mode: screen;
 }
 
 .presenceChapter::after {
   top: 13%;
   bottom: 13%;
-  left: 22%;
+  left: 78%;
   width: 1px;
   background: linear-gradient(transparent, var(--chapter-fire), transparent);
   box-shadow: 0 0 30px rgba(232, 84, 42, .32);
@@ -697,15 +700,7 @@
 }
 
 .pressChapter .pillarInner {
-  grid-template-areas:
-    "index glyph"
-    "name name"
-    "meta meta"
-    "statement copy"
-    "stats stats"
-    "link link";
-  grid-template-columns: 1fr 1fr;
-  gap: 0 clamp(3rem, 8vw, 9rem);
+  column-gap: clamp(3rem, 8vw, 9rem);
 }
 
 .pressChapter h2 {
@@ -730,10 +725,8 @@
 }
 
 .pressChapter .pillarCopy {
-  align-self: end;
   max-width: 31rem;
-  padding-left: clamp(1.5rem, 4vw, 4rem);
-  border-left: 1px solid rgba(201, 162, 39, .32);
+  border-left-color: rgba(201, 162, 39, .32);
 }
 
 /* Studios: fluid technical signal, teal HUD without dashboard chrome. */
@@ -765,16 +758,7 @@
 }
 
 .studiosChapter .pillarInner {
-  grid-template-areas:
-    "index index glyph"
-    "name name glyph"
-    "meta meta glyph"
-    "statement copy copy"
-    "stats stats stats"
-    "link link link";
-  grid-template-columns: .7fr .75fr 1fr;
-  gap: 0 clamp(2rem, 5vw, 5rem);
-  padding: clamp(2rem, 4vw, 4rem);
+  padding: clamp(2rem, 4vw, 4rem) 0;
   border-top: 1px solid rgba(43, 168, 160, .24);
   border-bottom: 1px solid rgba(43, 168, 160, .24);
 }
@@ -813,12 +797,10 @@
 
 .studiosChapter h3 {
   max-width: 32rem;
-  padding-left: 1.5rem;
-  border-left: 2px solid var(--chapter-water);
 }
 
 .studiosChapter .pillarCopy {
-  align-self: end;
+  border-left-color: rgba(43, 168, 160, .42);
 }
 
 .studiosChapter .pillarStats {
@@ -866,15 +848,7 @@
 }
 
 .foundationChapter .pillarInner {
-  grid-template-areas:
-    "index index glyph"
-    "name name glyph"
-    "meta meta glyph"
-    "statement copy copy"
-    "stats stats stats"
-    "link link link";
-  grid-template-columns: .8fr .8fr .65fr;
-  gap: 0 clamp(2rem, 6vw, 6rem);
+  column-gap: clamp(3rem, 8vw, 9rem);
 }
 
 .foundationChapter h2 {
@@ -891,9 +865,7 @@
 }
 
 .foundationChapter .pillarCopy {
-  align-self: end;
-  padding-left: clamp(1.5rem, 4vw, 4rem);
-  border-left: 1px solid rgba(184, 115, 51, .5);
+  border-left-color: rgba(184, 115, 51, .5);
   color: #93998c;
 }
 
@@ -911,13 +883,13 @@
 /* Guardian: the still observer at center, sparse and protected. */
 .guardianChapter {
   background:
-    radial-gradient(circle at 50% 48%, rgba(139, 111, 214, .15), transparent 24rem),
+    radial-gradient(circle at 76% 40%, rgba(139, 111, 214, .15), transparent 24rem),
     linear-gradient(135deg, #050505, #0d0914 54%, #050505);
 }
 
 .guardianChapter::before {
   top: 50%;
-  left: 50%;
+  left: 76%;
   width: min(68vw, 54rem);
   aspect-ratio: 1;
   border: 1px solid rgba(139, 111, 214, .13);
@@ -937,24 +909,11 @@
     radial-gradient(circle, rgba(139, 111, 214, .5) 0 .4px, transparent .72px);
   background-position: 0 0, 57px 41px;
   background-size: 137px 139px, 199px 193px;
-  mask-image: radial-gradient(circle at center, #000, transparent 73%);
+  mask-image: radial-gradient(circle at 76% 40%, #000, transparent 73%);
 }
 
 .guardianChapter .pillarInner {
-  display: grid;
-  max-width: 62rem;
-  grid-template-areas:
-    "glyph"
-    "index"
-    "name"
-    "meta"
-    "statement"
-    "copy"
-    "stats"
-    "link";
-  grid-template-columns: 1fr;
-  justify-items: center;
-  text-align: center;
+  column-gap: clamp(3rem, 8vw, 9rem);
 }
 
 .guardianChapter h2 {
@@ -969,8 +928,8 @@
 
 .guardianChapter h3,
 .guardianChapter .pillarCopy {
-  margin-right: auto;
-  margin-left: auto;
+  margin-right: 0;
+  margin-left: 0;
 }
 
 .guardianChapter .pillarCopy {
@@ -987,7 +946,7 @@
 }
 
 .guardianChapter .pillarLink {
-  justify-self: center;
+  justify-self: start;
 }
 
 /* Shared layers stay neutral and inherit identity at the item level. */
@@ -1433,16 +1392,17 @@
   .pillarInner,
   .pressChapter .pillarInner,
   .studiosChapter .pillarInner,
-  .foundationChapter .pillarInner {
+  .foundationChapter .pillarInner,
+  .guardianChapter .pillarInner {
     grid-template-areas:
-      "glyph index"
-      "glyph name"
-      "glyph meta"
+      "index index"
+      "name name"
+      "meta meta"
       "statement statement"
       "copy copy"
       "stats stats"
       "link link";
-    grid-template-columns: minmax(7rem, .3fr) 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 0 3rem;
   }
 
@@ -1561,7 +1521,6 @@
   .guardianChapter .pillarInner {
     width: calc(100% - 40px);
     grid-template-areas:
-      "glyph"
       "index"
       "name"
       "meta"
@@ -1590,7 +1549,10 @@
   }
 
   .pressChapter .pillarCopy,
-  .foundationChapter .pillarCopy {
+  .studiosChapter .pillarCopy,
+  .foundationChapter .pillarCopy,
+  .guardianChapter .pillarCopy,
+  .pillarCopy {
     padding: 0;
     border: 0;
   }
@@ -1610,11 +1572,6 @@
 
   .pillarStats > div:last-child {
     border-bottom: 0;
-  }
-
-  .guardianChapter .pillarInner {
-    justify-items: center;
-    text-align: center;
   }
 
   .calendarControls {

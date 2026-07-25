@@ -10,11 +10,11 @@ const pillars = [
 ] as const;
 
 const sharedLinks = [
-  { label: "Calendar", href: "/presence/events" },
-  { label: "Store", href: "/catalog" },
-  { label: "Guild", href: "/apply" },
-  { label: "Library", href: "/press/library" },
-  { label: "Media", href: "/studios/catalog" },
+  { label: "Calendar", href: "/calendar" },
+  { label: "Store", href: "/store" },
+  { label: "Guild", href: "/guild" },
+  { label: "Library", href: "/library" },
+  { label: "Media", href: "/media" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ] as const;
