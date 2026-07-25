@@ -1,0 +1,30 @@
+:root {
+  --studios-void: #050505;
+  --studios-carbon: #0a0a0f;
+  --studios-steel: #12121a;
+  --studios-mercury: #2a2a38;
+  --studios-bone: #ededed;
+  --studios-ghost: #8888a0;
+  --studios-water: #2ba8a0;
+  --studios-deep-water: #1a4d4d;
+}
+
+.site-experience--studios {
+  --water: var(--studios-water);
+  --active-rgb: 43, 168, 160;
+  background:
+    radial-gradient(circle at 74% 34%, rgba(43, 168, 160, .055), transparent 29rem),
+    var(--studios-void);
+}
+
+.site-experience--studios .hud-card {
+  border-color: color-mix(in srgb, var(--studios-water) 28%, var(--studios-mercury));
+  background:
+    linear-gradient(135deg, rgba(43, 168, 160, .025), transparent 38%),
+    rgba(10, 10, 15, .9);
+}
+
+.site-experience--studios ::selection {
+  background: var(--studios-water);
+  color: var(--studios-void);
+}

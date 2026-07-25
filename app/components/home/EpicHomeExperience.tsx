@@ -44,6 +44,13 @@ export function EpicHomeExperience() {
               <HeroQuincunx />
             </div>
             <div className="epic-home-vignette" aria-hidden="true" />
+            <div className="epic-home-quincunx-labels" aria-hidden="true">
+              <span className="epic-home-label-press"><i>🜁</i> Press / Air</span>
+              <span className="epic-home-label-presence"><i>🜂</i> Presence / Fire</span>
+              <span className="epic-home-label-studios"><i>🜄</i> Studios / Water</span>
+              <span className="epic-home-label-foundation"><i>🜃</i> Foundation / Earth</span>
+              <span className="epic-home-label-guardian"><i>⊙</i> Guardian / Observer</span>
+            </div>
             <div className="epic-home-hero-copy">
               <motion.p
                 className="epic-home-kicker"

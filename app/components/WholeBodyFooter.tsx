@@ -23,15 +23,15 @@ export function WholeBodyFooter() {
   return (
     <footer className={styles.footer}>
       <h2 className={styles.title}>Whole <span>Body</span></h2>
-      <div className={styles.constellation} aria-label="Navigate the five Whole Body pillars">
-        {Array.from({ length: 10 }, (_, index) => <i key={index} className={`${styles.edge} ${styles[`edge${index + 1}`]}`} aria-hidden="true" />)}
+      <nav className={styles.constellation} aria-label="Navigate the Whole Body quincunx">
+        {Array.from({ length: 8 }, (_, index) => <i key={index} className={`${styles.edge} ${styles[`edge${index + 1}`]}`} aria-hidden="true" />)}
         {pillars.map((pillar) => (
           <Link key={pillar.id} href={pillar.href} className={`${styles.node} ${styles[pillar.id]}`}>
             <i aria-hidden="true">{pillar.symbol}</i>
             <span>{pillar.name}</span>
           </Link>
         ))}
-      </div>
+      </nav>
       <nav className={styles.pillarNav} aria-label="Pillar navigation">
         {pillars.map((pillar) => (
           <Link key={pillar.id} href={pillar.href} className={styles[`${pillar.id}Link`]}>

@@ -42,7 +42,7 @@ const products: Product[] = [
     description: "Root",
     glyph: "✦",
     href: "/",
-    accent: "#F5F5F5",
+    accent: "#EDEDED",
   },
   {
     id: "presence",
@@ -52,7 +52,7 @@ const products: Product[] = [
     description: "The gathering",
     glyph: "🜂",
     href: "/presence",
-    accent: "#FF6B35",
+    accent: "#E8542A",
   },
   {
     id: "press",
@@ -62,7 +62,7 @@ const products: Product[] = [
     description: "The word",
     glyph: "🜁",
     href: "/press",
-    accent: "#A8D8EA",
+    accent: "#C9A227",
   },
   {
     id: "studios",
@@ -72,7 +72,7 @@ const products: Product[] = [
     description: "The signal",
     glyph: "🜄",
     href: "/studios",
-    accent: "#2E86AB",
+    accent: "#2BA8A0",
   },
   {
     id: "foundation",
@@ -82,7 +82,7 @@ const products: Product[] = [
     description: "The ground",
     glyph: "🜃",
     href: "/foundation",
-    accent: "#C18C2B",
+    accent: "#84A66E",
   },
   {
     id: "guardian",
@@ -92,7 +92,7 @@ const products: Product[] = [
     description: "The agreements",
     glyph: "⊙",
     href: "/guardian",
-    accent: "#6D4AFF",
+    accent: "#8B6FD6",
   },
 ];
 

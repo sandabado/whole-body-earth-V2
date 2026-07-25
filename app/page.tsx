@@ -14,10 +14,10 @@ export const metadata: Metadata = {
     siteName: "Whole Body Earth",
     images: [
       {
-        url: "/og-earth.png",
-        width: 1200,
-        height: 630,
-        alt: "The Whole Body Earth quincunx awakening in a dark field",
+        url: "/og-home-v2.png",
+        width: 1730,
+        height: 909,
+        alt: "Whole Body Earth — four elemental pillars held around Guardian at the center",
       },
     ],
     type: "website",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "Whole Body Earth — Five Elements. One Body.",
     description:
       "Five elements. One body. Living now.",
-    images: ["/og-earth.png"],
+    images: ["/og-home-v2.png"],
   },
 };
 

@@ -15,7 +15,7 @@ const pillars = [
     element: "Fire",
     geometry: "Tetrahedron",
     faces: "4 faces",
-    color: "#FF6B35",
+    color: "#E8542A",
     href: "/presence",
     title: "The shape of ignition.",
     copy: ["Weekly gatherings. Monthly retreats. Rites of passage.", "No hierarchy. No guru. Just belonging."],
@@ -29,7 +29,7 @@ const pillars = [
     element: "Air",
     geometry: "Octahedron",
     faces: "8 faces",
-    color: "#A8D8EA",
+    color: "#C9A227",
     href: "/press",
     title: "The shape that expands.",
     copy: ["Words carried outward. Manuscripts shaped. The Living Earth Codex.", "Knowledge that breathes."],
@@ -43,7 +43,7 @@ const pillars = [
     element: "Water",
     geometry: "Icosahedron",
     faces: "20 faces",
-    color: "#2E86AB",
+    color: "#2BA8A0",
     href: "/studios",
     title: "The shape that remembers.",
     copy: ["Music is infrastructure. The artist eats first.", "Twelve tracks. Twelve Houses. Each tuned to a room in the dodecahedron."],
@@ -57,7 +57,7 @@ const pillars = [
     element: "Earth",
     geometry: "Hexahedron",
     faces: "6 faces",
-    color: "#C18C2B",
+    color: "#84A66E",
     href: "/foundation",
     title: "The shape that endures.",
     copy: ["Rammed earth. Off-grid. Carbon negative.", "Sacred geometry as structural engineering."],
@@ -71,7 +71,7 @@ const pillars = [
     element: "Ether",
     geometry: "Dodecahedron",
     faces: "12 faces",
-    color: "#6D4AFF",
+    color: "#8B6FD6",
     href: "/guardian",
     title: "The shape that holds.",
     copy: ["Sovereign systems. Trust architecture. Asset protection.", "For creators with something real to protect."],
@@ -147,8 +147,13 @@ export function HomeContinuum() {
           <span>Live coherence across five dimensions. Every point is a door.</span>
         </motion.header>
         <div className={styles.geometryLayout}>
-          <motion.div {...reveal} className={styles.geometryMap} onPointerLeave={() => setActivePillar("guardian")}>
-            {Array.from({ length: 10 }, (_, index) => <i key={index} className={`${styles.geometryEdge} ${styles[`geometryEdge${index + 1}`]}`} aria-hidden="true" />)}
+          <motion.nav
+            {...reveal}
+            className={styles.geometryMap}
+            onPointerLeave={() => setActivePillar("guardian")}
+            aria-label="Navigate the Whole Body quincunx"
+          >
+            {Array.from({ length: 8 }, (_, index) => <i key={index} className={`${styles.geometryEdge} ${styles[`geometryEdge${index + 1}`]}`} aria-hidden="true" />)}
             {pillars.map((pillar) => (
               <Link
                 key={pillar.id}
@@ -163,8 +168,7 @@ export function HomeContinuum() {
                 <span>{pillar.name}</span>
               </Link>
             ))}
-            <div className={styles.geometryCore} aria-hidden="true">✦</div>
-          </motion.div>
+          </motion.nav>
           <motion.div {...reveal} className={styles.livePanel}>
             <div className={styles.liveHead}><span><i /> Coherence signal</span><b>ACTIVE</b></div>
             {pillars.map((pillar) => (
@@ -202,7 +206,8 @@ export function HomeContinuum() {
           <motion.section
             key={pillar.id}
             {...reveal}
-            className={styles.pillarSection}
+            className={`${styles.pillarSection} ${styles[`${pillar.id}Chapter`]}`}
+            data-pillar={pillar.id}
             style={{ "--wb-accent": pillar.color } as CSSProperties}
             aria-labelledby={`pillar-${pillar.id}`}
           >
