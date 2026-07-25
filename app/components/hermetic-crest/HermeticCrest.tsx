@@ -8,6 +8,10 @@ import {
   type CSSProperties,
   type PointerEvent,
 } from "react";
+import {
+  COMMAND_PILLAR_COLORS,
+  type ActivePillar,
+} from "../HeroEngine/config";
 import styles from "./HermeticCrest.module.css";
 
 type CrestPhase = "locked" | "turning" | "open";
@@ -21,7 +25,8 @@ interface HermeticCrestProps {
     fieldPulseSpeed?: number;
   };
   className?: string;
-  onUnlock?: () => void;
+  activePillar?: ActivePillar;
+  onUnlock?: (trigger: HTMLButtonElement) => void;
 }
 
 type CrestStyle = CSSProperties & {
@@ -41,14 +46,22 @@ type PointerSample = {
 };
 
 const ELEMENTS = [
-  { id: "air", label: "AIR", pillar: "PRESS", symbol: "🜁", x: 250, y: 103, color: "#A8D8EA" },
-  { id: "fire", label: "FIRE", pillar: "PRESENCE", symbol: "🜂", x: 103, y: 250, color: "#FF6B35" },
-  { id: "water", label: "WATER", pillar: "STUDIOS", symbol: "🜄", x: 397, y: 250, color: "#2E86AB" },
-  { id: "earth", label: "EARTH", pillar: "FOUNDATION", symbol: "🜃", x: 250, y: 397, color: "#8B4513" },
-  { id: "ether", label: "ETHER", pillar: "GUARDIAN", symbol: "⊙", x: 250, y: 250, color: "#6D4AFF" },
+  { id: "air", label: "AIR", pillar: "PRESS", symbol: "🜁", x: 250, y: 103, color: COMMAND_PILLAR_COLORS.press },
+  { id: "fire", label: "FIRE", pillar: "PRESENCE", symbol: "🜂", x: 103, y: 250, color: COMMAND_PILLAR_COLORS.presence },
+  { id: "water", label: "WATER", pillar: "STUDIOS", symbol: "🜄", x: 397, y: 250, color: COMMAND_PILLAR_COLORS.studios },
+  { id: "earth", label: "EARTH", pillar: "FOUNDATION", symbol: "🜃", x: 250, y: 397, color: COMMAND_PILLAR_COLORS.foundation },
+  { id: "ether", label: "ETHER", pillar: "GUARDIAN", symbol: "⊙", x: 250, y: 250, color: COMMAND_PILLAR_COLORS.guardian },
 ] as const;
 
 type ElementId = (typeof ELEMENTS)[number]["id"];
+
+const PILLAR_TO_ELEMENT: Partial<Record<ActivePillar, ElementId>> = {
+  presence: "fire",
+  press: "air",
+  studios: "water",
+  foundation: "earth",
+  guardian: "ether",
+};
 
 const DODECAGON = Array.from({ length: 12 }, (_, index) => {
   const angle = (index * Math.PI * 2) / 12 - Math.PI / 2;
@@ -70,6 +83,7 @@ export default function HermeticCrest({
   animate = true,
   layerControls = {},
   className,
+  activePillar = "none",
   onUnlock,
 }: HermeticCrestProps) {
   const [phase, setPhase] = useState<CrestPhase>("locked");
@@ -91,7 +105,13 @@ export default function HermeticCrest({
     mandalaSpeed = 110,
     fieldPulseSpeed = 6,
   } = layerControls;
-  const activeElement = ELEMENTS.find((element) => element.id === hoveredElement);
+  const selectedElement = hoveredElement ?? PILLAR_TO_ELEMENT[activePillar] ?? null;
+  const activeElement = ELEMENTS.find((element) => element.id === selectedElement);
+  const activeColor = hoveredElement
+    ? activeElement?.color
+    : activePillar === "none"
+      ? COMMAND_PILLAR_COLORS.guardian
+      : COMMAND_PILLAR_COLORS[activePillar];
   const crestStyle: CrestStyle = {
     "--crest-size": `${size}px`,
     "--outer-speed": `${outerSpeed}s`,
@@ -99,7 +119,7 @@ export default function HermeticCrest({
     "--mandala-speed": `${mandalaSpeed}s`,
     "--field-speed": `${fieldPulseSpeed}s`,
     "--node-speed": `${fieldPulseSpeed * 3}s`,
-    "--active-color": activeElement?.color ?? "#6D4AFF",
+    "--active-color": activeColor ?? COMMAND_PILLAR_COLORS.guardian,
   };
 
   useEffect(() => {
@@ -135,10 +155,13 @@ export default function HermeticCrest({
       return;
     }
     setPhase("turning");
+    const unlockDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 0
+      : 2_650;
     timerRef.current = window.setTimeout(() => {
       setPhase("open");
-      onUnlock?.();
-    }, 2_650);
+      if (crestRef.current) onUnlock?.(crestRef.current);
+    }, unlockDuration);
   };
 
   const enter = (event: PointerEvent<HTMLButtonElement>) => {
@@ -185,8 +208,12 @@ export default function HermeticCrest({
 
   const status = phase === "turning"
     ? "Unlocking the five fields"
-    : activeElement
+    : hoveredElement && activeElement
       ? `${activeElement.label} / ${activeElement.pillar}`
+      : activePillar !== "none" && activePillar !== "whole"
+        ? `${activePillar.toUpperCase()} / FIELD ACTIVE`
+        : activePillar === "whole"
+          ? "Whole field / live constellation"
       : phase === "open"
         ? "Field open / hover a house"
         : "Turn the ancient key";
@@ -198,7 +225,7 @@ export default function HermeticCrest({
       className={`${styles.crest} ${entered ? styles.entered : ""} ${className ?? ""}`}
       style={crestStyle}
       data-phase={phase}
-      data-active-element={hoveredElement ?? "none"}
+      data-active-element={selectedElement ?? (activePillar === "whole" ? "whole" : "none")}
       data-animate={animate ? "true" : "false"}
       data-running={animate && running ? "true" : "false"}
       aria-label={phase === "open" ? "Close the Whole Body field" : "Turn the ancient key and open the Whole Body field"}
@@ -273,7 +300,7 @@ export default function HermeticCrest({
               <line className={styles.currentLine} x1="250" y1="250" x2="250" y2="103" style={{ "--current-color": "#A8D8EA" } as CSSProperties} />
               <line className={styles.currentLine} x1="250" y1="250" x2="103" y2="250" style={{ "--current-color": "#FF6B35" } as CSSProperties} />
               <line className={styles.currentLine} x1="250" y1="250" x2="397" y2="250" style={{ "--current-color": "#2E86AB" } as CSSProperties} />
-              <line className={styles.currentLine} x1="250" y1="250" x2="250" y2="397" style={{ "--current-color": "#8B4513" } as CSSProperties} />
+              <line className={styles.currentLine} x1="250" y1="250" x2="250" y2="397" style={{ "--current-color": COMMAND_PILLAR_COLORS.foundation } as CSSProperties} />
               <polygon points={GUARDIAN_DODECAGON} fill="none" stroke="#6D4AFF" strokeWidth=".8" opacity=".34" />
             </g>
 
@@ -282,7 +309,7 @@ export default function HermeticCrest({
                 <g
                   key={element.id}
                   className={`${styles.elementNode} ${element.id === "ether" ? styles.observerNode : ""}`}
-                  data-active={hoveredElement === element.id ? "true" : "false"}
+                  data-active={selectedElement === element.id || activePillar === "whole" ? "true" : "false"}
                   transform={`translate(${element.x} ${element.y})`}
                   style={{
                     "--node-color": element.color,

@@ -2,6 +2,23 @@ import fallbackSource from "./hero-configs.json";
 
 export type HeroElement = "fire" | "water" | "earth" | "air" | "aether";
 export type ResolutionQuality = "low" | "medium" | "high";
+export type ActivePillar =
+  | "none"
+  | "presence"
+  | "press"
+  | "studios"
+  | "foundation"
+  | "guardian"
+  | "whole";
+
+export const COMMAND_PILLAR_COLORS = {
+  presence: "#FF6B35",
+  press: "#A8D8EA",
+  studios: "#2E86AB",
+  foundation: "#8B6F47",
+  guardian: "#6D4AFF",
+  whole: "#FF3366",
+} as const satisfies Record<Exclude<ActivePillar, "none">, string>;
 
 export interface HeroConfig {
   element: HeroElement;

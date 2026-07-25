@@ -5,25 +5,34 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 
-test("ships the complete Studios experience instead of the starter", async () => {
-  const [page, home, layout, packageJson] = await Promise.all([
+test("ships the fullscreen Whole Body Earth command deck", async () => {
+  const [page, home, nav, shelf, layout, packageJson] = await Promise.all([
     source("app/page.tsx"),
-    source("app/components/HomePage.tsx"),
+    source("app/components/home/EpicHomeExperience.tsx"),
+    source("app/components/home/TopNav.tsx"),
+    source("app/components/home/PillarShelf.tsx"),
     source("app/layout.tsx"),
     source("package.json"),
   ]);
 
   assert.match(layout, /Whole Body Studios/);
-  assert.match(home, /INFRASTRUCTURE,/);
-  assert.match(home, /NOT A LABEL/);
-  assert.match(home, /THE ARTIST EATS FIRST/);
-  assert.match(page, /<HomePage \/>/);
+  assert.match(page, /<EpicHomeExperience \/>/);
+  assert.match(home, /<HeroQuincunx activePillar=\{activePillar\}/);
+  assert.match(home, /<HermeticCrest/);
+  assert.match(home, /<TopNav activePillar=\{activePillar\}/);
+  assert.match(home, /<PillarShelf/);
+  assert.match(home, /Five pillars\. One whole body\./);
+  assert.match(home, /href="\/reading"/);
+  assert.doesNotMatch(home, /WholeBodyFooter|ElementZones|HomeContinuum/);
+  for (const symbol of ["🜂", "🜁", "🜄", "🜃", "⊙", "⏺"])
+    assert.match(nav, new RegExp(symbol));
+  assert.match(shelf, /DISMISS_THRESHOLD_PX = 100/);
   assert.doesNotMatch(page + home + layout + packageJson, /Your site is taking shape|codex-preview|react-loading-skeleton/i);
 });
 
-test("uses the reusable Water engine with hydration-safe degradation", async () => {
+test("uses the reusable Water engine with active-pillar focus and hydration-safe degradation", async () => {
   const [home, engine, canvas, capability, shader, styles] = await Promise.all([
-    source("app/components/HomePage.tsx"),
+    source("app/components/home/EpicHomeExperience.tsx"),
     source("app/components/HeroEngine/HeroEngine.tsx"),
     source("app/components/HeroEngine/WaterCanvas.tsx"),
     source("app/components/HeroEngine/hooks/useDeviceCapability.ts"),
@@ -33,6 +42,7 @@ test("uses the reusable Water engine with hydration-safe degradation", async () 
 
   assert.match(home, /<HeroEngine/);
   assert.match(home, /siteSlug="studios"/);
+  assert.match(home, /activePillar=\{activePillar\}/);
   assert.match(engine, /lazy\(\(\) => import\("\.\/WaterCanvas"\)\)/);
   assert.match(engine, /CanvasBoundary/);
   assert.match(engine, /capability\.reducedMotion/);
@@ -41,6 +51,7 @@ test("uses the reusable Water engine with hydration-safe degradation", async () 
   assert.match(capability, /prefers-reduced-motion:\s*reduce/);
   assert.match(canvas, /usePointerInfluence/);
   assert.match(canvas, /useScrollSpeed/);
+  assert.match(canvas, /activePillar/);
   assert.match(shader, /uFluidDissipation/);
   assert.match(shader, /uPointerInfluenceStrength/);
   assert.match(shader, /caustic/);
@@ -72,18 +83,14 @@ test("centralizes live configuration with a protected editor", async () => {
   assert.match(docs, /without a deployment/);
 });
 
-test("preserves the six-site constellation and client-stable studio status", async () => {
+test("preserves the pillar route spine and client-stable studio status", async () => {
   const shell = await source("app/components/SiteExperience.tsx");
-  for (const domain of [
-    "wholebody.earth",
-    "wholebody.foundation",
-    "wholebody.studio",
-    "wholebody.community",
-    "wholebody.press",
-    "wholebody.law",
-  ]) {
-    assert.match(shell, new RegExp(domain.replace(".", "\\.")));
+  for (const route of ["/studios", "/foundation", "/presence", "/press"]) {
+    assert.match(shell, new RegExp(route));
   }
+  assert.match(shell, /current !== "studios"/);
+  assert.match(shell, /pathname !== "\/"/);
+  assert.match(shell, /<WholeBodyFooter \/>/);
   assert.match(shell, /useState\("SYSTEMS — STANDING BY"\)/);
   assert.doesNotMatch(shell, /const studioStatus = hour/);
 });

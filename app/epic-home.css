@@ -1,712 +1,288 @@
 .epic-home {
-  --epic-bg: #050505;
-  --epic-surface: #070707;
-  --epic-border: #1e1e1e;
-  --epic-text: #ededed;
-  --epic-muted: #888896;
+  --command-bg: #050505;
+  --command-text: #f5f5f5;
+  --command-muted: #888;
+  --command-violet: #6d4aff;
+  --command-violet-soft: #9b7fff;
+  --ease-meditative: cubic-bezier(.16, 1, .3, 1);
+  --ease-gentle: cubic-bezier(.25, .46, .45, .94);
+  --duration-shelf: 600ms;
+  --duration-hover: 300ms;
+  --duration-transition: 400ms;
+  --duration-dim: 500ms;
   position: relative;
-  overflow: clip;
-  background: var(--epic-bg);
-  color: var(--epic-text);
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--command-bg);
+  color: var(--command-text);
   font-family: var(--font-body), Inter, Arial, sans-serif;
+  isolation: isolate;
 }
 
-html:has(.epic-home) {
-  background: var(--epic-bg);
-  scroll-behavior: smooth;
+html:has(.command-deck-home),
+body:has(.command-deck-home) {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--command-bg, #050505);
 }
 
 .epic-home main {
-  z-index: auto;
+  width: 100%;
+  height: 100%;
 }
 
 .epic-home :focus-visible {
-  outline: 1px solid rgba(237, 237, 237, .86);
+  outline: 1px solid rgba(245, 245, 245, .86);
   outline-offset: 5px;
 }
 
 .epic-home ::selection {
-  background: var(--epic-text);
-  color: var(--epic-bg);
+  background: var(--command-violet);
+  color: #fff;
 }
 
 .epic-home > main > .water-hero {
   position: relative;
-  display: grid;
-  min-height: 100svh;
-  place-items: center;
-  overflow: hidden;
-  isolation: isolate;
+  display: block;
+  width: 100%;
+  height: 100svh;
+  min-height: 0;
   padding: 0;
-  border-bottom: 0;
+  overflow: hidden;
+  border: 0;
+  background: var(--command-bg) !important;
+  isolation: isolate;
 }
 
 .epic-home > main > .water-hero::before {
   z-index: 1;
   background:
-    radial-gradient(circle at 50% 45%, rgba(0, 0, 0, .02), rgba(0, 0, 0, .42) 60%, rgba(0, 0, 0, .86) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, .38), transparent 32%, transparent 66%, var(--epic-bg));
+    radial-gradient(circle at 50% 43%, rgba(5, 5, 5, .08), rgba(5, 5, 5, .32) 48%, rgba(5, 5, 5, .88) 100%),
+    linear-gradient(180deg, rgba(5, 5, 5, .48), transparent 20%, transparent 70%, rgba(5, 5, 5, .84));
 }
 
-.epic-home > main > .water-hero::after {
+.command-deck-vignette,
+.command-deck-grain {
   position: absolute;
   z-index: 2;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 1px;
-  background: var(--epic-border);
-  content: "";
+  inset: 0;
   pointer-events: none;
 }
 
-.epic-home-vignette {
-  position: absolute;
-  z-index: 2;
-  inset: 2rem;
-  border-right: 1px solid rgba(237, 237, 237, .06);
-  border-left: 1px solid rgba(237, 237, 237, .06);
-  pointer-events: none;
+.command-deck-vignette {
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, .72), transparent 18%, transparent 82%, rgba(5, 5, 5, .72)),
+    radial-gradient(circle at center, transparent 35%, rgba(5, 5, 5, .48) 100%);
 }
 
-.epic-home-hero-copy {
-  position: relative;
+.command-deck-grain {
+  background-image: url('/noise.png');
+  background-repeat: repeat;
+  opacity: .03;
+  mix-blend-mode: soft-light;
+}
+
+.command-deck-visual {
+  position: absolute;
   z-index: 3;
-  display: flex;
-  width: min(76rem, calc(100% - 48px));
-  min-height: 100svh;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: clamp(.85rem, 1.8vh, 1.35rem);
-  padding: clamp(2rem, 4vh, 3rem) 0 clamp(2.5rem, 5vh, 4rem);
-  text-align: center;
-  animation: epic-home-enter 900ms ease both;
+  inset: max(4rem, env(safe-area-inset-top)) 0 clamp(10.5rem, 22svh, 13rem);
+  display: grid;
+  place-items: center;
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  transform-origin: 50% 42%;
+  filter: blur(0);
+  will-change: opacity, filter, transform;
+  transition:
+    opacity var(--duration-dim) var(--ease-gentle),
+    filter var(--duration-dim) var(--ease-gentle),
+    transform var(--duration-dim) var(--ease-meditative);
 }
 
-.epic-home-hero-content {
+.command-deck-constellation {
+  position: absolute;
+  inset: -5% 0;
+  opacity: .48;
+  pointer-events: none;
+  transform: scale(1.08);
+  transition: opacity var(--duration-dim) var(--ease-gentle), transform var(--duration-dim) var(--ease-meditative);
+}
+
+.command-deck-dial-shell {
   position: relative;
   z-index: 2;
+  width: min(62svh, 43rem, calc(100vw - 2rem));
+}
+
+.command-deck-dial-shell > button {
+  width: 100%;
+}
+
+.command-deck-home[data-shelf-open="true"] .command-deck-constellation {
+  opacity: .72;
+  transform: scale(1.14);
+}
+
+.command-deck-home[data-shelf-open="true"] .command-deck-visual {
+  opacity: .4;
+  filter: blur(4px);
+  transform: translate3d(0, -24svh, 0) scale(.76);
+}
+
+.command-deck-hero-content {
+  position: absolute;
+  z-index: 5;
+  right: 1.5rem;
+  bottom: max(1.75rem, env(safe-area-inset-bottom));
+  left: 1.5rem;
   display: flex;
   align-items: center;
   flex-direction: column;
+  text-align: center;
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity var(--duration-dim) var(--ease-gentle),
+    filter var(--duration-dim) var(--ease-gentle),
+    transform var(--duration-dim) var(--ease-meditative);
 }
 
-.epic-home-key {
-  max-width: clamp(27rem, 61vh, 42rem);
-  margin-bottom: 1.25rem;
+.command-deck-home[data-shelf-open="true"] .command-deck-hero-content {
+  opacity: .28;
+  filter: blur(4px);
+  transform: translate3d(0, 1rem, 0);
+  pointer-events: none;
 }
 
-.epic-home-hero-copy h1 {
+.command-deck-hero-content h1 {
   margin: 0;
-  font: 600 clamp(3.6rem, 7.5vw, 6.75rem)/.8 var(--font-editorial), "Cormorant Garamond", Georgia, serif;
-  letter-spacing: -.045em;
-  white-space: nowrap;
+  color: var(--command-text);
+  font: 400 clamp(2rem, 4.2vw, 2.5rem)/1 var(--font-editorial), "Cormorant Garamond", Georgia, serif;
+  letter-spacing: .05em;
   text-transform: uppercase;
+  text-wrap: balance;
 }
 
-.epic-home-hero-content > p {
-  margin: .95rem 0 1.15rem;
-  color: #b2b2bd;
-  font-size: clamp(.95rem, 1.6vw, 1.15rem);
-  letter-spacing: .015em;
+.command-deck-hero-content p {
+  margin: .65rem 0 1.05rem;
+  color: var(--command-muted);
+  font: 400 1rem/1.4 var(--font-body), Inter, sans-serif;
 }
 
-.epic-home-hero-content > a,
-.epic-home-reading-inner > a {
+.command-deck-hero-content > a {
   display: inline-flex;
-  min-height: 3.25rem;
+  min-height: 3rem;
   align-items: center;
   justify-content: center;
-  gap: .7rem;
-  padding: 0 1.4rem;
-  border: 1px solid rgba(237, 237, 237, .82);
-  color: var(--epic-text);
-  font-size: .69rem;
-  font-weight: 600;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  transform-origin: center;
-  transition: background 200ms ease, color 200ms ease, border-color 200ms ease, transform 200ms ease;
-}
-
-.epic-home-hero-content > a:hover,
-.epic-home-hero-content > a:focus-visible,
-.epic-home-reading-inner > a:hover,
-.epic-home-reading-inner > a:focus-visible {
-  border-color: var(--epic-text);
-  background: var(--epic-text);
-  color: var(--epic-bg);
-  transform: scale(1.05);
-}
-
-.epic-home > main a {
-  transform-origin: center;
-  transition-duration: 200ms;
-  transition-timing-function: ease;
-}
-
-.epic-home > main a:hover,
-.epic-home > main a:focus-visible {
-  transform: scale(1.05);
-}
-
-.epic-home-section {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  border-top: 1px solid var(--epic-border);
-  background: var(--epic-bg);
-}
-
-.epic-home-section::before {
-  display: none;
-}
-
-.epic-home-section::after {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  padding: 0 1rem;
-  background: var(--epic-bg);
-  color: rgba(237, 237, 237, .2);
-  content: attr(data-divider);
-  font: 400 1rem/1 var(--font-editorial), "Cormorant Garamond", serif;
-  transform: translate(-50%, -50%);
-}
-
-.epic-home-inner {
-  width: min(76rem, calc(100% - 48px));
-  margin: 0 auto;
-}
-
-.epic-home-activity {
-  min-height: 40svh;
-  padding: clamp(4rem, 7vw, 6rem) 0;
-}
-
-.epic-home-layers {
-  min-height: 60svh;
-  padding: clamp(4rem, 7vw, 6rem) 0;
-  background: var(--epic-bg);
-}
-
-.epic-home-layers::after {
-  background: var(--epic-bg);
-}
-
-.epic-home-reading {
-  min-height: 40svh;
-  padding: clamp(4rem, 7vw, 6rem) 0;
-  text-align: center;
-}
-
-.epic-home-section-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.epic-home-section-heading h2 {
-  max-width: 50rem;
-  margin: .8rem 0 0;
-  font-family: var(--font-editorial), "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(2rem, 3.6vw, 3.25rem);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -.035em;
-}
-
-.epic-home-section-heading > a,
-.epic-home-layer-action {
-  color: var(--epic-muted);
-  font-family: var(--font-data), "JetBrains Mono", monospace;
-  font-size: .66rem;
-  font-weight: 500;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  transition: color 180ms ease;
-}
-
-.epic-home-section-heading > a:hover,
-.epic-home-section-heading > a:focus-visible,
-.epic-home-layer-action:hover,
-.epic-home-layer-action:focus-visible {
-  color: var(--epic-text);
-}
-
-.epic-home-live {
-  display: flex;
-  align-items: center;
   gap: .55rem;
-  color: #75d475;
-  font-family: var(--font-data), "JetBrains Mono", monospace;
-  font-size: .66rem;
-  font-weight: 600;
-  letter-spacing: .12em;
+  padding: .75rem 2rem;
+  border: 1px solid var(--command-violet);
+  background: rgba(5, 5, 5, .22);
+  color: var(--command-violet-soft);
+  font: 500 .875rem/1 var(--font-body), Inter, sans-serif;
+  letter-spacing: .05em;
   text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform: scale(1);
+  transition:
+    background var(--duration-transition) var(--ease-gentle),
+    border-color var(--duration-transition) var(--ease-gentle),
+    box-shadow var(--duration-transition) var(--ease-gentle),
+    color var(--duration-transition) var(--ease-gentle),
+    transform var(--duration-transition) var(--ease-meditative);
 }
 
-.epic-home-live i {
-  width: .4rem;
-  height: .4rem;
-  border-radius: 50%;
-  background: #75d475;
-  box-shadow: 0 0 12px rgba(117, 212, 117, .8);
-  animation: epic-home-live-pulse 2s ease-in-out infinite;
+.command-deck-hero-content > a:hover,
+.command-deck-hero-content > a:focus-visible {
+  border-color: var(--command-violet-soft);
+  background: rgba(109, 74, 255, .1);
+  box-shadow: 0 0 32px rgba(109, 74, 255, .11);
+  color: #b6a2ff;
+  transform: scale(1.025);
 }
 
-.epic-home-feed {
-  border-top: 1px solid var(--epic-border);
-}
-
-.epic-home-feed > div {
-  display: grid;
-  min-height: 3.4rem;
-  grid-template-columns: 2rem 1fr auto;
-  align-items: center;
-  gap: 1rem;
-  border-bottom: 1px solid var(--epic-border);
-}
-
-.epic-home[data-motion-ready="true"] .epic-home-feed > div {
-  opacity: 0;
-  transform: translateX(-18px);
-}
-
-.epic-home[data-motion-ready="true"] [data-visible="true"] .epic-home-feed > div {
-  animation: epic-home-feed-enter 520ms cubic-bezier(.2, .8, .2, 1) forwards;
-}
-
-.epic-home[data-motion-ready="true"] [data-visible="true"] .epic-home-feed > div:nth-child(1) { animation-delay: 0ms; }
-.epic-home[data-motion-ready="true"] [data-visible="true"] .epic-home-feed > div:nth-child(2) { animation-delay: 100ms; }
-.epic-home[data-motion-ready="true"] [data-visible="true"] .epic-home-feed > div:nth-child(3) { animation-delay: 200ms; }
-.epic-home[data-motion-ready="true"] [data-visible="true"] .epic-home-feed > div:nth-child(4) { animation-delay: 300ms; }
-.epic-home[data-motion-ready="true"] [data-visible="true"] .epic-home-feed > div:nth-child(5) { animation-delay: 400ms; }
-
-.epic-home-feed > div > .wb-glyph {
-  font-size: 1.05rem;
-}
-
-.epic-home-feed p {
-  margin: 0;
-  color: #b9b9c3;
-  font-size: .86rem;
-}
-
-.epic-home-feed-status {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: .5rem;
-}
-
-.epic-home-feed-status > i {
-  width: .36rem;
-  height: .36rem;
-  border-radius: 50%;
-}
-
-.epic-home-feed-status > i[data-status="live"] {
-  background: #75d475;
-  box-shadow: 0 0 10px rgba(117, 212, 117, .72);
-  animation: epic-home-live-pulse 2s ease-in-out infinite;
-}
-
-.epic-home-feed-status > i[data-status="delayed"] {
-  background: #ef5350;
-  box-shadow: 0 0 10px rgba(239, 83, 80, .58);
-}
-
-.epic-home-feed time {
-  color: #5d5d6d;
-  font-family: var(--font-data), "JetBrains Mono", monospace;
-  font-size: .68rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.epic-home-layer-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.epic-home-layer {
-  --parallax-x: 0deg;
-  --parallax-y: 0deg;
-  display: flex;
-  min-height: 24rem;
-  flex-direction: column;
-  padding: 1.5rem;
-  border: 1px solid var(--epic-border);
-  background: var(--epic-surface);
-  transform: perspective(900px) rotateX(var(--parallax-x)) rotateY(var(--parallax-y));
-  transform-style: preserve-3d;
-  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
-  will-change: transform;
-}
-
-.epic-home-layer:hover {
-  border-color: #303030;
-  box-shadow: 0 18px 70px rgba(0, 0, 0, .42);
-}
-
-.epic-home-layer > header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1.1rem;
-  border-bottom: 1px solid var(--epic-border);
-}
-
-.epic-home-layer > header span {
-  font-family: var(--font-data), "JetBrains Mono", monospace;
-  font-size: .76rem;
-  font-weight: 600;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-
-.epic-home-layer > header small {
-  color: var(--epic-muted);
-  font-family: var(--font-data), "JetBrains Mono", monospace;
-  font-size: .68rem;
-}
-
-.epic-home-event-list,
-.epic-home-release-list {
-  flex: 1;
-}
-
-.epic-home-event-list > a,
-.epic-home-release-list > a {
-  display: grid;
-  align-items: center;
-  border-bottom: 1px solid var(--epic-border);
-  color: #b9b9c3;
-  transition: color 180ms ease, padding 180ms ease;
-}
-
-.epic-home-event-list > a {
-  min-height: 3rem;
-  grid-template-columns: 4rem 1.5rem 1fr auto;
-  gap: .6rem;
-}
-
-.epic-home-release-list > a {
-  min-height: 4rem;
-  grid-template-columns: 1.8rem 1fr auto;
-  gap: .8rem;
-}
-
-.epic-home-event-list > a:hover,
-.epic-home-event-list > a:focus-visible,
-.epic-home-release-list > a:hover,
-.epic-home-release-list > a:focus-visible {
-  padding-left: .35rem;
-  color: var(--epic-text);
-}
-
-.epic-home-event-list time {
-  color: #737382;
-  font-family: var(--font-data), "JetBrains Mono", monospace;
-  font-size: .64rem;
-  font-variant-numeric: tabular-nums;
-  text-transform: uppercase;
-}
-
-.epic-home-event-list .wb-glyph,
-.epic-home-release-list .wb-glyph {
-  font-size: 1rem;
-}
-
-.epic-home-event-list span,
-.epic-home-release-list span {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: .2rem;
-}
-
-.epic-home-event-list b,
-.epic-home-release-list b {
-  overflow: hidden;
-  color: inherit;
-  font-size: .76rem;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.epic-home-event-list small,
-.epic-home-release-list small {
-  color: #686878;
-  font-family: var(--font-data), "JetBrains Mono", monospace;
-  font-size: .64rem;
-}
-
-.epic-home-event-list em,
-.epic-home-release-list em {
-  color: #686878;
-  font-style: normal;
-}
-
-.epic-home-layer-action {
-  width: max-content;
-  margin-top: 1.4rem;
-}
-
-.epic-home-reading-inner {
-  width: min(58rem, calc(100% - 48px));
-  margin: 0 auto;
-}
-
-.epic-home-reading-mark {
-  display: block;
-  margin-bottom: 1.2rem;
-  color: var(--guardian-primary);
-  font: 400 2rem/1 var(--font-editorial), "Cormorant Garamond", serif;
-  filter: drop-shadow(0 0 16px var(--guardian-primary));
-  text-shadow: 0 0 28px rgba(109, 74, 255, .3);
-}
-
-.epic-home-reading-inner h2 {
-  margin: 0;
-  font-family: var(--font-editorial), "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(2.5rem, 6vw, 5.4rem);
-  font-weight: 500;
-  line-height: .96;
-  letter-spacing: -.06em;
-}
-
-.epic-home-reading-inner p {
-  margin: 1.25rem 0 2rem;
-  color: var(--epic-muted);
-  font-size: .95rem;
-}
-
-.epic-home-reading-inner > a {
-  border-color: var(--epic-text);
-  background: var(--epic-text);
-  color: var(--epic-bg);
-}
-
-.epic-home-reading-inner > a:hover,
-.epic-home-reading-inner > a:focus-visible {
-  background: transparent;
-  color: var(--epic-text);
-}
-
-.epic-home-pillar-nav {
-  min-height: 10svh;
-  padding: 1.25rem 0;
-}
-
-.epic-home-pillar-row {
-  display: flex;
-  width: min(76rem, calc(100% - 48px));
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0 auto;
-}
-
-.epic-home-pillar-row a {
-  display: inline-flex;
-  align-items: center;
-  gap: .55rem;
-  color: var(--epic-muted);
-  font-size: .72rem;
-  font-weight: 500;
-  letter-spacing: .06em;
-  transition: color 200ms ease, transform 200ms ease;
-}
-
-.epic-home-pillar-row a:hover,
-.epic-home-pillar-row a:focus-visible {
-  color: var(--epic-text);
-}
-
-.epic-home-pillar-row i {
-  font-size: 1rem;
-}
-
-.epic-home [data-pillar="presence"] { color: var(--presence-primary); filter: drop-shadow(0 0 16px var(--presence-primary)); }
-.epic-home [data-pillar="press"] { color: var(--press-primary); filter: drop-shadow(0 0 16px var(--press-primary)); }
-.epic-home [data-pillar="studios"] { color: var(--studios-primary); filter: drop-shadow(0 0 16px var(--studios-primary)); }
-.epic-home [data-pillar="foundation"] { color: var(--foundation-primary); filter: drop-shadow(0 0 16px var(--foundation-primary)); }
-.epic-home [data-pillar="guardian"] { color: var(--guardian-primary); filter: drop-shadow(0 0 16px var(--guardian-primary)); }
-
-.epic-home[data-motion-ready="true"] [data-home-reveal] {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 300ms ease, transform 300ms ease;
-}
-
-.epic-home[data-motion-ready="true"] [data-home-reveal][data-visible="true"] {
-  opacity: 1;
-  transform: none;
-}
-
-.epic-home-sr-only {
+.command-deck-sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
-  padding: 0;
   margin: -1px;
+  padding: 0;
   overflow: hidden;
   clip: rect(0 0 0 0);
-  white-space: nowrap;
   border: 0;
-}
-
-@keyframes epic-home-enter {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-}
-
-@keyframes epic-home-live-pulse {
-  50% {
-    opacity: .35;
-    box-shadow: 0 0 3px rgba(117, 212, 117, .45);
-  }
-}
-
-@keyframes epic-home-feed-enter {
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  white-space: nowrap;
 }
 
 @media (max-width: 760px) {
-  .epic-home-vignette {
-    inset: 1rem;
+  .command-deck-vignette {
+    background:
+      radial-gradient(circle at 50% 39%, transparent 26%, rgba(5, 5, 5, .58) 100%),
+      linear-gradient(180deg, rgba(5, 5, 5, .35), transparent 18%, transparent 66%, rgba(5, 5, 5, .9));
   }
 
-  .epic-home-hero-copy h1 {
-    font-size: clamp(3rem, 15vw, 5.5rem);
+  .command-deck-visual {
+    inset: max(4.4rem, env(safe-area-inset-top)) 0 clamp(10.75rem, 24svh, 12rem);
   }
 
-  .epic-home-key {
-    max-width: min(90vw, 29rem);
+  .command-deck-dial-shell {
+    width: min(55svh, calc(100vw - 1.75rem));
   }
 
-  .epic-home-activity,
-  .epic-home-layers,
-  .epic-home-reading {
-    min-height: auto;
-    padding: 5rem 0;
+  .command-deck-home[data-shelf-open="true"] .command-deck-visual {
+    transform: translate3d(0, -33svh, 0) scale(.56);
   }
 
-  .epic-home-section-heading {
-    display: block;
+  .command-deck-hero-content {
+    right: 1rem;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+    left: 1rem;
   }
 
-  .epic-home-section-heading > a {
-    display: inline-block;
-    margin-top: 1.2rem;
+  .command-deck-hero-content h1 {
+    font-size: clamp(1.85rem, 9vw, 2.25rem);
   }
 
-  .epic-home-layer-grid {
-    grid-template-columns: 1fr;
+  .command-deck-hero-content p {
+    margin-block: .5rem .8rem;
+    font-size: .92rem;
   }
 
-  .epic-home-layer {
-    min-height: 0;
-    transform: none;
-    will-change: auto;
-  }
-
-  .epic-home-pillar-row {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem 1.5rem;
-  }
-}
-
-@media (max-height: 760px) and (min-width: 761px) {
-  .epic-home-key {
-    max-width: min(27rem, 51vh);
-  }
-
-  .epic-home-hero-copy h1 {
-    font-size: clamp(3.25rem, 7vw, 5.2rem);
-  }
-
-  .epic-home-hero-content > p {
-    margin: .65rem 0 .9rem;
-  }
-}
-
-@media (max-height: 620px) {
-  .epic-home-hero-copy {
-    gap: .45rem;
-    padding: .75rem 0 1.5rem;
-  }
-
-  .epic-home-hero-copy h1 {
-    font-size: clamp(2.65rem, 11vw, 4.4rem);
-  }
-
-  .epic-home-hero-content > p {
-    margin: .45rem 0 .65rem;
-    font-size: .82rem;
-  }
-
-  .epic-home-hero-content > a {
-    min-height: 2.55rem;
+  .command-deck-hero-content > a {
+    width: min(100%, 22rem);
     padding-inline: 1rem;
-  }
-
-  .epic-home-key {
-    max-width: min(76vw, 52vh, 22rem);
-    margin-bottom: .85rem;
+    font-size: .72rem;
   }
 }
 
-@media (max-width: 520px) {
-  .epic-home-feed > div {
-    grid-template-columns: 1.5rem minmax(0, 1fr) auto;
-    gap: .65rem;
+@media (max-height: 650px) {
+  .command-deck-visual {
+    inset-block: 3.65rem 9.5rem;
   }
 
-  .epic-home-feed p {
-    font-size: .78rem;
-    line-height: 1.45;
+  .command-deck-hero-content {
+    bottom: max(.7rem, env(safe-area-inset-bottom));
   }
 
-  .epic-home-event-list > a {
-    grid-template-columns: 3.4rem 1.3rem 1fr auto;
+  .command-deck-hero-content p {
+    margin-block: .35rem .55rem;
   }
 
-  .epic-home-event-list small {
-    display: none;
-  }
-
-  .epic-home-reading-inner > a {
-    width: 100%;
-    padding-inline: .8rem;
+  .command-deck-hero-content > a {
+    min-height: 2.7rem;
+    padding-block: .65rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .epic-home-hero-copy,
-  .epic-home-live i {
-    animation: none;
-  }
-
-  .epic-home[data-motion-ready="true"] [data-home-reveal],
-  .epic-home[data-motion-ready="true"] .epic-home-feed > div {
-    opacity: 1;
-    transform: none;
-    transition: none;
-    animation: none;
+  .command-deck-visual,
+  .command-deck-hero-content,
+  .command-deck-hero-content > a {
+    animation: none !important;
+    transition-duration: .01ms !important;
   }
 }

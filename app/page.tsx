@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { EpicHomeExperience } from "./components/home/EpicHomeExperience";
 
 export const metadata: Metadata = {
-  title: "Whole Body Earth — Five Elements. One Body.",
+  title: "Whole Body Earth — Five Pillars. One Whole Body.",
   description:
-    "Five elements. One body. A living constellation for sovereign creators.",
+    "Five pillars. One whole body. A living constellation for sovereign creators.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Whole Body Earth — Five Elements. One Body.",
+    title: "Whole Body Earth — Five Pillars. One Whole Body.",
     description:
-      "Five elements. One body. Living now.",
+      "Five pillars. One whole body.",
     url: "/",
     siteName: "Whole Body Earth",
     images: [
@@ -24,9 +24,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Whole Body Earth — Five Elements. One Body.",
+    title: "Whole Body Earth — Five Pillars. One Whole Body.",
     description:
-      "Five elements. One body. Living now.",
+      "Five pillars. One whole body.",
     images: ["/og-home-v2.png"],
   },
 };

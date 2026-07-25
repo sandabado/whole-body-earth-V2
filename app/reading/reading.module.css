@@ -1,0 +1,101 @@
+.page {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: clamp(5rem, 10vh, 8rem) 1.5rem 4rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(109, 74, 255, .13), transparent 25rem),
+    #050505;
+  color: #f5f5f5;
+}
+
+.back {
+  position: fixed;
+  z-index: 2;
+  top: max(1.5rem, env(safe-area-inset-top));
+  left: max(1.5rem, env(safe-area-inset-left));
+  color: #888;
+  font: 500 .68rem/1 var(--font-data), monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transition: color 300ms cubic-bezier(.25, .46, .45, .94);
+}
+
+.back:hover,
+.back:focus-visible {
+  color: #f5f5f5;
+}
+
+.reading {
+  width: min(46rem, 100%);
+}
+
+.mark {
+  display: block;
+  margin-bottom: 1.5rem;
+  color: #6d4aff;
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 18px #6d4aff);
+}
+
+.eyebrow {
+  margin: 0 0 1.4rem;
+  color: #9b7fff;
+  font: 500 .68rem/1.4 var(--font-data), monospace;
+  letter-spacing: .18em;
+}
+
+.reading h1 {
+  margin: 0;
+  font: 600 clamp(3.2rem, 8vw, 6.5rem)/.82 var(--font-editorial), Georgia, serif;
+  letter-spacing: -.045em;
+}
+
+.body {
+  max-width: 40rem;
+  margin: clamp(1.75rem, 4vh, 2.75rem) 0;
+  color: #aaa;
+  font: 400 1rem/1.7 var(--font-body), Inter, sans-serif;
+}
+
+.return {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  padding: 0 1.35rem;
+  border: 1px solid #6d4aff;
+  background: transparent;
+  color: #9b7fff;
+  font: 500 .72rem/1 var(--font-data), monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: background 400ms cubic-bezier(.25, .46, .45, .94), color 400ms cubic-bezier(.25, .46, .45, .94);
+}
+
+.return:hover,
+.return:focus-visible {
+  background: rgba(109, 74, 255, .1);
+  color: #c7baff;
+}
+
+@media (max-width: 560px) {
+  .reading h1 {
+    font-size: clamp(3rem, 16vw, 4.6rem);
+  }
+
+  .return {
+    width: 100%;
+    padding-inline: .8rem;
+    font-size: .64rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back,
+  .return {
+    transition: none;
+  }
+}

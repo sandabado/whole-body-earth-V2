@@ -12,6 +12,10 @@ import {
 } from "react";
 import { useDeviceCapability } from "./hooks/useDeviceCapability";
 import { useHeroConfig } from "./useHeroConfig";
+import {
+  COMMAND_PILLAR_COLORS,
+  type ActivePillar,
+} from "./config";
 import styles from "./HeroEngine.module.css";
 
 const WaterCanvas = lazy(() => import("./WaterCanvas"));
@@ -21,6 +25,7 @@ type HeroEngineProps = {
   children: ReactNode;
   ariaLabel: string;
   autoRotate?: boolean;
+  activePillar?: ActivePillar;
 };
 
 type HeroStyle = CSSProperties & {
@@ -29,6 +34,8 @@ type HeroStyle = CSSProperties & {
   "--hero-secondary": string;
   "--hero-surface": string;
   "--hero-headline-delay": string;
+  "--hero-focus-color": string;
+  "--hero-focus-strength": string;
 };
 
 class CanvasBoundary extends Component<{
@@ -51,7 +58,13 @@ class CanvasBoundary extends Component<{
   }
 }
 
-export default function HeroEngine({ siteSlug, children, ariaLabel, autoRotate = false }: HeroEngineProps) {
+export default function HeroEngine({
+  siteSlug,
+  children,
+  ariaLabel,
+  autoRotate = false,
+  activePillar = "none",
+}: HeroEngineProps) {
   const { config, loading: configLoading, source, version } = useHeroConfig(siteSlug);
   const capability = useDeviceCapability();
   const [canvasReady, setCanvasReady] = useState(false);
@@ -71,12 +84,22 @@ export default function HeroEngine({ siteSlug, children, ariaLabel, autoRotate =
     && !degraded
     && config.isActive;
   const ready = capability.checked && (!shouldRender || canvasReady);
+  const focusColor = activePillar === "none"
+    ? config.colorPrimary
+    : COMMAND_PILLAR_COLORS[activePillar];
+  const focusStrength = activePillar === "none"
+    ? "0"
+    : activePillar === "whole"
+      ? "0.18"
+      : "1";
   const heroStyle: HeroStyle = {
     "--hero-base": config.colorBase,
     "--hero-primary": config.colorPrimary,
     "--hero-secondary": config.colorSecondary ?? config.colorBase,
     "--hero-surface": config.colorSurface,
     "--hero-headline-delay": `${config.headlineDelayMs}ms`,
+    "--hero-focus-color": focusColor,
+    "--hero-focus-strength": focusStrength,
     backgroundColor: config.colorBase,
   };
 
@@ -87,6 +110,7 @@ export default function HeroEngine({ siteSlug, children, ariaLabel, autoRotate =
       aria-label={ariaLabel}
       data-config-source={source}
       data-config-version={version}
+      data-active-pillar={activePillar}
     >
       <div className={`${styles.stage} ${ready ? styles.ready : ""}`} aria-hidden="true">
         <div className={styles.fallback} />
@@ -99,6 +123,7 @@ export default function HeroEngine({ siteSlug, children, ariaLabel, autoRotate =
                   pixelRatio={requestedPixelRatio}
                   tier={capability.tier}
                   autoRotate={autoRotate}
+                  activePillar={activePillar}
                   onReady={onCanvasReady}
                 />
               </div>

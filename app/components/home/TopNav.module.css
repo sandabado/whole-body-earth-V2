@@ -1,0 +1,129 @@
+.nav {
+  position: fixed;
+  z-index: 180;
+  top: max(1rem, env(safe-area-inset-top));
+  left: 50%;
+  max-width: calc(100vw - 1rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+  transform: translateX(-50%);
+}
+
+.nav::-webkit-scrollbar { display: none; }
+
+.rail {
+  display: grid;
+  grid-template-columns: repeat(6, 3rem);
+  align-items: center;
+  width: max-content;
+  margin: 0;
+  padding: .25rem;
+  border: 1px solid rgba(245, 245, 245, .075);
+  border-radius: 999px;
+  background: rgba(5, 5, 5, .38);
+  box-shadow: 0 12px 46px rgba(0, 0, 0, .22);
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  list-style: none;
+}
+
+.rail li { display: block; }
+
+.command {
+  --command-color: #888;
+  position: relative;
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  outline: 0;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.command::before {
+  position: absolute;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  transform: scale(.72);
+  transition:
+    border-color 300ms cubic-bezier(.25, .46, .45, .94),
+    opacity 300ms cubic-bezier(.25, .46, .45, .94),
+    transform 300ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.command > span {
+  display: block;
+  font: 400 1.5rem/1 "Times New Roman", "Noto Sans Symbols 2", serif;
+  transform-origin: center;
+  transition:
+    color 300ms cubic-bezier(.25, .46, .45, .94),
+    filter 300ms cubic-bezier(.25, .46, .45, .94),
+    opacity 300ms cubic-bezier(.25, .46, .45, .94),
+    transform 300ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.command:hover > span,
+.command:focus-visible > span,
+.command[data-active="true"] > span {
+  color: var(--command-color);
+  filter: drop-shadow(0 0 12px var(--command-color));
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.command:hover::before,
+.command:focus-visible::before,
+.command[data-active="true"]::before {
+  border-color: color-mix(in srgb, var(--command-color) 32%, transparent);
+  opacity: 1;
+  transform: scale(1);
+}
+
+.command:focus-visible {
+  outline: 1px solid rgba(245, 245, 245, .78);
+  outline-offset: 2px;
+}
+
+.record {
+  color: #ff3366;
+}
+
+.record > span {
+  color: #ff3366;
+  filter: drop-shadow(0 0 7px rgba(255, 51, 102, .62));
+  animation: recBlink 1.6s step-end infinite;
+}
+
+.record:hover > span,
+.record:focus-visible > span,
+.record[data-active="true"] > span {
+  animation: none;
+  opacity: 1;
+}
+
+@keyframes recBlink {
+  0%, 75% { opacity: 1; }
+  76%, 100% { opacity: .2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .command::before,
+  .command > span {
+    transition-duration: .01ms;
+  }
+
+  .record > span {
+    animation: none;
+    opacity: 1;
+  }
+}
