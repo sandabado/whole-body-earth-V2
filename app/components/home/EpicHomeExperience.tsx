@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { WholeBodyFooter } from "../WholeBodyFooter";
 import HeroEngine from "../HeroEngine/HeroEngine";
+import { ElementZones } from "./ElementZones";
 
 const activity = [
   { symbol: "🜂", message: "Presence Circle opened twelve seats for the August gathering.", time: "2m", tone: "presence", live: true },
@@ -113,6 +114,8 @@ export function EpicHomeExperience() {
             <Link href="#reading">Take the Reading <span aria-hidden="true">→</span></Link>
           </div>
         </HeroEngine>
+
+        <ElementZones />
 
         <section className="epic-home-section epic-home-activity" data-divider="✦" aria-labelledby="activity-title">
           <div className="epic-home-inner" data-home-reveal>
