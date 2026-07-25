@@ -107,12 +107,13 @@ export function EpicHomeExperience() {
       <main>
         <HeroEngine autoRotate siteSlug="studios" ariaLabel="Whole Body — five elements moving as one living system">
           <div className="epic-home-vignette" aria-hidden="true" />
-          <div className="epic-home-grain" aria-hidden="true" />
           <div className="epic-home-hero-copy">
-            <HermeticCrest className="epic-home-key" size={380} />
-            <h1 id="epic-home-title">Whole Body</h1>
-            <p>Five elements. One body. Living now.</p>
-            <Link href="#reading">Take the Reading <span aria-hidden="true">→</span></Link>
+            <div className="epic-home-hero-content">
+              <h1 id="epic-home-title">WHOLE BODY</h1>
+              <p>Five elements. One body. Living now.</p>
+              <Link href="#reading">Take the Reading <span aria-hidden="true">→</span></Link>
+            </div>
+            <HermeticCrest className="epic-home-key" size={720} />
           </div>
         </HeroEngine>
 

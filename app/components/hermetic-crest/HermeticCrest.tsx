@@ -31,17 +31,24 @@ type CrestStyle = CSSProperties & {
   "--mandala-speed": string;
   "--field-speed": string;
   "--node-speed": string;
-  "--tilt-x": string;
-  "--tilt-y": string;
+  "--active-color": string;
+};
+
+type PointerSample = {
+  target: HTMLButtonElement;
+  horizontal: number;
+  vertical: number;
 };
 
 const ELEMENTS = [
-  { id: "air", label: "AIR", symbol: "🜁", x: 250, y: 103, color: "#c9a227" },
-  { id: "fire", label: "FIRE", symbol: "🜂", x: 103, y: 250, color: "#e8542a" },
-  { id: "water", label: "WATER", symbol: "🜄", x: 397, y: 250, color: "#2ba8a0" },
-  { id: "earth", label: "EARTH", symbol: "🜃", x: 250, y: 397, color: "#84a66e" },
-  { id: "ether", label: "ETHER", symbol: "⊙", x: 250, y: 250, color: "#8b6fd6" },
+  { id: "air", label: "AIR", pillar: "PRESS", symbol: "🜁", x: 250, y: 103, color: "#A8D8EA" },
+  { id: "fire", label: "FIRE", pillar: "PRESENCE", symbol: "🜂", x: 103, y: 250, color: "#FF6B35" },
+  { id: "water", label: "WATER", pillar: "STUDIOS", symbol: "🜄", x: 397, y: 250, color: "#2E86AB" },
+  { id: "earth", label: "EARTH", pillar: "FOUNDATION", symbol: "🜃", x: 250, y: 397, color: "#8B4513" },
+  { id: "ether", label: "ETHER", pillar: "GUARDIAN", symbol: "⊙", x: 250, y: 250, color: "#6D4AFF" },
 ] as const;
+
+type ElementId = (typeof ELEMENTS)[number]["id"];
 
 const DODECAGON = Array.from({ length: 12 }, (_, index) => {
   const angle = (index * Math.PI * 2) / 12 - Math.PI / 2;
@@ -53,8 +60,8 @@ const INNER_DODECAGON = Array.from({ length: 12 }, (_, index) => {
   return `${250 + Math.cos(angle) * 119},${250 + Math.sin(angle) * 119}`;
 }).join(" ");
 
-const PENTAGON = Array.from({ length: 5 }, (_, index) => {
-  const angle = (index * Math.PI * 2) / 5 - Math.PI / 2;
+const GUARDIAN_DODECAGON = Array.from({ length: 12 }, (_, index) => {
+  const angle = (index * Math.PI * 2) / 12 - Math.PI / 2;
   return `${250 + Math.cos(angle) * 73},${250 + Math.sin(angle) * 73}`;
 }).join(" ");
 
@@ -66,21 +73,25 @@ export default function HermeticCrest({
   onUnlock,
 }: HermeticCrestProps) {
   const [phase, setPhase] = useState<CrestPhase>("locked");
+  const [hoveredElement, setHoveredElement] = useState<ElementId | null>(null);
   const [entered, setEntered] = useState(false);
   const [running, setRunning] = useState(true);
   const crestRef = useRef<HTMLButtonElement>(null);
   const timerRef = useRef<number | null>(null);
+  const pointerFrameRef = useRef<number | null>(null);
+  const pointerBoundsRef = useRef<DOMRect | null>(null);
+  const pointerSampleRef = useRef<PointerSample | null>(null);
   const instanceId = useId().replaceAll(":", "");
   const metalId = `${instanceId}-metal`;
   const patinaId = `${instanceId}-patina`;
   const glowId = `${instanceId}-glow`;
-  const textureId = `${instanceId}-texture`;
   const mottoPathId = `${instanceId}-motto`;
   const {
     outerSpeed = 150,
     mandalaSpeed = 110,
     fieldPulseSpeed = 6,
   } = layerControls;
+  const activeElement = ELEMENTS.find((element) => element.id === hoveredElement);
   const crestStyle: CrestStyle = {
     "--crest-size": `${size}px`,
     "--outer-speed": `${outerSpeed}s`,
@@ -88,14 +99,14 @@ export default function HermeticCrest({
     "--mandala-speed": `${mandalaSpeed}s`,
     "--field-speed": `${fieldPulseSpeed}s`,
     "--node-speed": `${fieldPulseSpeed * 3}s`,
-    "--tilt-x": "0deg",
-    "--tilt-y": "0deg",
+    "--active-color": activeElement?.color ?? "#6D4AFF",
   };
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => setEntered(true));
     return () => {
       window.cancelAnimationFrame(frame);
+      if (pointerFrameRef.current !== null) window.cancelAnimationFrame(pointerFrameRef.current);
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
     };
   }, []);
@@ -130,21 +141,55 @@ export default function HermeticCrest({
     }, 2_650);
   };
 
+  const enter = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!animate || event.pointerType === "touch") return;
+    pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
+    move(event);
+  };
+
   const move = (event: PointerEvent<HTMLButtonElement>) => {
     if (!animate || event.pointerType === "touch") return;
-    const bounds = event.currentTarget.getBoundingClientRect();
+    const bounds = pointerBoundsRef.current ?? event.currentTarget.getBoundingClientRect();
     const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
     const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
-    event.currentTarget.style.setProperty("--tilt-x", `${(-vertical * 3).toFixed(2)}deg`);
-    event.currentTarget.style.setProperty("--tilt-y", `${(horizontal * 3).toFixed(2)}deg`);
+    pointerSampleRef.current = { target: event.currentTarget, horizontal, vertical };
+    if (pointerFrameRef.current !== null) return;
+    pointerFrameRef.current = window.requestAnimationFrame(() => {
+      const sample = pointerSampleRef.current;
+      pointerFrameRef.current = null;
+      if (!sample) return;
+      const nextElement: ElementId = Math.hypot(sample.horizontal, sample.vertical) < .16
+        ? "ether"
+        : Math.abs(sample.horizontal) > Math.abs(sample.vertical)
+          ? sample.horizontal > 0 ? "water" : "fire"
+          : sample.vertical > 0 ? "earth" : "air";
+      setHoveredElement((current) => current === nextElement ? current : nextElement);
+      sample.target.style.setProperty("--tilt-x", `${(-sample.vertical * 4.5).toFixed(2)}deg`);
+      sample.target.style.setProperty("--tilt-y", `${(sample.horizontal * 4.5).toFixed(2)}deg`);
+      sample.target.style.setProperty("--pointer-x", `${(sample.horizontal * 10).toFixed(2)}px`);
+      sample.target.style.setProperty("--pointer-y", `${(sample.vertical * 10).toFixed(2)}px`);
+    });
   };
 
   const reset = (event: PointerEvent<HTMLButtonElement>) => {
+    if (pointerFrameRef.current !== null) window.cancelAnimationFrame(pointerFrameRef.current);
+    pointerFrameRef.current = null;
+    pointerBoundsRef.current = null;
+    pointerSampleRef.current = null;
+    setHoveredElement(null);
     event.currentTarget.style.setProperty("--tilt-x", "0deg");
     event.currentTarget.style.setProperty("--tilt-y", "0deg");
+    event.currentTarget.style.setProperty("--pointer-x", "0px");
+    event.currentTarget.style.setProperty("--pointer-y", "0px");
   };
 
-  const status = phase === "open" ? "Field open" : phase === "turning" ? "Key turning" : "Turn the key";
+  const status = phase === "turning"
+    ? "Unlocking the five fields"
+    : activeElement
+      ? `${activeElement.label} / ${activeElement.pillar}`
+      : phase === "open"
+        ? "Field open / hover a house"
+        : "Turn the ancient key";
 
   return (
     <button
@@ -153,11 +198,13 @@ export default function HermeticCrest({
       className={`${styles.crest} ${entered ? styles.entered : ""} ${className ?? ""}`}
       style={crestStyle}
       data-phase={phase}
+      data-active-element={hoveredElement ?? "none"}
       data-animate={animate ? "true" : "false"}
       data-running={animate && running ? "true" : "false"}
       aria-label={phase === "open" ? "Close the Whole Body field" : "Turn the ancient key and open the Whole Body field"}
       aria-pressed={phase === "open"}
       onClick={turnKey}
+      onPointerEnter={enter}
       onPointerMove={move}
       onPointerLeave={reset}
     >
@@ -186,21 +233,14 @@ export default function HermeticCrest({
               <stop offset=".35" stopColor="#6d4aff" stopOpacity=".38" />
               <stop offset="1" stopColor="#6d4aff" stopOpacity="0" />
             </radialGradient>
-            <filter id={textureId} x="-30%" y="-30%" width="160%" height="160%">
-              <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="17" result="noise" />
-              <feColorMatrix in="noise" type="matrix" values=".7 0 0 0 .1  0 .52 0 0 .08  0 0 .34 0 .03  0 0 0 .24 0" result="grain" />
-              <feBlend in="SourceGraphic" in2="grain" mode="soft-light" />
-            </filter>
             <path id={mottoPathId} d="M 110 388 Q 250 472 390 388" fill="none" />
           </defs>
 
           <g className={styles.instrument}>
             <circle className={styles.fieldGlow} cx="250" cy="250" r="190" fill={`url(#${glowId})`} />
 
-            <g className={styles.outerMechanism} filter={`url(#${textureId})`}>
+            <g className={styles.outerMechanism}>
               <path className={styles.serpentBody} d="M 218 26 C 107 42 24 135 24 250 C 24 375 125 476 250 476 C 375 476 476 375 476 250 C 476 129 381 30 261 24" fill="none" stroke={`url(#${metalId})`} strokeWidth="8" strokeLinecap="round" />
-              <path className={styles.serpentHead} d="M 215 25 L 239 14 L 232 34 L 244 48 L 219 43 L 203 51 L 207 34 Z" fill={`url(#${metalId})`} stroke="#4a3d23" strokeWidth="1" />
-              <circle cx="225" cy="29" r="2.4" fill="#8b6fd6" />
               <circle cx="250" cy="250" r="214" fill="none" stroke={`url(#${patinaId})`} strokeWidth="1" opacity=".5" />
             </g>
 
@@ -230,11 +270,11 @@ export default function HermeticCrest({
 
             <g className={styles.quincunxGeometry}>
               <polygon points="250,103 397,250 250,397 103,250" fill="none" stroke="#ededed" strokeWidth=".7" opacity=".2" />
-              <line x1="250" y1="250" x2="250" y2="103" />
-              <line x1="250" y1="250" x2="103" y2="250" />
-              <line x1="250" y1="250" x2="397" y2="250" />
-              <line x1="250" y1="250" x2="250" y2="397" />
-              <polygon points={PENTAGON} fill="none" stroke="#8b6fd6" strokeWidth=".8" opacity=".28" />
+              <line className={styles.currentLine} x1="250" y1="250" x2="250" y2="103" style={{ "--current-color": "#A8D8EA" } as CSSProperties} />
+              <line className={styles.currentLine} x1="250" y1="250" x2="103" y2="250" style={{ "--current-color": "#FF6B35" } as CSSProperties} />
+              <line className={styles.currentLine} x1="250" y1="250" x2="397" y2="250" style={{ "--current-color": "#2E86AB" } as CSSProperties} />
+              <line className={styles.currentLine} x1="250" y1="250" x2="250" y2="397" style={{ "--current-color": "#8B4513" } as CSSProperties} />
+              <polygon points={GUARDIAN_DODECAGON} fill="none" stroke="#6D4AFF" strokeWidth=".8" opacity=".34" />
             </g>
 
             <g className={styles.elementNodes}>
@@ -242,6 +282,7 @@ export default function HermeticCrest({
                 <g
                   key={element.id}
                   className={`${styles.elementNode} ${element.id === "ether" ? styles.observerNode : ""}`}
+                  data-active={hoveredElement === element.id ? "true" : "false"}
                   transform={`translate(${element.x} ${element.y})`}
                   style={{
                     "--node-color": element.color,
@@ -258,7 +299,7 @@ export default function HermeticCrest({
             </g>
 
             <g className={styles.lockMechanism}>
-              <circle cx="250" cy="250" r="60" fill="#070708" stroke={`url(#${metalId})`} strokeWidth="5" filter={`url(#${textureId})`} />
+              <circle cx="250" cy="250" r="60" fill="#070708" stroke={`url(#${metalId})`} strokeWidth="5" />
               <circle cx="250" cy="250" r="51" fill="none" stroke="#6f5d32" strokeWidth="1" strokeDasharray="2 5" />
               {Array.from({ length: 5 }, (_, index) => (
                 <g key={index} transform={`rotate(${index * 72} 250 250)`}>
@@ -282,11 +323,14 @@ export default function HermeticCrest({
               <circle className={styles.observerCore} cx="250" cy="250" r="13" fill="#6d4aff" />
             </g>
 
-            <g className={styles.keyAssembly} filter={`url(#${textureId})`}>
-              <circle cx="250" cy="250" r="29" fill="none" stroke={`url(#${metalId})`} strokeWidth="9" />
-              <circle cx="250" cy="250" r="12" fill="#050505" stroke="#8b6fd6" strokeWidth="1" />
-              <path d="M244 278 L256 278 L256 337 L273 337 L273 327 L286 327 L286 351 L264 351 L264 362 L244 362 Z" fill={`url(#${metalId})`} stroke="#4d4025" strokeWidth="1" />
-              <path d="M250 286 L250 350" stroke="#f0d774" strokeWidth="1" opacity=".48" />
+            <g className={styles.keyFollower}>
+              <g className={styles.keyAssembly}>
+                <circle className={styles.keyCurrent} cx="250" cy="250" r="42" />
+                <circle cx="250" cy="250" r="34" fill="none" stroke={`url(#${metalId})`} strokeWidth="11" />
+                <circle cx="250" cy="250" r="15" fill="#050505" stroke="var(--active-color)" strokeWidth="1.4" />
+                <path d="M243 283 L257 283 L257 346 L275 346 L275 334 L292 334 L292 360 L276 360 L276 374 L264 374 L264 389 L243 389 Z" fill={`url(#${metalId})`} stroke="#4d4025" strokeWidth="1.2" />
+                <path d="M250 289 L250 376" stroke="#f6dd78" strokeWidth="1.4" opacity=".62" />
+              </g>
             </g>
 
             <g className={styles.inscriptions}>
