@@ -26,6 +26,8 @@ test("ships the fullscreen Whole Body Earth command deck", async () => {
   assert.doesNotMatch(home, /WholeBodyFooter|ElementZones|HomeContinuum/);
   for (const symbol of ["🜂", "🜁", "🜄", "🜃", "⊙", "⏺"])
     assert.match(nav, new RegExp(symbol));
+  assert.match(nav, /styles\.label/);
+  assert.match(nav, /navLabel: "Foundation"/);
   assert.match(shelf, /DISMISS_THRESHOLD_PX = 100/);
   assert.doesNotMatch(page + home + layout + packageJson, /Your site is taking shape|codex-preview|react-loading-skeleton/i);
 });

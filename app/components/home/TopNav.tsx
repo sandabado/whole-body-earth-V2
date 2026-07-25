@@ -14,15 +14,16 @@ type TopNavProps = {
 const commands: ReadonlyArray<{
   id: CommandPillar;
   label: string;
+  navLabel: string;
   symbol: string;
   color: string;
 }> = [
-  { id: "presence", label: "Presence", symbol: "🜂", color: "#FF6B35" },
-  { id: "press", label: "Press", symbol: "🜁", color: "#A8D8EA" },
-  { id: "studios", label: "Studios", symbol: "🜄", color: "#2E86AB" },
-  { id: "foundation", label: "Foundation", symbol: "🜃", color: "#8B6F47" },
-  { id: "guardian", label: "Guardian", symbol: "⊙", color: "#6D4AFF" },
-  { id: "whole", label: "Whole — live activity and calendar", symbol: "⏺︎", color: "#FF3366" },
+  { id: "presence", label: "Presence", navLabel: "Presence", symbol: "🜂", color: "#FF6B35" },
+  { id: "press", label: "Press", navLabel: "Press", symbol: "🜁", color: "#A8D8EA" },
+  { id: "studios", label: "Studios", navLabel: "Studios", symbol: "🜄", color: "#2E86AB" },
+  { id: "foundation", label: "Foundation", navLabel: "Foundation", symbol: "🜃", color: "#8B6F47" },
+  { id: "guardian", label: "Guardian", navLabel: "Guardian", symbol: "⊙", color: "#6D4AFF" },
+  { id: "whole", label: "Whole — live activity and calendar", navLabel: "Whole", symbol: "⏺︎", color: "#FF3366" },
 ];
 
 export function TopNav({ activePillar, onSelect }: TopNavProps) {
@@ -45,7 +46,8 @@ export function TopNav({ activePillar, onSelect }: TopNavProps) {
                 aria-controls="whole-body-command-shelf"
                 onClick={(event) => onSelect(command.id, event.currentTarget)}
               >
-                <span aria-hidden="true">{command.symbol}</span>
+                <span className={styles.symbol} aria-hidden="true">{command.symbol}</span>
+                <span className={styles.label}>{command.navLabel}</span>
               </button>
             </li>
           );
