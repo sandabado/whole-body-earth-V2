@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ContactForm } from "../components/ContactForm";
 import { Reveal } from "../components/Reveal";
 
@@ -10,7 +11,7 @@ const paths = [
 export default function Page() {
   return <div className="page page-contact">
     <header className="cinematic-hero contact-hero">
-      <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?w=1920&q=88" alt="Open desert road in warm evening light" />
+      <Image src="https://images.unsplash.com/photo-1500534623283-312aade485b7?w=1920&q=88" alt="Open desert road in warm evening light" fill sizes="100vw" priority />
       <div className="cinematic-shade" />
       <div className="cinematic-copy"><p className="eyebrow">CONTACT / A HUMAN ANSWERS</p><h1>Speak plainly.<br />We listen.</h1><p>No ticket maze. No sales sequence. Your note reaches the people holding the room.</p></div>
     </header>

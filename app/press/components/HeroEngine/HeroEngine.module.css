@@ -143,5 +143,5 @@
   .lightVault,
   .loading::before { animation: none; }
   .canvas { display: none; }
-  .fallback { opacity: 1 !important; transition: none; }
+  .stage .fallback { opacity: 1; transition: none; }
 }

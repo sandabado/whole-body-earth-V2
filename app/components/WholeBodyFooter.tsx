@@ -2,10 +2,10 @@ import Link from "next/link";
 import styles from "./WholeBodyFooter.module.css";
 
 const pillars = [
-  { id: "presence", name: "Presence", symbol: "🜂", href: "/presence" },
-  { id: "press", name: "Press", symbol: "🜁", href: "/press" },
-  { id: "studios", name: "Studios", symbol: "🜄", href: "/studios" },
-  { id: "foundation", name: "Foundation", symbol: "🜃", href: "/foundation" },
+  { id: "presence", name: "Presence", symbol: "🜂︎", href: "/presence" },
+  { id: "press", name: "Press", symbol: "🜁︎", href: "/press" },
+  { id: "studios", name: "Studios", symbol: "🜄︎", href: "/studios" },
+  { id: "foundation", name: "Foundation", symbol: "🜃︎", href: "/foundation" },
   { id: "guardian", name: "Guardian", symbol: "⊙", href: "/guardian" },
 ] as const;
 

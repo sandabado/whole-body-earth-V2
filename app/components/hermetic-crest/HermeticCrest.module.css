@@ -7,9 +7,7 @@
   --node-speed: 18s;
   --tilt-x: 0deg;
   --tilt-y: 0deg;
-  --pointer-x: 0px;
-  --pointer-y: 0px;
-  --active-color: #6d4aff;
+  --active-color: #d4af37;
   position: relative;
   display: grid;
   width: min(var(--crest-size), 100%);
@@ -47,10 +45,7 @@
 }
 
 .crest::after {
-  width: 88%;
-  border: 1px solid rgba(201, 162, 39, .08);
-  box-shadow: 0 0 54px rgba(109, 74, 255, .08), inset 0 0 45px rgba(5, 5, 5, .68);
-  opacity: .45;
+  display: none;
 }
 
 .crest:not([data-active-element="none"])::before {
@@ -104,6 +99,13 @@
   right: -2%;
   color: rgba(139, 111, 214, .58);
   writing-mode: vertical-rl;
+}
+
+.interfaceLabel,
+.coordinate,
+.inscriptions,
+.calibrationRing {
+  display: none;
 }
 
 .status {
@@ -167,6 +169,75 @@
   transform: translate(-50%, -50%) scale(1.08);
 }
 
+.controlLabel {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  width: max-content;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--control-color) 34%, rgba(255, 255, 255, .16));
+  border-radius: 999px;
+  background: rgba(2, 3, 8, .88);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, .92),
+    0 0 3px rgba(0, 0, 0, .98);
+  color: #fff;
+  font: 600 13px/1 var(--font-body), Inter, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 8px rgba(0, 0, 0, .9),
+    0 0 4px rgba(0, 0, 0, .9);
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: none;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    color 200ms ease,
+    transform 200ms ease;
+}
+
+.nodeControl[data-element="air"] .controlLabel {
+  bottom: calc(100% + .35rem);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nodeControl[data-element="fire"] .controlLabel {
+  top: 50%;
+  right: calc(100% + .45rem);
+  transform: translateY(-50%);
+}
+
+.nodeControl[data-element="water"] .controlLabel {
+  top: 50%;
+  left: calc(100% + .45rem);
+  transform: translateY(-50%);
+}
+
+.nodeControl[data-element="earth"] .controlLabel {
+  top: calc(100% + .35rem);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nodeControl[data-element="ether"] .controlLabel {
+  top: calc(50% + 2.6rem);
+  left: calc(50% + 2.7rem);
+}
+
+.nodeControl:hover .controlLabel,
+.nodeControl:focus-visible .controlLabel,
+.nodeControl[data-active="true"] .controlLabel {
+  border-color: color-mix(in srgb, var(--control-color) 48%, rgba(255, 255, 255, .18));
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, .92),
+    0 0 16px color-mix(in srgb, var(--control-color) 20%, transparent);
+  color: var(--control-color);
+}
+
 .instrument {
   opacity: 0;
   transform: scale(.92) rotate(-2deg);
@@ -191,6 +262,16 @@
 .mandala {
   transform-box: view-box;
   transform-origin: 250px 250px;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--active-color) 24%, transparent));
+  transition: filter 450ms ease;
+}
+
+.outerMechanism {
+  display: none;
+}
+
+.mandala {
+  display: none;
 }
 
 .entered[data-animate="true"][data-running="true"] .outerMechanism {
@@ -214,7 +295,7 @@
 .entered .serpentBody { stroke-dashoffset: 0; }
 
 .quincunxGeometry line {
-  stroke: rgba(237, 237, 237, .24);
+  stroke: rgba(237, 237, 237, .09);
   stroke-width: .7;
   stroke-dasharray: 3 7;
   transition: stroke 450ms ease, opacity 450ms ease;
@@ -243,7 +324,7 @@
 }
 
 .elementNode > circle:first-child {
-  fill: rgba(5, 5, 5, .82);
+  fill: rgba(3, 5, 10, .74);
   stroke: var(--node-color);
   stroke-width: 1;
   opacity: .72;
@@ -266,14 +347,13 @@
 
 .elementNode text {
   fill: var(--node-color);
-  font: 400 19px/1 "Times New Roman", "Noto Sans Symbols 2", serif;
+  font: 400 19px/1 "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", serif;
+  font-variant-emoji: text;
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--node-color) 32%, transparent));
 }
 
 .elementNode .nodeLabel {
-  font: 500 6px/1 var(--font-data), "JetBrains Mono", monospace;
-  letter-spacing: 1.4px;
-  opacity: .62;
+  display: none;
 }
 
 .observerNode text {
@@ -281,62 +361,9 @@
 }
 
 .observerNode > circle:first-child {
-  fill: rgba(11, 8, 17, .9);
-  opacity: .94;
-}
-
-.lockMechanism,
-.keyFollower,
-.keyAssembly,
-.aperture {
-  transform-box: view-box;
-  transform-origin: 250px 250px;
-}
-
-.keyFollower {
-  transform: translate(var(--pointer-x), var(--pointer-y)) scale(1.06);
-  transition: transform 260ms cubic-bezier(.2, .8, .2, 1);
-}
-
-.lockPin {
-  --pin-delay: 420ms;
-  opacity: .85;
-  transform-box: fill-box;
-  transform-origin: center top;
-  transition: opacity 360ms ease var(--pin-delay), transform 620ms cubic-bezier(.2, .8, .2, 1) var(--pin-delay);
-}
-
-.aperture {
-  transition: transform 1.05s cubic-bezier(.2, .8, .2, 1);
-}
-
-.observerCore {
-  filter: drop-shadow(0 0 8px #6d4aff);
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: opacity 450ms ease, transform 650ms cubic-bezier(.2, .8, .2, 1);
-}
-
-.entered[data-animate="true"][data-running="true"] .observerCore {
-  animation: observerBreath var(--field-speed) ease-in-out infinite;
-}
-
-.keyAssembly {
-  transition: transform 900ms cubic-bezier(.2, .8, .2, 1);
-}
-
-.keyCurrent {
-  fill: none;
-  stroke: var(--active-color);
-  stroke-width: 1.4;
-  opacity: .15;
-  transition: opacity 300ms ease, stroke 300ms ease, stroke-width 300ms ease;
-}
-
-.crest:not([data-active-element="none"]) .keyCurrent {
-  opacity: .9;
-  stroke-width: 2.2;
-  filter: drop-shadow(0 0 5px var(--active-color));
+  fill: color-mix(in srgb, var(--node-color) 18%, rgba(5, 5, 5, .86));
+  stroke-width: 1.5;
+  opacity: 1;
 }
 
 .inscriptions text {
@@ -356,21 +383,6 @@
   box-shadow: 0 0 0 4px rgba(5, 5, 5, .92), 0 0 0 5px rgba(201, 162, 39, .45), 0 0 54px rgba(109, 74, 255, .16);
 }
 
-.crest[data-phase="turning"] .keyAssembly {
-  animation: keyTurn 2.65s cubic-bezier(.32, .02, .16, 1) both;
-}
-
-.crest[data-phase="turning"] .aperture,
-.crest[data-phase="open"] .aperture {
-  transform: rotate(18deg) scale(1.08);
-}
-
-.crest[data-phase="turning"] .lockPin,
-.crest[data-phase="open"] .lockPin {
-  opacity: .16;
-  transform: scaleY(.14);
-}
-
 .crest[data-phase="turning"] .elementNode {
   opacity: 1;
   transition-delay: var(--node-unlock-delay);
@@ -379,16 +391,6 @@
 .crest[data-phase="turning"] .elementNode > circle:first-child {
   filter: drop-shadow(0 0 8px var(--node-color));
   transition-delay: var(--node-unlock-delay);
-}
-
-.crest[data-phase="turning"] .observerCore,
-.crest[data-phase="open"] .observerCore {
-  opacity: .32;
-  transform: scale(.5);
-}
-
-.crest[data-phase="open"] .keyAssembly {
-  transform: rotate(90deg);
 }
 
 .crest[data-phase="open"] .fieldGlow {
@@ -413,15 +415,14 @@
 }
 
 .crest[data-phase="open"] .status {
-  color: #9b7fff;
+  color: var(--active-color);
 }
 
 .crest[data-phase="open"] .status i {
-  background: #8b6fd6;
-  box-shadow: 0 0 12px #6d4aff;
+  background: var(--active-color);
+  box-shadow: 0 0 12px var(--active-color);
 }
 
-.crest[data-running="false"] .keyAssembly,
 .crest[data-running="false"] .quincunxGeometry line,
 .crest[data-running="false"] .status i {
   animation-play-state: paused;
@@ -431,21 +432,32 @@
 @keyframes calibrationRotation { to { transform: rotate(360deg); } }
 @keyframes mandalaRotation { to { transform: rotate(360deg); } }
 @keyframes nodeOrbit { to { transform: rotate(360deg); } }
-@keyframes observerBreath { 50% { opacity: .62; transform: scale(.82); filter: drop-shadow(0 0 16px #6d4aff); } }
 @keyframes statusPulse { 50% { opacity: .28; transform: scale(.68); } }
 @keyframes currentFlow { to { stroke-dashoffset: -24; } }
-@keyframes keyTurn {
-  0% { transform: rotate(0); }
-  18% { transform: rotate(-5deg); }
-  68% { transform: rotate(96deg); }
-  84% { transform: rotate(85deg); }
-  100% { transform: rotate(90deg); }
-}
 
 @media (max-width: 640px) {
   .interfaceLabel,
   .coordinate { display: none; }
   .status { bottom: -.9rem; font-size: .42rem; }
+
+  .controlLabel {
+    font-size: 11px;
+  }
+
+  .nodeControl[data-element="fire"] .controlLabel {
+    right: auto;
+    left: calc(100% + .15rem);
+  }
+
+  .nodeControl[data-element="water"] .controlLabel {
+    right: calc(100% + .15rem);
+    left: auto;
+  }
+
+  .nodeControl[data-element="ether"] .controlLabel {
+    top: calc(50% + 2rem);
+    left: calc(50% + 1.7rem);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -456,10 +468,6 @@
   .fieldGlow,
   .elementNode,
   .elementNode > circle,
-  .aperture,
-  .keyFollower,
-  .keyAssembly,
-  .observerCore,
   .status i,
   .quincunxGeometry line {
     animation: none !important;

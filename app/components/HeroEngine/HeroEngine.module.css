@@ -3,8 +3,18 @@
   z-index: 0;
   inset: 0;
   overflow: hidden;
-  background: #050505;
+  background: var(--void);
   pointer-events: none;
+  transition:
+    filter 300ms cubic-bezier(.65, 0, .35, 1),
+    opacity 300ms cubic-bezier(.65, 0, .35, 1),
+    transform 600ms cubic-bezier(.65, 0, .35, 1);
+}
+
+:global(.water-hero[data-transitioning="true"]) .stage {
+  opacity: .2;
+  filter: saturate(.72) brightness(.62);
+  transform: scale(1.015);
 }
 
 .fallback,
@@ -23,6 +33,14 @@
   transform: scale(1.06);
   opacity: 1;
   transition: opacity 1.4s ease;
+}
+
+.cosmicFallback {
+  background:
+    radial-gradient(ellipse at 66% 44%, rgba(46, 26, 71, .42), transparent 34%),
+    radial-gradient(ellipse at 38% 62%, rgba(26, 58, 82, .34), transparent 42%),
+    radial-gradient(ellipse at 54% 52%, rgba(10, 26, 63, .38), transparent 58%),
+    #020308;
 }
 
 .fallback::before,
@@ -45,6 +63,31 @@
   animation-direction: alternate-reverse;
 }
 
+.cosmicFallback::before {
+  inset: 0;
+  background:
+    radial-gradient(circle at 8% 18%, rgba(255,255,255,.72) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 22% 72%, rgba(255,255,255,.42) 0 .7px, transparent 1.1px),
+    radial-gradient(circle at 38% 28%, rgba(255,255,255,.56) 0 .8px, transparent 1.2px),
+    radial-gradient(circle at 56% 82%, rgba(255,255,255,.32) 0 .65px, transparent 1px),
+    radial-gradient(circle at 73% 14%, rgba(255,255,255,.62) 0 .9px, transparent 1.3px),
+    radial-gradient(circle at 89% 61%, rgba(255,255,255,.48) 0 .75px, transparent 1.15px);
+  background-size: 173px 157px, 211px 193px, 137px 181px, 229px 167px, 191px 223px, 149px 199px;
+  filter: none;
+  opacity: .72;
+  animation: cosmicFallbackStars 300s linear infinite;
+}
+
+.cosmicFallback::after {
+  inset: -20%;
+  background:
+    radial-gradient(ellipse at 66% 42%, rgba(46, 26, 71, .28), transparent 34%),
+    radial-gradient(ellipse at 34% 63%, rgba(26, 58, 82, .24), transparent 43%);
+  filter: blur(38px);
+  opacity: .7;
+  animation: cosmicFallbackNebula 32s ease-in-out infinite alternate;
+}
+
 .canvas {
   opacity: 0;
   transform: scale(1.025);
@@ -57,8 +100,8 @@
 .depth {
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(5,5,5,.94) 0%, rgba(5,5,5,.66) 39%, rgba(5,5,5,.08) 76%),
-    linear-gradient(180deg, rgba(5,5,5,.3), transparent 30%, rgba(5,5,5,.4));
+    radial-gradient(circle at 50% 48%, transparent 34%, rgba(5,5,5,.2) 100%),
+    linear-gradient(180deg, rgba(5,5,5,.12), transparent 24%, transparent 76%, rgba(5,5,5,.2));
 }
 
 .surfaceLight {
@@ -72,6 +115,13 @@
   mix-blend-mode: screen;
   pointer-events: none;
   animation: surfaceBreathe 9s ease-in-out infinite alternate;
+}
+
+:global(.water-hero[data-background-variant="cosmic"]) .surfaceLight {
+  background:
+    radial-gradient(ellipse at center, rgba(109,74,255,.06), transparent 54%),
+    radial-gradient(ellipse at 68% 42%, rgba(46,134,171,.045), transparent 68%);
+  opacity: .72;
 }
 
 .loading {
@@ -124,11 +174,19 @@
   50% { opacity: .22; transform: scale(.7); }
 }
 
+@keyframes cosmicFallbackStars {
+  to { transform: rotate(.8deg) scale(1.008); }
+}
+
+@keyframes cosmicFallbackNebula {
+  to { transform: translate3d(-2%, 1.5%, 0) rotate(2deg) scale(1.04); }
+}
+
 @media (max-width: 760px) {
   .depth {
     background:
-      linear-gradient(0deg, rgba(5,5,5,.98) 7%, rgba(5,5,5,.68) 46%, rgba(5,5,5,.16) 88%),
-      linear-gradient(180deg, rgba(5,5,5,.38), transparent 30%);
+      radial-gradient(circle at 50% 44%, transparent 28%, rgba(5,5,5,.24) 100%),
+      linear-gradient(180deg, rgba(5,5,5,.14), transparent 24%, transparent 72%, rgba(5,5,5,.28));
   }
   .loading { right: 24px; bottom: 82px; }
   .telemetry { display: none; }
@@ -137,8 +195,13 @@
 @media (prefers-reduced-motion: reduce) {
   .fallback::before,
   .fallback::after,
+  .cosmicFallback::before,
+  .cosmicFallback::after,
   .surfaceLight,
   .loading::before { animation: none; }
   .canvas { display: none; }
-  .fallback { opacity: 1 !important; transition: none; }
+  .stage .fallback { opacity: 1; transition: none; }
+  :global(.water-hero[data-transitioning="true"]) .stage {
+    transform: none;
+  }
 }

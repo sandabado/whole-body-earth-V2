@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {notFound} from "next/navigation";
 import {practitioners} from "../../components/data";
@@ -25,7 +26,13 @@ export default async function PractitionerProfile({
 
       <section className="profile-hero profile-hero-rich" aria-labelledby="profile-name">
         <figure className="profile-photo">
-          <img src={person.image} alt={`Portrait of ${person.name}`} />
+          <Image
+            src={person.image}
+            alt={`Portrait of ${person.name}`}
+            fill
+            sizes="(max-width: 760px) 100vw, 50vw"
+            priority
+          />
           <figcaption>{person.location} · accepting beta requests</figcaption>
         </figure>
         <div className="profile-copy">
@@ -98,7 +105,13 @@ export default async function PractitionerProfile({
         <div className={`profile-gallery-grid profile-gallery-${person.gallery.length}`}>
           {person.gallery.map((image, index) => (
             <figure key={image}>
-              <img src={image} alt={`${person.name}'s practice environment, view ${index + 1}`} loading="lazy" />
+              <Image
+                src={image}
+                alt={`${person.name}'s practice environment, view ${index + 1}`}
+                width={1000}
+                height={1000}
+                sizes="(max-width: 760px) 84vw, 50vw"
+              />
             </figure>
           ))}
         </div>

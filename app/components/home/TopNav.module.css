@@ -1,10 +1,14 @@
 .nav {
   position: fixed;
-  z-index: 180;
-  top: max(1rem, env(safe-area-inset-top));
+  z-index: 100;
+  top: auto;
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
   left: 50%;
   max-width: calc(100vw - 1rem);
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: .25rem;
+  scroll-snap-type: inline proximity;
   scrollbar-width: none;
   transform: translateX(-50%);
 }
@@ -18,20 +22,24 @@
   align-items: center;
   width: max-content;
   margin: 0;
-  padding: .25rem;
-  border: 1px solid rgba(245, 245, 245, .075);
+  padding: .45rem .6rem;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
   border-radius: 999px;
-  background: rgba(5, 5, 5, .38);
-  box-shadow: 0 12px 46px rgba(0, 0, 0, .22);
+  background: color-mix(in srgb, var(--void) 78%, transparent);
+  box-shadow: 0 12px 46px color-mix(in srgb, black 22%, transparent);
   backdrop-filter: blur(14px) saturate(115%);
   -webkit-backdrop-filter: blur(14px) saturate(115%);
   list-style: none;
 }
 
-.rail li { display: block; }
+.item {
+  position: relative;
+  display: block;
+  scroll-snap-align: center;
+}
 
 .command {
-  --command-color: #888;
+  --command-color: var(--text-muted);
   position: relative;
   display: flex;
   width: auto;
@@ -45,7 +53,7 @@
   border-radius: 50%;
   outline: 0;
   background: transparent;
-  color: #888;
+  color: var(--text-muted);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -69,7 +77,8 @@
 
 .symbol {
   display: block;
-  font: 400 1.5rem/1 "Times New Roman", "Noto Sans Symbols 2", serif;
+  font: 400 1.5rem/1 "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", serif;
+  font-variant-emoji: text;
   transform-origin: center;
   transition:
     color 300ms cubic-bezier(.25, .46, .45, .94),
@@ -79,11 +88,14 @@
 }
 
 .label {
-  color: #777;
+  color: color-mix(in srgb, var(--text-primary) 72%, transparent);
   font: 500 .62rem/1 var(--font-data), "JetBrains Mono", monospace;
-  letter-spacing: .12em;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  transition: color 300ms cubic-bezier(.25, .46, .45, .94);
+  white-space: nowrap;
+  transition:
+    color 300ms cubic-bezier(.25, .46, .45, .94),
+    text-shadow 300ms cubic-bezier(.25, .46, .45, .94);
 }
 
 .command:hover .symbol,
@@ -99,6 +111,7 @@
 .command:focus-visible .label,
 .command[data-active="true"] .label {
   color: color-mix(in srgb, var(--command-color) 86%, white);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--command-color) 26%, transparent);
 }
 
 .command:hover::before,
@@ -110,35 +123,28 @@
 }
 
 .command:focus-visible {
-  outline: 1px solid rgba(245, 245, 245, .78);
+  outline: 1px solid color-mix(in srgb, var(--text-primary) 78%, transparent);
   outline-offset: 2px;
 }
 
-.record {
-  color: #ff3366;
+.globe > .symbol {
+  display: grid;
+  color: var(--text-muted);
+  filter: none;
+  place-items: center;
 }
 
-.record > .symbol {
-  color: #ff3366;
-  filter: drop-shadow(0 0 7px rgba(255, 51, 102, .62));
-  animation: recBlink 1.6s step-end infinite;
-}
-
-.record:hover > .symbol,
-.record:focus-visible > .symbol,
-.record[data-active="true"] > .symbol {
-  animation: none;
-  opacity: 1;
-}
-
-@keyframes recBlink {
-  0%, 75% { opacity: 1; }
-  76%, 100% { opacity: .2; }
+.globe:hover > .symbol,
+.globe:focus-visible > .symbol,
+.globe[data-active="true"] > .symbol {
+  color: #c0c0c0;
+  filter: drop-shadow(0 0 8px rgba(192, 192, 192, .32));
 }
 
 @media (max-width: 760px) {
   .rail {
     grid-template-columns: repeat(6, 3rem);
+    padding: .4rem .5rem;
   }
 
   .command {
@@ -169,8 +175,4 @@
     transition-duration: .01ms;
   }
 
-  .record > .symbol {
-    animation: none;
-    opacity: 1;
-  }
 }

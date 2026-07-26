@@ -5,19 +5,26 @@ import {
   COMMAND_PILLAR_COLORS,
   type ActivePillar,
 } from "../HeroEngine/config";
+import styles from "./HeroQuincunx.module.css";
 type Vector3 = Readonly<{ x: number; y: number; z: number }>;
 type Point2 = Readonly<{ x: number; y: number }>;
 type Edge = readonly [from: number, to: number];
 type Face = readonly number[];
 type RGB = readonly [red: number, green: number, blue: number];
-type QuincunxPosition = "top" | "left" | "right" | "bottom" | "center";
 type ElementPillar = Exclude<ActivePillar, "none" | "whole">;
+
+const PILLAR_TURN_SLOT: Record<ElementPillar, number> = {
+  presence: 0,
+  press: 1,
+  studios: 2,
+  foundation: 3,
+  guardian: 4,
+};
 
 interface SolidDefinition {
   name: string;
   element: string;
   pillar: ElementPillar;
-  position: QuincunxPosition;
   color: RGB;
   vertices: readonly Vector3[];
   faces: readonly Face[];
@@ -31,29 +38,11 @@ interface ProjectedVertex extends Point2 {
   depth: number;
 }
 
-interface Star {
-  x: number;
-  y: number;
-  radius: number;
-  opacity: number;
-  phase: number;
-}
-
 const PHI = (1 + Math.sqrt(5)) / 2;
 const TAU = Math.PI * 2;
 const STATIC_TIME = 9;
 const MAX_DEVICE_PIXEL_RATIO = 2;
-const CONNECTIONS: readonly Edge[] = [
-  [0, 1],
-  [1, 3],
-  [3, 2],
-  [2, 0],
-  [0, 4],
-  [1, 4],
-  [2, 4],
-  [3, 4],
-];
-
+const FOCUS_TRANSITION_SECONDS = 0.4;
 const TETRAHEDRON_VERTICES: readonly Vector3[] = [
   { x: 1, y: 1, z: 1 },
   { x: -1, y: -1, z: 1 },
@@ -342,19 +331,20 @@ const SOLID_COLORS = {
   foundation: hexToRgb(COMMAND_PILLAR_COLORS.foundation),
   guardian: hexToRgb(COMMAND_PILLAR_COLORS.guardian),
 } satisfies Record<ElementPillar, RGB>;
+const WHOLE_COLOR = hexToRgb(COMMAND_PILLAR_COLORS.whole);
+const DEFAULT_GOLD_COLOR = hexToRgb("#D4AF37");
 
-// Array order also defines the semantic quincunx layout used by CONNECTIONS:
-// top, left, right, bottom, and the witnessing center.
+// Array order follows the five-field sequence and supplies the geometry used
+// by the one-at-a-time center instrument.
 const SOLIDS: readonly SolidDefinition[] = [
   makeSolid({
     name: "Octahedron",
     element: "Air",
     pillar: "press",
-    position: "top",
     color: SOLID_COLORS.press,
     vertices: OCTAHEDRON_VERTICES,
     faces: OCTAHEDRON_FACES,
-    revealAt: 3.05,
+    revealAt: 0.35,
     rotation: { x: 0.17, y: 0.26, z: 0.06 },
     phase: 0.8,
   }),
@@ -362,11 +352,10 @@ const SOLIDS: readonly SolidDefinition[] = [
     name: "Tetrahedron",
     element: "Fire",
     pillar: "presence",
-    position: "left",
     color: SOLID_COLORS.presence,
     vertices: TETRAHEDRON_VERTICES,
     faces: TETRAHEDRON_FACES,
-    revealAt: 3.7,
+    revealAt: 0.35,
     rotation: { x: -0.21, y: 0.31, z: 0.08 },
     phase: 2.2,
   }),
@@ -374,11 +363,10 @@ const SOLIDS: readonly SolidDefinition[] = [
     name: "Icosahedron",
     element: "Water",
     pillar: "studios",
-    position: "right",
     color: SOLID_COLORS.studios,
     vertices: ICOSAHEDRON_VERTICES,
     faces: ICOSAHEDRON_FACES,
-    revealAt: 4.35,
+    revealAt: 0.35,
     rotation: { x: 0.12, y: -0.22, z: 0.05 },
     phase: 3.7,
   }),
@@ -386,11 +374,10 @@ const SOLIDS: readonly SolidDefinition[] = [
     name: "Cube",
     element: "Earth",
     pillar: "foundation",
-    position: "bottom",
     color: SOLID_COLORS.foundation,
     vertices: CUBE_VERTICES,
     faces: CUBE_FACES,
-    revealAt: 5,
+    revealAt: 0.35,
     rotation: { x: -0.13, y: 0.2, z: -0.045 },
     phase: 5.1,
   }),
@@ -398,7 +385,6 @@ const SOLIDS: readonly SolidDefinition[] = [
     name: "Dodecahedron",
     element: "Ether",
     pillar: "guardian",
-    position: "center",
     color: SOLID_COLORS.guardian,
     vertices: DODECAHEDRON_VERTICES,
     faces: dodecahedronFaces,
@@ -407,30 +393,6 @@ const SOLIDS: readonly SolidDefinition[] = [
     phase: 0,
   }),
 ];
-
-function seededRandom(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state += 0x6d2b79f5;
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4_294_967_296;
-  };
-}
-
-function makeStarfield(count: number): readonly Star[] {
-  const random = seededRandom(0x5eedc0de);
-  return Array.from({ length: count }, () => ({
-    x: random(),
-    y: random(),
-    radius: 0.35 + random() * 0.8,
-    opacity: 0.15 + random() * 0.5,
-    phase: random() * TAU,
-  }));
-}
-
-const STARFIELD = makeStarfield(112);
 
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.min(maximum, Math.max(minimum, value));
@@ -449,24 +411,24 @@ function isElementPillar(pillar: ActivePillar): pillar is ElementPillar {
   return pillar !== "none" && pillar !== "whole";
 }
 
-function focusTargets(
-  activePillar: ActivePillar,
-  motionTime: number,
-  reducedMotion: boolean,
-): number[] {
+function focusTargets(activePillar: ActivePillar): number[] {
   if (isElementPillar(activePillar)) {
-    return SOLIDS.map((solid) => solid.pillar === activePillar ? 1 : 0.15);
+    return SOLIDS.map((solid) => solid.pillar === activePillar ? 1 : 0);
   }
 
   if (activePillar === "whole") {
-    if (reducedMotion) return SOLIDS.map(() => 0.58);
-    return SOLIDS.map((_, index) => {
-      const wave = Math.sin(motionTime * 0.72 - index * (TAU / SOLIDS.length)) * 0.5 + 0.5;
-      return 0.3 + wave * wave * 0.7;
-    });
+    return SOLIDS.map((solid) => solid.pillar === "guardian" ? 1 : 0);
   }
 
-  return SOLIDS.map(() => 0.3);
+  return SOLIDS.map((solid) => solid.pillar === "guardian" ? 1 : 0);
+}
+
+function nextFullTurn(current: number, pillar: ElementPillar): number {
+  const step = TAU / 5;
+  const desired = PILLAR_TURN_SLOT[pillar] * step;
+  const normalized = ((current % TAU) + TAU) % TAU;
+  const alignment = (desired - normalized + TAU) % TAU;
+  return current + TAU + alignment;
 }
 
 function rgba([red, green, blue]: RGB, alpha: number): string {
@@ -503,32 +465,6 @@ function project(vertex: Vector3, center: Point2, radiusInPixels: number): Proje
   };
 }
 
-function nodePosition(
-  position: QuincunxPosition,
-  center: Point2,
-  orbitRadius: number,
-  elapsed: number,
-  phase: number,
-  reducedMotion: boolean,
-): Point2 {
-  const offsets: Record<QuincunxPosition, Point2> = {
-    top: { x: 0, y: -orbitRadius },
-    left: { x: -orbitRadius, y: 0 },
-    right: { x: orbitRadius, y: 0 },
-    bottom: { x: 0, y: orbitRadius },
-    center: { x: 0, y: 0 },
-  };
-  const offset = offsets[position];
-  const commonX = reducedMotion ? 0 : Math.cos(elapsed * 0.22) * 2.2;
-  const commonY = reducedMotion ? 0 : Math.sin(elapsed * 0.34) * 5;
-  const independentY = reducedMotion ? 0 : Math.sin(elapsed * 0.62 + phase) * 2.8;
-
-  return {
-    x: center.x + offset.x + commonX,
-    y: center.y + offset.y + commonY + independentY,
-  };
-}
-
 function drawGlow(
   context: CanvasRenderingContext2D,
   center: Point2,
@@ -556,6 +492,10 @@ function drawSolid(
   motionElapsed: number,
   reducedMotion: boolean,
   focusIntensity: number,
+  renderColor: RGB = solid.color,
+  rotationOverrideY: number | null = null,
+  displayScale = 1,
+  emphasized = false,
 ): void {
   const pointReveal = smoothstep(solid.revealAt, solid.revealAt + 0.32, revealElapsed);
   const geometryReveal = smoothstep(solid.revealAt + 0.25, solid.revealAt + 1.45, revealElapsed);
@@ -564,7 +504,10 @@ function drawSolid(
   const pulse = reducedMotion ? 0 : Math.sin(motionElapsed * 1.08 + solid.phase) * 0.5 + 0.5;
   const emergenceScale = 0.045 + easeOutCubic(geometryReveal) * 0.955;
   const breathingScale = reducedMotion ? 1 : 0.985 + pulse * 0.03;
-  const renderedRadius = radiusInPixels * emergenceScale * breathingScale;
+  const renderedRadius = radiusInPixels
+    * emergenceScale
+    * breathingScale
+    * displayScale;
 
   context.save();
   context.globalCompositeOperation = "screen";
@@ -572,15 +515,15 @@ function drawSolid(
     context,
     center,
     Math.max(12, radiusInPixels * (1.55 + pulse * 0.28)),
-    solid.color,
-    pointReveal * focusIntensity * (0.08 + pulse * 0.035),
+    renderColor,
+    pointReveal * focusIntensity * (0.16 + pulse * 0.07),
   );
   drawGlow(
     context,
     center,
     Math.max(2, 2.2 + geometryReveal * 2.6),
-    solid.color,
-    pointReveal * focusIntensity * (0.82 - geometryReveal * 0.34),
+    renderColor,
+    pointReveal * focusIntensity * (0.96 - geometryReveal * 0.26),
   );
   context.restore();
 
@@ -588,11 +531,13 @@ function drawSolid(
 
   const animationTime = reducedMotion ? solid.phase * 0.7 + 2.4 : motionElapsed;
   const baseTilt = solidIndex === 4 ? 0.28 : 0.18;
+  const animatedY = rotationOverrideY
+    ?? 0.42 + animationTime * solid.rotation.y + solid.phase * 0.11;
   const rotatedVertices = solid.vertices.map((vertex) =>
     rotate(
       vertex,
       baseTilt + animationTime * solid.rotation.x + solid.phase * 0.08,
-      0.42 + animationTime * solid.rotation.y + solid.phase * 0.11,
+      animatedY,
       animationTime * solid.rotation.z,
     ),
   );
@@ -608,6 +553,7 @@ function drawSolid(
     .sort((left, right) => left.depth - right.depth);
 
   context.save();
+  const solidity = emphasized ? 1.85 : 1;
   for (const { face, depth } of sortedFaces) {
     const light = clamp((depth + 1) / 2);
     context.beginPath();
@@ -618,8 +564,8 @@ function drawSolid(
     });
     context.closePath();
     context.fillStyle = rgba(
-      solid.color,
-      geometryReveal * focusIntensity * (0.025 + light * 0.105),
+      renderColor,
+      geometryReveal * focusIntensity * solidity * (0.055 + light * 0.16),
     );
     context.fill();
   }
@@ -635,78 +581,36 @@ function drawSolid(
   context.save();
   context.globalCompositeOperation = "screen";
   context.lineCap = "round";
+  context.shadowColor = rgba(renderColor, (emphasized ? 0.92 : 0.72) * focusIntensity);
+  context.shadowBlur = (emphasized ? 15 : 8) + focusIntensity * 10;
   for (const { edge, depth } of sortedEdges) {
     const from = projectedVertices[edge[0]];
     const to = projectedVertices[edge[1]];
     const light = clamp((depth + 1) / 2);
     context.strokeStyle = rgba(
-      solid.color,
-      geometryReveal * focusIntensity * (0.2 + light * 0.62),
+      renderColor,
+      geometryReveal * focusIntensity * (0.4 + light * 0.58),
     );
-    context.lineWidth = 0.55 + light * 0.75;
+    context.lineWidth = (emphasized ? 1.35 : 1.05) + light * 1.15;
     context.beginPath();
     context.moveTo(from.x, from.y);
     context.lineTo(to.x, to.y);
     context.stroke();
   }
   context.restore();
-}
 
-function drawConnections(
-  context: CanvasRenderingContext2D,
-  positions: readonly Point2[],
-  revealElapsed: number,
-  motionElapsed: number,
-  reducedMotion: boolean,
-  focusLevels: readonly number[],
-): void {
   context.save();
   context.globalCompositeOperation = "screen";
-  context.lineCap = "round";
-
-  CONNECTIONS.forEach(([fromIndex, toIndex], connectionIndex) => {
-    const from = positions[fromIndex];
-    const to = positions[toIndex];
-    const lineReveal = smoothstep(
-      4.65 + connectionIndex * 0.25,
-      5.8 + connectionIndex * 0.25,
-      revealElapsed,
+  for (const point of projectedVertices) {
+    const light = clamp((point.depth + 1) / 2);
+    context.fillStyle = rgba(
+      renderColor,
+      geometryReveal * focusIntensity * (0.62 + light * 0.34),
     );
-    const nodeReveal = Math.min(
-      smoothstep(SOLIDS[fromIndex].revealAt, SOLIDS[fromIndex].revealAt + 0.8, revealElapsed),
-      smoothstep(SOLIDS[toIndex].revealAt, SOLIDS[toIndex].revealAt + 0.8, revealElapsed),
-    );
-    const connectionFocus = (focusLevels[fromIndex] + focusLevels[toIndex]) * 0.5;
-    const alpha = lineReveal * nodeReveal * connectionFocus;
-    if (alpha <= 0.002) return;
-
-    const lineGradient = context.createLinearGradient(from.x, from.y, to.x, to.y);
-    lineGradient.addColorStop(0, rgba(SOLIDS[fromIndex].color, alpha * 0.08));
-    lineGradient.addColorStop(0.5, rgba([151, 118, 255], alpha * 0.24));
-    lineGradient.addColorStop(1, rgba(SOLIDS[toIndex].color, alpha * 0.08));
-    context.strokeStyle = lineGradient;
-    context.lineWidth = 0.8;
     context.beginPath();
-    context.moveTo(from.x, from.y);
-    context.lineTo(to.x, to.y);
-    context.stroke();
-
-    const travel = reducedMotion
-      ? (connectionIndex * 0.137 + 0.34) % 1
-      : (motionElapsed * 0.14 + connectionIndex * 0.137) % 1;
-    const pulseX = from.x + (to.x - from.x) * travel;
-    const pulseY = from.y + (to.y - from.y) * travel;
-    const endpointFade = Math.sin(travel * Math.PI);
-    const pulseAlpha = alpha * endpointFade;
-    drawGlow(
-      context,
-      { x: pulseX, y: pulseY },
-      7,
-      [151, 118, 255],
-      pulseAlpha * 0.72,
-    );
-  });
-
+    context.arc(point.x, point.y, 1.35 + light * 1.15, 0, TAU);
+    context.fill();
+  }
   context.restore();
 }
 
@@ -718,97 +622,89 @@ function drawScene(
   motionElapsed: number,
   reducedMotion: boolean,
   focusLevels: readonly number[],
+  activePillar: ActivePillar,
+  dodecaTurn: number | null,
   opaqueBackground: boolean,
 ): void {
   context.clearRect(0, 0, width, height);
 
   const center = { x: width / 2, y: height / 2 };
-  const background = context.createRadialGradient(
-    center.x,
-    center.y,
-    0,
-    center.x,
-    center.y,
-    Math.max(width, height) * 0.72,
-  );
   if (opaqueBackground) {
+    const background = context.createRadialGradient(
+      center.x,
+      center.y,
+      0,
+      center.x,
+      center.y,
+      Math.max(width, height) * 0.72,
+    );
     background.addColorStop(0, "#090811");
     background.addColorStop(0.45, "#040407");
     background.addColorStop(1, "#000000");
-  } else {
-    background.addColorStop(0, "rgba(9, 8, 17, 0.16)");
-    background.addColorStop(0.48, "rgba(4, 4, 7, 0.06)");
-    background.addColorStop(1, "rgba(0, 0, 0, 0)");
-  }
-  context.fillStyle = background;
-  context.fillRect(0, 0, width, height);
-
-  const skyReveal = smoothstep(0.5, 4.2, revealElapsed);
-  for (const star of STARFIELD) {
-    const twinkle = reducedMotion ? 0.78 : 0.68 + Math.sin(motionElapsed * 0.46 + star.phase) * 0.22;
-    const alpha = skyReveal * star.opacity * twinkle;
-    context.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-    context.beginPath();
-    context.arc(star.x * width, star.y * height, star.radius, 0, TAU);
-    context.fill();
+    context.fillStyle = background;
+    context.fillRect(0, 0, width, height);
   }
 
-  const orbitRadius = Math.min(270, Math.max(36, Math.min(width * 0.31, height * 0.255)));
-  const positions = SOLIDS.map((solid) =>
-    nodePosition(
-      solid.position,
-      center,
-      orbitRadius,
-      motionElapsed,
-      solid.phase,
-      reducedMotion,
-    ),
-  );
-
-  drawConnections(
-    context,
-    positions,
-    revealElapsed,
-    motionElapsed,
-    reducedMotion,
-    focusLevels,
+  const centerDrift = {
+    x: center.x + (reducedMotion ? 0 : Math.cos(motionElapsed * 0.22) * 1.6),
+    y: center.y + (reducedMotion ? 0 : Math.sin(motionElapsed * 0.34) * 2.4),
+  };
+  const baseRadius = Math.min(
+    116,
+    Math.max(46, Math.min(width, height) * 0.16),
   );
 
   SOLIDS.forEach((solid, index) => {
-    const baseRadius = solid.position === "center"
-      ? Math.min(82, Math.max(24, orbitRadius * 0.34))
-      : Math.min(58, Math.max(17, orbitRadius * 0.235));
+    const renderColor = activePillar === "whole"
+      ? WHOLE_COLOR
+      : activePillar === "none" && solid.pillar === "guardian"
+        ? DEFAULT_GOLD_COLOR
+        : solid.color;
     drawSolid(
       context,
       solid,
       index,
-      positions[index],
+      centerDrift,
       baseRadius,
       revealElapsed,
       motionElapsed,
       reducedMotion,
       focusLevels[index],
+      renderColor,
+      isElementPillar(activePillar) && solid.pillar === activePillar
+        ? dodecaTurn
+        : null,
+      0.82 + focusLevels[index] * 0.14,
+      isElementPillar(activePillar) && solid.pillar === activePillar,
     );
   });
 }
 
 type HeroQuincunxProps = {
   activePillar?: ActivePillar;
+  turnPillar?: ElementPillar | null;
   opaqueBackground?: boolean;
 };
 
 export function HeroQuincunx({
   activePillar = "none",
+  turnPillar = null,
   opaqueBackground = false,
 }: HeroQuincunxProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const activePillarRef = useRef<ActivePillar>(activePillar);
+  const turnPillarRef = useRef<ElementPillar | null>(turnPillar);
   const redrawRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     activePillarRef.current = activePillar;
     redrawRef.current?.();
   }, [activePillar]);
+
+  useEffect(() => {
+    turnPillarRef.current = turnPillar;
+    redrawRef.current?.();
+  }, [turnPillar]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -824,11 +720,16 @@ export function HeroQuincunx({
     let revealElapsed = reducedMotion ? STATIC_TIME : 0;
     let motionElapsed = reducedMotion ? STATIC_TIME : 0;
     let motionRate = isElementPillar(activePillarRef.current) ? 0.45 : 1;
-    let focusLevels = focusTargets(
-      activePillarRef.current,
-      motionElapsed,
-      reducedMotion,
-    );
+    let dodecaTurn: number | null = null;
+    let dodecaTarget = 0;
+    let dodecaTurnStart = 0;
+    let dodecaTurnElapsed = 0;
+    let dodecaIsTurning = false;
+    let lastTurnPillar: ElementPillar | null = null;
+    let focusLevels = focusTargets(activePillarRef.current);
+    let focusStartLevels = [...focusLevels];
+    let focusTransitionElapsed = FOCUS_TRANSITION_SECONDS;
+    let lastFocusPillar = activePillarRef.current;
     let lastFrameTime = 0;
     let animationFrame: number | null = null;
     let disposed = false;
@@ -836,19 +737,71 @@ export function HeroQuincunx({
     let lastRenderedAt = 0;
 
     const updateFocus = (delta: number, immediate = false) => {
-      const targets = focusTargets(
-        activePillarRef.current,
-        motionElapsed,
-        reducedMotion,
+      const requestedPillar = activePillarRef.current;
+      const targets = focusTargets(requestedPillar);
+
+      if (requestedPillar !== lastFocusPillar) {
+        focusStartLevels = [...focusLevels];
+        focusTransitionElapsed = 0;
+        lastFocusPillar = requestedPillar;
+      }
+
+      if (immediate) {
+        focusLevels = targets;
+        focusStartLevels = [...targets];
+        focusTransitionElapsed = FOCUS_TRANSITION_SECONDS;
+        return;
+      }
+
+      focusTransitionElapsed = Math.min(
+        FOCUS_TRANSITION_SECONDS,
+        focusTransitionElapsed + delta,
       );
-      const blend = immediate ? 1 : 1 - Math.exp(-delta * 2.1);
-      focusLevels = focusLevels.map((level, index) =>
-        level + (targets[index] - level) * blend
+      const progress = easeOutCubic(
+        focusTransitionElapsed / FOCUS_TRANSITION_SECONDS,
+      );
+      focusLevels = focusStartLevels.map((level, index) =>
+        level + (targets[index] - level) * progress
       );
     };
 
+    const updateDodecaTurn = (delta: number, immediate = false) => {
+      const requestedPillar = turnPillarRef.current;
+      if (requestedPillar && requestedPillar !== lastTurnPillar) {
+        const currentTurn = dodecaTurn
+          ?? 0.42 + motionElapsed * SOLIDS[4].rotation.y;
+        dodecaTurnStart = currentTurn;
+        dodecaTurn = currentTurn;
+        dodecaTarget = nextFullTurn(currentTurn, requestedPillar);
+        dodecaTurnElapsed = 0;
+        dodecaIsTurning = true;
+        lastTurnPillar = requestedPillar;
+      }
+
+      if (!requestedPillar && dodecaTurn === null) return;
+
+      if (immediate) {
+        dodecaTurn = dodecaTarget;
+        dodecaIsTurning = false;
+        return;
+      }
+
+      if (!dodecaIsTurning) return;
+      dodecaTurnElapsed = Math.min(0.6, dodecaTurnElapsed + delta);
+      const progress = easeOutCubic(dodecaTurnElapsed / 0.6);
+      dodecaTurn =
+        dodecaTurnStart + (dodecaTarget - dodecaTurnStart) * progress;
+      if (dodecaTurnElapsed >= 0.6) {
+        dodecaTurn = dodecaTarget;
+        dodecaIsTurning = false;
+      }
+    };
+
     const render = () => {
-      if (reducedMotion) updateFocus(0, true);
+      if (reducedMotion) {
+        updateFocus(0, true);
+        updateDodecaTurn(0, true);
+      }
       drawScene(
         context,
         width,
@@ -857,6 +810,8 @@ export function HeroQuincunx({
         reducedMotion ? STATIC_TIME : motionElapsed,
         reducedMotion,
         focusLevels,
+        activePillarRef.current,
+        dodecaTurn,
         opaqueBackground,
       );
     };
@@ -909,6 +864,7 @@ export function HeroQuincunx({
         motionRate += (targetMotionRate - motionRate) * motionBlend;
         motionElapsed += delta * motionRate;
         updateFocus(delta);
+        updateDodecaTurn(delta);
       }
       lastFrameTime = time;
       lastRenderedAt = time;
@@ -1002,17 +958,9 @@ export function HeroQuincunx({
       ref={canvasRef}
       role="img"
       data-active-pillar={activePillar}
+      data-opaque-background={opaqueBackground ? "true" : "false"}
       aria-label="The Whole Body Earth quincunx: Air and Press above, Fire and Presence left, Water and Studios right, Earth and Foundation below, and Ether and Guardian at the center."
-      className="h-full w-full"
-      style={{
-        background: opaqueBackground
-          ? "radial-gradient(circle at center, #090811 0%, #020204 52%, #000 100%)"
-          : "transparent",
-        display: "block",
-        height: "100%",
-        pointerEvents: "none",
-        width: "100%",
-      }}
+      className={styles.canvas}
     >
       A luminous quincunx of five Platonic solids representing the five Whole
       Body Earth pillars.

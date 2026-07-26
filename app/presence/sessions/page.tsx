@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {practitioners} from "../components/data";
 
@@ -6,9 +7,12 @@ export default function SessionsPage() {
     <div className="page sessions-page">
       <header className="sessions-hero">
         <div className="sessions-hero-image">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=1400&h=1100&q=85"
             alt="Quiet practice room in warm natural light"
+            fill
+            sizes="(max-width: 1000px) 100vw, 58vw"
+            priority
           />
           <span>PRIVATE · CONSENSUAL · ENCRYPTED</span>
         </div>
@@ -45,7 +49,13 @@ export default function SessionsPage() {
           {practitioners.map((person) => (
             <article key={person.slug}>
               <Link className="session-person-image" href={`/presence/practitioners/${person.slug}`} aria-label={`View ${person.name}'s profile`}>
-                <img src={person.image} alt="" loading="lazy" />
+                <Image
+                  src={person.image}
+                  alt=""
+                  width={900}
+                  height={1100}
+                  sizes="(max-width: 520px) 100vw, (max-width: 760px) 39vw, 21vw"
+                />
               </Link>
               <div>
                 <small>{person.title}</small>

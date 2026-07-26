@@ -82,7 +82,7 @@ function GeometryField({ audioOn }: { audioOn: boolean }) {
           particle.x = Math.random();
         }
         context.beginPath();
-        context.fillStyle = `rgba(43,168,160,${particle.alpha * (isNight ? 1.25 : 0.8)})`;
+        context.fillStyle = `rgba(46,134,171,${particle.alpha * (isNight ? 1.25 : 0.8)})`;
         context.arc(particle.x * width, particle.y * height, particle.size, 0, Math.PI * 2);
         context.fill();
       }
@@ -104,9 +104,9 @@ function GeometryField({ audioOn }: { audioOn: boolean }) {
       });
 
       context.save();
-      context.shadowColor = "rgba(43,168,160,.75)";
+      context.shadowColor = "rgba(46,134,171,.75)";
       context.shadowBlur = 18 + stormRef.current * 24;
-      context.strokeStyle = `rgba(43,168,160,${0.25 + stormRef.current * 0.45})`;
+      context.strokeStyle = `rgba(46,134,171,${0.25 + stormRef.current * 0.45})`;
       context.lineWidth = 0.8;
       for (const [a, b] of edges) {
         context.beginPath();
@@ -117,8 +117,8 @@ function GeometryField({ audioOn }: { audioOn: boolean }) {
       context.restore();
 
       const halo = context.createRadialGradient(cx, cy, 0, cx, cy, scale * 2.2);
-      halo.addColorStop(0, `rgba(43,168,160,${0.045 + stormRef.current * 0.08})`);
-      halo.addColorStop(1, "rgba(43,168,160,0)");
+      halo.addColorStop(0, `rgba(46,134,171,${0.045 + stormRef.current * 0.08})`);
+      halo.addColorStop(1, "rgba(46,134,171,0)");
       context.fillStyle = halo;
       context.fillRect(cx - scale * 2.2, cy - scale * 2.2, scale * 4.4, scale * 4.4);
       raf = requestAnimationFrame(render);
@@ -170,33 +170,15 @@ const navLinks = [
   ["/studios/contact", "Contact"],
 ] as const;
 
-const portalNavLinks = [
-  ["/studios", "Studios"],
-  ["/foundation", "Foundation"],
-  ["/presence", "Presence"],
-  ["/press", "Press"],
-] as const;
-
-const siteConfig = {
-  studios: { name: "STUDIOS", glyph: "🜄", accent: "#2ba8a0", rgb: "43,168,160" },
-  foundation: { name: "FOUNDATION", glyph: "🜃", accent: "#65a765", rgb: "101,167,101" },
-  presence: { name: "PRESENCE", glyph: "🜂", accent: "#e8542a", rgb: "232,84,42" },
-  press: { name: "PRESS", glyph: "🜁", accent: "#c9a227", rgb: "201,162,39" },
+const studiosSite = {
+  name: "STUDIOS",
+  glyph: "🜄",
+  accent: "#2E86AB",
+  rgb: "46,134,171",
 } as const;
 
 export function SiteExperience({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const current = pathname.startsWith("/studios")
-    ? "studios"
-    : pathname.startsWith("/foundation")
-    ? "foundation"
-    : pathname.startsWith("/presence")
-      ? "presence"
-      : pathname.startsWith("/press")
-        ? "press"
-        : null;
-  const activeSite = current ? siteConfig[current] : siteConfig.studios;
-  const activeNav = current === "studios" ? navLinks : portalNavLinks;
   const [entrance, setEntrance] = useState(false);
   const [audioOn, setAudioOn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -301,17 +283,12 @@ export function SiteExperience({ children }: { children: ReactNode }) {
     }
   };
 
-  if (current !== "studios") {
-    const standaloneSharedPage = current === null && pathname !== "/" && !pathname.startsWith("/guardian") && !pathname.startsWith("/admin");
-    return <>{children}{standaloneSharedPage ? <WholeBodyFooter /> : null}</>;
-  }
-
   return (
     <div
-      className={`site-experience site-experience--${current} pillar-spine pillar-spine--${current}`}
+      className="site-experience site-experience--studios pillar-spine pillar-spine--studios"
       style={{
-        "--water": activeSite.accent,
-        "--active-rgb": activeSite.rgb,
+        "--water": studiosSite.accent,
+        "--active-rgb": studiosSite.rgb,
       } as React.CSSProperties}
     >
       <GeometryField audioOn={audioOn} />
@@ -326,12 +303,12 @@ export function SiteExperience({ children }: { children: ReactNode }) {
           aria-expanded={switcherOpen}
           aria-controls="constellation-dialog"
         >
-          <span className="brand-mark" onClick={glyphClick}>{activeSite.glyph}</span>
-          <span>WHOLE BODY<span>/{activeSite.name}</span></span>
+          <span className="brand-mark" onClick={glyphClick}>{studiosSite.glyph}</span>
+          <span>WHOLE BODY<span>/{studiosSite.name}</span></span>
           <span className="brand-grid" aria-hidden="true">••<br />••</span>
         </button>
         <nav className={menuOpen ? "nav-links nav-links--open" : "nav-links"} aria-label="Primary navigation">
-          {activeNav.map(([href, label]) => (
+          {navLinks.map(([href, label]) => (
             <Link onClick={() => setMenuOpen(false)} className={pathname === href ? "active" : ""} href={href} key={href}>{label}</Link>
           ))}
           <Link className="nav-apply" href="/studios/apply" onClick={() => setMenuOpen(false)}>Apply</Link>
@@ -345,7 +322,7 @@ export function SiteExperience({ children }: { children: ReactNode }) {
         </div>
       </header>
       <ProductSwitcher
-        current={current}
+        current="studios"
         open={switcherOpen}
         onClose={() => setSwitcherOpen(false)}
       />

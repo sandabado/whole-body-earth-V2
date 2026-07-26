@@ -1,39 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import HeroEngine from "../HeroEngine/HeroEngine";
 import type { ActivePillar } from "../HeroEngine/config";
 import HermeticCrest from "../hermetic-crest/HermeticCrest";
+import { useWholeBodyTransition } from "../WholeBodyTransition";
 import { HeroQuincunx } from "./HeroQuincunx";
-import { PillarShelf } from "./PillarShelf";
 import { TopNav, type CommandPillar } from "./TopNav";
 
-const CLOSE_DURATION_MS = 500;
-
-function transitionDuration(): number {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ? 0
-    : CLOSE_DURATION_MS;
-}
+type NamedPillar = Exclude<ActivePillar, "none" | "whole">;
 
 export function EpicHomeExperience() {
-  const [shelfPillar, setShelfPillar] = useState<CommandPillar | null>(null);
-  const [shelfOpen, setShelfOpen] = useState(false);
-  const switchTimerRef = useRef<number | null>(null);
-  const focusTimerRef = useRef<number | null>(null);
-  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
-
-  const clearTimers = useCallback(() => {
-    if (switchTimerRef.current !== null) {
-      window.clearTimeout(switchTimerRef.current);
-      switchTimerRef.current = null;
-    }
-    if (focusTimerRef.current !== null) {
-      window.clearTimeout(focusTimerRef.current);
-      focusTimerRef.current = null;
-    }
-  }, []);
+  const {
+    activePillar,
+    transitioning,
+    beginTransition,
+  } = useWholeBodyTransition();
+  const [dialPreview, setDialPreview] = useState<NamedPillar | null>(null);
+  const [dialTurnPillar, setDialTurnPillar] = useState<NamedPillar | null>(null);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -49,108 +34,96 @@ export function EpicHomeExperience() {
     body.style.height = "100%";
 
     return () => {
-      clearTimers();
       root.style.overflow = previousRootOverflow;
       root.style.height = previousRootHeight;
       body.style.overflow = previousBodyOverflow;
       body.style.height = previousBodyHeight;
     };
-  }, [clearTimers]);
-
-  const restoreTriggerFocus = useCallback(() => {
-    focusTimerRef.current = window.setTimeout(() => {
-      lastTriggerRef.current?.focus();
-      focusTimerRef.current = null;
-    }, transitionDuration());
   }, []);
 
-  const closeShelf = useCallback(() => {
-    clearTimers();
-    setShelfOpen(false);
-    restoreTriggerFocus();
-  }, [clearTimers, restoreTriggerFocus]);
+  const beginNamedTransition = useCallback((pillar: NamedPillar) => {
+    setDialPreview(null);
+    setDialTurnPillar(pillar);
+    beginTransition(pillar);
+  }, [beginTransition]);
 
-  const selectPillar = useCallback((pillar: CommandPillar, trigger: HTMLButtonElement) => {
-    clearTimers();
-    lastTriggerRef.current = trigger;
+  const selectNavPillar = useCallback((pillar: CommandPillar) => {
+    setDialPreview(null);
+    setDialTurnPillar(pillar === "whole" ? null : pillar);
+    beginTransition(pillar);
+  }, [beginTransition]);
 
-    if (shelfOpen && shelfPillar === pillar) {
-      setShelfOpen(false);
-      restoreTriggerFocus();
-      return;
-    }
+  const previewDialPillar = useCallback((pillar: NamedPillar | null) => {
+    if (!transitioning) setDialPreview(pillar);
+  }, [transitioning]);
 
-    if (shelfOpen) {
-      setShelfOpen(false);
-      switchTimerRef.current = window.setTimeout(() => {
-        setShelfPillar(pillar);
-        setShelfOpen(true);
-        switchTimerRef.current = null;
-      }, transitionDuration());
-      return;
-    }
-
-    setShelfPillar(pillar);
-    window.requestAnimationFrame(() => setShelfOpen(true));
-  }, [clearTimers, restoreTriggerFocus, shelfOpen, shelfPillar]);
-
-  const activePillar: ActivePillar = shelfOpen && shelfPillar
-    ? shelfPillar
-    : "none";
-
-  const selectDialPillar = useCallback((
-    pillar: Exclude<ActivePillar, "none" | "whole">,
-    trigger: HTMLButtonElement,
-  ) => {
-    selectPillar(pillar, trigger);
-  }, [selectPillar]);
+  const visualPillar: ActivePillar = dialPreview ?? activePillar;
 
   return (
-    <div className="epic-home command-deck-home" data-shelf-open={shelfOpen ? "true" : "false"}>
+    <div
+      className="epic-home command-deck-home"
+      data-transitioning={transitioning ? "true" : "false"}
+    >
       <main>
         <HeroEngine
           autoRotate
           siteSlug="studios"
-          activePillar={activePillar}
+          backgroundVariant="cosmic"
+          activePillar={visualPillar}
+          transitioning={transitioning}
+          showWholeEarthGlobe
+          onWholeActivate={() => selectNavPillar("whole")}
           ariaLabel="Whole Body Earth — five living pillars held in one constellation"
         >
           <div className="command-deck-vignette" aria-hidden="true" />
           <div className="command-deck-grain" aria-hidden="true" />
 
-          <TopNav activePillar={activePillar} onSelect={selectPillar} />
-
-          <div className="command-deck-hero-content" aria-hidden={shelfOpen ? true : undefined}>
-            <h1>Whole Body Earth</h1>
-            <p>Five pillars. One whole body.</p>
-            <Link href="/reading" tabIndex={shelfOpen ? -1 : undefined}>
-              Get Your Whole Body Design Reading <span aria-hidden="true">→</span>
+          <aside
+            className="command-deck-reading-cta"
+            aria-label="Whole Body Design reading"
+            aria-hidden={transitioning ? true : undefined}
+            inert={transitioning ? true : undefined}
+          >
+            <Link href="/reading" tabIndex={transitioning ? -1 : undefined}>
+              <span>Get Your Whole Body Design Reading</span>
+              <b aria-hidden="true">Begin&nbsp; →</b>
             </Link>
+          </aside>
+
+          <TopNav activePillar={activePillar} onSelect={selectNavPillar} />
+
+          <div
+            className="command-deck-hero-content"
+            aria-hidden={transitioning ? true : undefined}
+            inert={transitioning ? true : undefined}
+          >
+            <h1>Whole Body Earth</h1>
+            <h4>Five Pillars. One Whole Body.</h4>
+            <p>Visit each pillar. Explore the constellation.</p>
           </div>
 
-          <div className="command-deck-visual">
+          <div
+            className="command-deck-visual"
+            aria-hidden={transitioning ? true : undefined}
+            inert={transitioning ? true : undefined}
+          >
             <div className="command-deck-constellation">
-              <HeroQuincunx activePillar={activePillar} />
+              <HeroQuincunx
+                activePillar={visualPillar}
+                turnPillar={dialTurnPillar}
+              />
             </div>
             <div className="command-deck-dial-shell">
               <HermeticCrest
                 size={720}
-                activePillar={activePillar}
-                onPillarSelect={selectDialPillar}
+                activePillar={visualPillar}
+                onPillarPreview={previewDialPillar}
+                onPillarTurnStart={setDialTurnPillar}
+                onPillarActivate={beginNamedTransition}
               />
             </div>
           </div>
 
-          <PillarShelf
-            activePillar={shelfPillar}
-            open={shelfOpen}
-            onClose={closeShelf}
-          />
-
-          <p className="command-deck-sr-only" aria-live="polite">
-            {shelfOpen && shelfPillar
-              ? `${shelfPillar} shelf open`
-              : "All shelves closed"}
-          </p>
         </HeroEngine>
       </main>
     </div>

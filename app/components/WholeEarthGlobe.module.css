@@ -1,0 +1,44 @@
+.shell {
+  position: absolute;
+  z-index: 1;
+  top: calc(50% + var(--command-visual-offset, 0rem));
+  left: 50%;
+  width: min(64svh, 44rem, calc(100vw - 1.5rem));
+  aspect-ratio: 1;
+  border-radius: 50%;
+  outline: 0;
+  opacity: .96;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  transition: opacity 300ms cubic-bezier(.65, 0, .35, 1), filter 300ms cubic-bezier(.65, 0, .35, 1);
+}
+
+.shell canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: manipulation;
+}
+
+.shell:focus-visible {
+  outline: 1px solid rgba(192, 192, 192, .8);
+  outline-offset: -1.2rem;
+}
+
+:global(.water-hero[data-transitioning="true"]) .shell {
+  opacity: .18;
+  filter: brightness(.7) saturate(.8);
+}
+
+@media (max-width: 760px) {
+  .shell {
+    width: min(62svh, calc(100vw - 1rem));
+    opacity: .96;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell {
+    transition: none;
+  }
+}

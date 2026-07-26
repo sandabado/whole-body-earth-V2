@@ -3,6 +3,7 @@
 import Link from "next/link";
 import styles from "./reading.module.css";
 
+/** Renders the placeholder doorway for the external Whole Body reading flow. */
 export function ReadingExperience() {
   return (
     <main className={styles.page}>

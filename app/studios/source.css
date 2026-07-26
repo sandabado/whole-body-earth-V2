@@ -1,17 +1,17 @@
-:root {
-  --studios-void: #050505;
-  --studios-carbon: #0a0a0f;
-  --studios-steel: #12121a;
-  --studios-mercury: #2a2a38;
-  --studios-bone: #ededed;
-  --studios-ghost: #8888a0;
-  --studios-water: #2ba8a0;
+.pillar-spine--studios {
+  --studios-void: var(--void);
+  --studios-carbon: var(--obsidian);
+  --studios-steel: var(--surface);
+  --studios-mercury: var(--border);
+  --studios-bone: var(--text-primary);
+  --studios-ghost: var(--text-muted);
+  --studios-water: var(--studios);
   --studios-deep-water: #1a4d4d;
 }
 
-.site-experience--studios {
+.pillar-spine--studios {
   --water: var(--studios-water);
-  --active-rgb: 43, 168, 160;
+  --active-rgb: 46, 134, 171;
   background:
     radial-gradient(circle at 74% 34%, rgba(43, 168, 160, .055), transparent 29rem),
     var(--studios-void);
@@ -22,64 +22,63 @@
  * Studios shell explicitly water-scoped so later Foundation, Presence, and
  * Press rules cannot restyle this route.
  */
-.site-experience--studios .site-header {
+.pillar-spine--studios .site-header {
   border-bottom-color: rgba(43, 168, 160, .2);
   background:
     linear-gradient(180deg, rgba(5, 10, 10, .56), rgba(5, 10, 10, .12) 72%, transparent);
   backdrop-filter: none;
 }
 
-.site-experience--studios .site-header::after {
+.pillar-spine--studios .site-header::after {
   background: linear-gradient(90deg, transparent, var(--studios-water));
 }
 
-.site-experience--studios .brand-mark,
-.site-experience--studios .brand > span:nth-child(2) span {
+.pillar-spine--studios .brand-mark, .pillar-spine--studios .brand > span:nth-child(2) span {
   color: var(--studios-water);
 }
 
-.site-experience--studios .brand-mark {
+.pillar-spine--studios .brand-mark {
   filter: drop-shadow(0 0 9px rgba(43, 168, 160, .52));
 }
 
-.site-experience--studios .nav-links a::after {
+.pillar-spine--studios .nav-links a::after {
   background: var(--studios-water);
 }
 
-.site-experience--studios .nav-links .nav-apply {
+.pillar-spine--studios .nav-links .nav-apply {
   border-color: var(--studios-water);
   color: var(--studios-water);
 }
 
-.site-experience--studios .nav-links .nav-apply:hover {
+.pillar-spine--studios .nav-links .nav-apply:hover {
   background: var(--studios-water);
   color: var(--studios-void);
 }
 
-.site-experience--studios .eyebrow {
+.pillar-spine--studios .eyebrow {
   color: var(--studios-water);
 }
 
-.site-experience--studios .text-link {
+.pillar-spine--studios .text-link {
   color: var(--studios-ghost);
 }
 
-.site-experience--studios .text-link span {
+.pillar-spine--studios .text-link span {
   color: var(--studios-water);
 }
 
-.site-experience--studios .button {
+.pillar-spine--studios .button {
   border-color: var(--studios-water);
   color: var(--studios-water);
 }
 
-.site-experience--studios .button--solid {
+.pillar-spine--studios .button--solid {
   background: var(--studios-water);
   color: var(--studios-void);
 }
 
 /* Restore the full-width water veil after Foundation's hero grid rule. */
-.site-experience--studios .hero::before {
+.pillar-spine--studios .hero::before {
   inset: 0;
   width: auto;
   border: 0;
@@ -88,14 +87,14 @@
   transform: none;
 }
 
-.site-experience--studios .hud-card {
+.pillar-spine--studios .hud-card {
   border-color: color-mix(in srgb, var(--studios-water) 28%, var(--studios-mercury));
   background:
     linear-gradient(135deg, rgba(43, 168, 160, .025), transparent 38%),
     rgba(10, 10, 15, .9);
 }
 
-.site-experience--studios ::selection {
+.pillar-spine--studios ::selection {
   background: var(--studios-water);
   color: var(--studios-void);
 }

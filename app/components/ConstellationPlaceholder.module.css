@@ -1,5 +1,6 @@
 .page {
   --accent: #ededed;
+  --accent-text: var(--accent);
   position: relative;
   min-height: 100svh;
   overflow: hidden;
@@ -11,16 +12,11 @@
 }
 
 .guardian {
-  --accent: #8b6fd6;
+  --accent: var(--guardian);
+  --accent-text: color-mix(in srgb, var(--accent) 80%, var(--text-primary));
   background:
-    radial-gradient(circle at 73% 42%, rgba(139, 111, 214, 0.15), transparent 24rem),
+    radial-gradient(circle at 73% 42%, color-mix(in srgb, var(--accent) 15%, transparent), transparent 24rem),
     linear-gradient(135deg, #050505, #0d0914 54%, #050505);
-}
-
-.epicPage {
-  min-height: 100svh;
-  overflow: visible;
-  background: #000;
 }
 
 .sky {
@@ -102,16 +98,6 @@
   -webkit-backdrop-filter: blur(12px) saturate(115%);
 }
 
-.epicHeader {
-  position: fixed;
-  z-index: 90;
-  top: 0;
-  right: 0;
-  left: 0;
-  border-color: rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent);
-}
-
 .brand {
   display: flex;
   align-items: center;
@@ -124,8 +110,8 @@
   letter-spacing: 0.12em;
 }
 
-.brand > span { color: var(--accent); font-size: 20px; }
-.brand em { color: var(--accent); font-style: normal; }
+.brand > span { color: var(--accent-text); font-size: 20px; }
+.brand em { color: var(--accent-text); font-style: normal; }
 .brand small { color: #777785; font-size: 7px; line-height: 5px; }
 .header > p { color: #777785; font: 400 8px/1 var(--font-mono), monospace; letter-spacing: 0.14em; }
 
@@ -135,17 +121,9 @@
   padding: clamp(88px, 15vh, 150px) 0 92px;
 }
 
-.epicMain {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
 .eyebrow {
   margin: 0 0 24px;
-  color: var(--accent);
+  color: var(--accent-text);
   font: 500 9px/1 var(--font-mono), monospace;
   letter-spacing: 0.2em;
 }
@@ -262,7 +240,7 @@
 .footer button {
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-text);
   cursor: pointer;
   font: inherit;
   letter-spacing: inherit;
