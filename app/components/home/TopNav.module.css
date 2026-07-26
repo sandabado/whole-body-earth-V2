@@ -2,7 +2,7 @@
   position: fixed;
   z-index: 100;
   top: auto;
-  bottom: max(1rem, env(safe-area-inset-bottom));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
   left: 50%;
   max-width: calc(100vw - 1rem);
   overflow-x: auto;
@@ -22,7 +22,7 @@
   align-items: center;
   width: max-content;
   margin: 0;
-  padding: .25rem;
+  padding: .45rem .6rem;
   border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--void) 78%, transparent);
@@ -144,6 +144,7 @@
 @media (max-width: 760px) {
   .rail {
     grid-template-columns: repeat(6, 3rem);
+    padding: .4rem .5rem;
   }
 
   .command {

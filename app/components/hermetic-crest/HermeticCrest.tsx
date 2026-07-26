@@ -366,8 +366,8 @@ export default function HermeticCrest({
                     "--node-unlock-delay": `${180 + index * 55}ms`,
                   } as CSSProperties}
                 >
-                  <circle r={element.id === "ether" ? 46 : 25} />
-                  <circle className={styles.nodeOrbit} r={element.id === "ether" ? 36 : 18} />
+                  <circle r="25" />
+                  <circle className={styles.nodeOrbit} r="18" />
                   <text y="1" dominantBaseline="middle" textAnchor="middle">{element.symbol}</text>
                   {element.id !== "ether" && <text className={styles.nodeLabel} y="39" dominantBaseline="middle" textAnchor="middle">{element.label}</text>}
                 </g>
@@ -393,7 +393,7 @@ export default function HermeticCrest({
               "--control-x": `${(element.x / 500) * 100}%`,
               "--control-y": `${(element.y / 500) * 100}%`,
               "--control-color": element.color,
-              "--control-size": element.id === "ether" ? "18%" : "12%",
+              "--control-size": "12%",
             } as CSSProperties}
             data-element={element.id}
             data-active={selectedElement === element.id ? "true" : "false"}

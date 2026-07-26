@@ -10,6 +10,8 @@
   --duration-hover: 300ms;
   --duration-transition: 400ms;
   --duration-dim: 500ms;
+  --command-visual-offset: -.5rem;
+  --command-reading-cta-height: 3.35rem;
   position: relative;
   width: 100%;
   height: 100svh;
@@ -64,6 +66,31 @@ body:has(.command-deck-home) {
     linear-gradient(180deg, rgba(5, 5, 5, .18), transparent 22%, transparent 74%, rgba(5, 5, 5, .32));
 }
 
+.epic-home > main > .water-hero::after {
+  position: absolute;
+  z-index: 2;
+  inset: -24%;
+  background:
+    radial-gradient(
+      ellipse at center,
+      color-mix(in srgb, var(--hero-focus-color) 28%, transparent) 0%,
+      color-mix(in srgb, var(--hero-focus-color) 13%, transparent) 30%,
+      transparent 68%
+    );
+  content: "";
+  opacity: var(--hero-focus-strength);
+  pointer-events: none;
+  transform: scale(1.08);
+  transition:
+    opacity 420ms var(--ease-gentle),
+    transform 700ms var(--ease-meditative);
+}
+
+.epic-home > main > .water-hero[data-active-pillar="none"]::after {
+  opacity: 0;
+  transform: scale(.82);
+}
+
 .command-deck-vignette,
 .command-deck-grain {
   position: absolute;
@@ -85,6 +112,89 @@ body:has(.command-deck-home) {
   mix-blend-mode: soft-light;
 }
 
+.command-deck-reading-cta {
+  position: fixed;
+  z-index: 120;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  padding-top: env(safe-area-inset-top);
+  background: #6d4aff;
+  box-shadow:
+    0 5px 24px rgba(109, 74, 255, .72),
+    0 12px 48px rgba(255, 59, 171, .2);
+  isolation: isolate;
+  transition:
+    opacity 300ms var(--ease-gentle),
+    transform 500ms var(--ease-meditative);
+}
+
+.command-deck-reading-cta::before {
+  position: absolute;
+  z-index: -1;
+  inset: -2px 0 -4px;
+  background: linear-gradient(
+    90deg,
+    #ff3b6b,
+    #ff9f2f,
+    #ffe65a,
+    #57e389,
+    #45caff,
+    #7c5cff,
+    #f45cff,
+    #ff3b6b
+  );
+  background-size: 260% 100%;
+  content: "";
+  filter: blur(7px);
+  opacity: .3;
+  animation: readingRainbowGlow 14s linear infinite;
+  pointer-events: none;
+}
+
+.command-deck-reading-cta > a {
+  position: relative;
+  display: flex;
+  min-height: var(--command-reading-cta-height);
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 4vw, 3.5rem);
+  padding: .75rem max(1rem, env(safe-area-inset-right)) .75rem max(1rem, env(safe-area-inset-left));
+  background: #6d4aff;
+  color: #fff;
+  font: 700 clamp(.75rem, 1.2vw, .9rem)/1 var(--font-body), Inter, sans-serif;
+  letter-spacing: .09em;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(30, 14, 84, .52);
+}
+
+.command-deck-reading-cta b {
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.command-deck-reading-cta > a:hover,
+.command-deck-reading-cta > a:focus-visible {
+  background: #7b61ff;
+  box-shadow: inset 0 0 28px rgba(255, 255, 255, .13);
+}
+
+.command-deck-home[data-transitioning="true"] .command-deck-reading-cta {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+@keyframes readingRainbowGlow {
+  to {
+    background-position: 260% 0;
+  }
+}
+
 .command-deck-visual {
   position: absolute;
   z-index: 3;
@@ -97,7 +207,7 @@ body:has(.command-deck-home) {
   opacity: 1;
   transform: translate3d(
     -50%,
-    calc(-50% + clamp(2rem, 5svh, 4.5rem)),
+    calc(-50% + var(--command-visual-offset)),
     0
   ) scale(1);
   transform-origin: 50% 50%;
@@ -109,12 +219,13 @@ body:has(.command-deck-home) {
     transform var(--duration-dim) var(--ease-meditative);
 }
 
+
 .command-deck-constellation {
   position: absolute;
   inset: -7% -18%;
-  opacity: .48;
+  opacity: .72;
   pointer-events: none;
-  transform: scale(.92);
+  transform: scale(.76);
   mix-blend-mode: screen;
   transition: opacity var(--duration-dim) var(--ease-gentle), transform var(--duration-dim) var(--ease-meditative);
 }
@@ -139,7 +250,7 @@ body:has(.command-deck-home) {
   filter: blur(3px) saturate(.72);
   transform: translate3d(
     -50%,
-    calc(-50% + clamp(2rem, 5svh, 4.5rem)),
+    calc(-50% + var(--command-visual-offset)),
     0
   ) scale(.92);
 }
@@ -147,7 +258,11 @@ body:has(.command-deck-home) {
 .command-deck-hero-content {
   position: absolute;
   z-index: 5;
-  top: max(5.4rem, calc(env(safe-area-inset-top) + 4.5rem));
+  top: calc(
+    env(safe-area-inset-top) +
+    var(--command-reading-cta-height) +
+    2.25rem
+  );
   right: 1.5rem;
   bottom: auto;
   left: 1.5rem;
@@ -155,6 +270,7 @@ body:has(.command-deck-home) {
   align-items: center;
   flex-direction: column;
   text-align: center;
+  pointer-events: none;
   opacity: 1;
   filter: blur(0);
   transform: translate3d(0, 0, 0);
@@ -174,49 +290,25 @@ body:has(.command-deck-home) {
 .command-deck-hero-content h1 {
   margin: 0;
   color: var(--command-text);
-  font: 400 clamp(2rem, 4.2vw, 2.5rem)/1 var(--font-editorial), "Cormorant Garamond", Georgia, serif;
-  letter-spacing: .05em;
+  font: 400 clamp(3.1rem, 7vw, 5rem)/.9 var(--font-editorial), "Cormorant Garamond", Georgia, serif;
+  letter-spacing: .035em;
   text-transform: uppercase;
   text-wrap: balance;
 }
 
-.command-deck-hero-content p {
-  margin: .65rem 0 1.05rem;
-  color: var(--command-muted);
-  font: 400 1rem/1.4 var(--font-body), Inter, sans-serif;
-}
-
-.command-deck-hero-content > a {
-  display: inline-flex;
-  min-height: 3rem;
-  align-items: center;
-  justify-content: center;
-  gap: .55rem;
-  padding: .75rem 2rem;
-  border: 1px solid var(--command-violet);
-  background: rgba(5, 5, 5, .22);
-  color: var(--command-violet-soft);
-  font: 500 .875rem/1 var(--font-body), Inter, sans-serif;
-  letter-spacing: .05em;
+.command-deck-hero-content h4 {
+  margin: .9rem 0 .5rem;
+  color: var(--command-text);
+  font: 600 clamp(.68rem, 1vw, .82rem)/1 var(--font-body), Inter, sans-serif;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transform: scale(1);
-  transition:
-    background var(--duration-transition) var(--ease-gentle),
-    border-color var(--duration-transition) var(--ease-gentle),
-    box-shadow var(--duration-transition) var(--ease-gentle),
-    color var(--duration-transition) var(--ease-gentle),
-    transform var(--duration-transition) var(--ease-meditative);
 }
 
-.command-deck-hero-content > a:hover,
-.command-deck-hero-content > a:focus-visible {
-  border-color: var(--command-violet-soft);
-  background: rgba(109, 74, 255, .1);
-  box-shadow: 0 0 32px rgba(109, 74, 255, .11);
-  color: #b6a2ff;
-  transform: scale(1.025);
+.command-deck-hero-content p {
+  margin: 0;
+  color: var(--command-muted);
+  font: 400 clamp(.75rem, 1vw, .86rem)/1.45 var(--font-body), Inter, sans-serif;
+  letter-spacing: .04em;
 }
 
 .command-deck-sr-only {
@@ -253,25 +345,36 @@ body:has(.command-deck-home) {
   }
 
   .command-deck-hero-content {
-    top: max(4.9rem, calc(env(safe-area-inset-top) + 4.35rem));
+    top: calc(
+      env(safe-area-inset-top) +
+      var(--command-reading-cta-height) +
+      1.25rem
+    );
     right: 1rem;
     left: 1rem;
   }
 
   .command-deck-hero-content h1 {
-    font-size: clamp(1.85rem, 9vw, 2.25rem);
+    font-size: clamp(2.6rem, 11vw, 3.5rem);
+  }
+
+  .command-deck-hero-content h4 {
+    margin-block: .65rem .4rem;
+    font-size: .64rem;
+    letter-spacing: .14em;
   }
 
   .command-deck-hero-content p {
-    margin-block: .5rem .8rem;
-    font-size: .92rem;
+    font-size: .74rem;
   }
 
-  .command-deck-hero-content > a {
-    width: min(100%, 22rem);
-    padding-inline: 1rem;
-    font-size: .72rem;
+  .command-deck-reading-cta > a {
+    min-height: var(--command-reading-cta-height);
+    justify-content: space-between;
+    gap: .75rem;
+    font-size: .68rem;
   }
+
 }
 
 @media (max-height: 650px) {
@@ -284,23 +387,35 @@ body:has(.command-deck-home) {
   }
 
   .command-deck-hero-content {
-    top: max(4.45rem, calc(env(safe-area-inset-top) + 4rem));
+    top: calc(
+      env(safe-area-inset-top) +
+      var(--command-reading-cta-height) +
+      .75rem
+    );
+  }
+
+  .command-deck-hero-content h1 {
+    font-size: clamp(2.25rem, 9svh, 3rem);
+  }
+
+  .command-deck-hero-content h4 {
+    margin-block: .4rem .25rem;
   }
 
   .command-deck-hero-content p {
-    margin-block: .35rem .55rem;
+    font-size: .7rem;
   }
 
-  .command-deck-hero-content > a {
-    min-height: 2.7rem;
-    padding-block: .65rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .command-deck-reading-cta::before {
+    animation: none;
+  }
+
   .epic-home .command-deck-visual,
   .epic-home .command-deck-hero-content,
-  .epic-home .command-deck-hero-content > a {
+  .epic-home .command-deck-reading-cta {
     animation: none;
     transition-duration: .01ms;
   }

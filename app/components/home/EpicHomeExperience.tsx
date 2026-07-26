@@ -78,6 +78,18 @@ export function EpicHomeExperience() {
           <div className="command-deck-vignette" aria-hidden="true" />
           <div className="command-deck-grain" aria-hidden="true" />
 
+          <aside
+            className="command-deck-reading-cta"
+            aria-label="Whole Body Design reading"
+            aria-hidden={transitioning ? true : undefined}
+            inert={transitioning ? true : undefined}
+          >
+            <Link href="/reading" tabIndex={transitioning ? -1 : undefined}>
+              <span>Get Your Whole Body Design Reading</span>
+              <b aria-hidden="true">Begin&nbsp; →</b>
+            </Link>
+          </aside>
+
           <TopNav activePillar={activePillar} onSelect={selectNavPillar} />
 
           <div
@@ -86,10 +98,8 @@ export function EpicHomeExperience() {
             inert={transitioning ? true : undefined}
           >
             <h1>Whole Body Earth</h1>
-            <p>Five pillars. One whole body.</p>
-            <Link href="/reading" tabIndex={transitioning ? -1 : undefined}>
-              Get Your Whole Body Design Reading <span aria-hidden="true">→</span>
-            </Link>
+            <h4>Five Pillars. One Whole Body.</h4>
+            <p>Visit each pillar. Explore the constellation.</p>
           </div>
 
           <div

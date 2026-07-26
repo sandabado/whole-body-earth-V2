@@ -45,10 +45,7 @@
 }
 
 .crest::after {
-  width: 88%;
-  border: 1px solid rgba(201, 162, 39, .08);
-  box-shadow: 0 0 54px rgba(109, 74, 255, .08), inset 0 0 45px rgba(5, 5, 5, .68);
-  opacity: .45;
+  display: none;
 }
 
 .crest:not([data-active-element="none"])::before {
@@ -270,11 +267,11 @@
 }
 
 .outerMechanism {
-  opacity: .48;
+  display: none;
 }
 
 .mandala {
-  opacity: .16;
+  display: none;
 }
 
 .entered[data-animate="true"][data-running="true"] .outerMechanism {
@@ -298,7 +295,7 @@
 .entered .serpentBody { stroke-dashoffset: 0; }
 
 .quincunxGeometry line {
-  stroke: rgba(237, 237, 237, .12);
+  stroke: rgba(237, 237, 237, .09);
   stroke-width: .7;
   stroke-dasharray: 3 7;
   transition: stroke 450ms ease, opacity 450ms ease;
@@ -327,7 +324,7 @@
 }
 
 .elementNode > circle:first-child {
-  fill: rgba(5, 5, 5, .82);
+  fill: rgba(3, 5, 10, .74);
   stroke: var(--node-color);
   stroke-width: 1;
   opacity: .72;
@@ -364,8 +361,9 @@
 }
 
 .observerNode > circle:first-child {
-  fill: transparent;
-  opacity: .42;
+  fill: color-mix(in srgb, var(--node-color) 18%, rgba(5, 5, 5, .86));
+  stroke-width: 1.5;
+  opacity: 1;
 }
 
 .inscriptions text {

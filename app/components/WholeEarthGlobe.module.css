@@ -1,7 +1,7 @@
 .shell {
   position: absolute;
   z-index: 1;
-  top: calc(50% + clamp(2rem, 5svh, 4.5rem));
+  top: calc(50% + var(--command-visual-offset, 0rem));
   left: 50%;
   width: min(64svh, 44rem, calc(100vw - 1.5rem));
   aspect-ratio: 1;

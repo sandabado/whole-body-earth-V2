@@ -38,14 +38,6 @@ interface ProjectedVertex extends Point2 {
   depth: number;
 }
 
-interface Star {
-  x: number;
-  y: number;
-  radius: number;
-  opacity: number;
-  phase: number;
-}
-
 const PHI = (1 + Math.sqrt(5)) / 2;
 const TAU = Math.PI * 2;
 const STATIC_TIME = 9;
@@ -402,30 +394,6 @@ const SOLIDS: readonly SolidDefinition[] = [
   }),
 ];
 
-function seededRandom(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state += 0x6d2b79f5;
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4_294_967_296;
-  };
-}
-
-function makeStarfield(count: number): readonly Star[] {
-  const random = seededRandom(0x5eedc0de);
-  return Array.from({ length: count }, () => ({
-    x: random(),
-    y: random(),
-    radius: 0.35 + random() * 0.8,
-    opacity: 0.15 + random() * 0.5,
-    phase: random() * TAU,
-  }));
-}
-
-const STARFIELD = makeStarfield(112);
-
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.min(maximum, Math.max(minimum, value));
 }
@@ -527,6 +495,7 @@ function drawSolid(
   renderColor: RGB = solid.color,
   rotationOverrideY: number | null = null,
   displayScale = 1,
+  emphasized = false,
 ): void {
   const pointReveal = smoothstep(solid.revealAt, solid.revealAt + 0.32, revealElapsed);
   const geometryReveal = smoothstep(solid.revealAt + 0.25, solid.revealAt + 1.45, revealElapsed);
@@ -547,14 +516,14 @@ function drawSolid(
     center,
     Math.max(12, radiusInPixels * (1.55 + pulse * 0.28)),
     renderColor,
-    pointReveal * focusIntensity * (0.08 + pulse * 0.035),
+    pointReveal * focusIntensity * (0.16 + pulse * 0.07),
   );
   drawGlow(
     context,
     center,
     Math.max(2, 2.2 + geometryReveal * 2.6),
     renderColor,
-    pointReveal * focusIntensity * (0.82 - geometryReveal * 0.34),
+    pointReveal * focusIntensity * (0.96 - geometryReveal * 0.26),
   );
   context.restore();
 
@@ -562,12 +531,13 @@ function drawSolid(
 
   const animationTime = reducedMotion ? solid.phase * 0.7 + 2.4 : motionElapsed;
   const baseTilt = solidIndex === 4 ? 0.28 : 0.18;
+  const animatedY = rotationOverrideY
+    ?? 0.42 + animationTime * solid.rotation.y + solid.phase * 0.11;
   const rotatedVertices = solid.vertices.map((vertex) =>
     rotate(
       vertex,
       baseTilt + animationTime * solid.rotation.x + solid.phase * 0.08,
-      rotationOverrideY
-        ?? 0.42 + animationTime * solid.rotation.y + solid.phase * 0.11,
+      animatedY,
       animationTime * solid.rotation.z,
     ),
   );
@@ -583,6 +553,7 @@ function drawSolid(
     .sort((left, right) => left.depth - right.depth);
 
   context.save();
+  const solidity = emphasized ? 1.85 : 1;
   for (const { face, depth } of sortedFaces) {
     const light = clamp((depth + 1) / 2);
     context.beginPath();
@@ -594,7 +565,7 @@ function drawSolid(
     context.closePath();
     context.fillStyle = rgba(
       renderColor,
-      geometryReveal * focusIntensity * (0.025 + light * 0.105),
+      geometryReveal * focusIntensity * solidity * (0.055 + light * 0.16),
     );
     context.fill();
   }
@@ -610,19 +581,35 @@ function drawSolid(
   context.save();
   context.globalCompositeOperation = "screen";
   context.lineCap = "round";
+  context.shadowColor = rgba(renderColor, (emphasized ? 0.92 : 0.72) * focusIntensity);
+  context.shadowBlur = (emphasized ? 15 : 8) + focusIntensity * 10;
   for (const { edge, depth } of sortedEdges) {
     const from = projectedVertices[edge[0]];
     const to = projectedVertices[edge[1]];
     const light = clamp((depth + 1) / 2);
     context.strokeStyle = rgba(
       renderColor,
-      geometryReveal * focusIntensity * (0.2 + light * 0.62),
+      geometryReveal * focusIntensity * (0.4 + light * 0.58),
     );
-    context.lineWidth = 0.55 + light * 0.75;
+    context.lineWidth = (emphasized ? 1.35 : 1.05) + light * 1.15;
     context.beginPath();
     context.moveTo(from.x, from.y);
     context.lineTo(to.x, to.y);
     context.stroke();
+  }
+  context.restore();
+
+  context.save();
+  context.globalCompositeOperation = "screen";
+  for (const point of projectedVertices) {
+    const light = clamp((point.depth + 1) / 2);
+    context.fillStyle = rgba(
+      renderColor,
+      geometryReveal * focusIntensity * (0.62 + light * 0.34),
+    );
+    context.beginPath();
+    context.arc(point.x, point.y, 1.35 + light * 1.15, 0, TAU);
+    context.fill();
   }
   context.restore();
 }
@@ -658,23 +645,13 @@ function drawScene(
     context.fillRect(0, 0, width, height);
   }
 
-  const skyReveal = smoothstep(0.5, 4.2, revealElapsed);
-  for (const star of STARFIELD) {
-    const twinkle = reducedMotion ? 0.78 : 0.68 + Math.sin(motionElapsed * 0.46 + star.phase) * 0.22;
-    const alpha = skyReveal * star.opacity * twinkle;
-    context.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-    context.beginPath();
-    context.arc(star.x * width, star.y * height, star.radius, 0, TAU);
-    context.fill();
-  }
-
   const centerDrift = {
     x: center.x + (reducedMotion ? 0 : Math.cos(motionElapsed * 0.22) * 1.6),
     y: center.y + (reducedMotion ? 0 : Math.sin(motionElapsed * 0.34) * 2.4),
   };
   const baseRadius = Math.min(
-    138,
-    Math.max(54, Math.min(width, height) * 0.19),
+    116,
+    Math.max(46, Math.min(width, height) * 0.16),
   );
 
   SOLIDS.forEach((solid, index) => {
@@ -697,7 +674,8 @@ function drawScene(
       isElementPillar(activePillar) && solid.pillar === activePillar
         ? dodecaTurn
         : null,
-      0.8 + focusLevels[index] * 0.2,
+      0.82 + focusLevels[index] * 0.14,
+      isElementPillar(activePillar) && solid.pillar === activePillar,
     );
   });
 }
