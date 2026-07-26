@@ -20,6 +20,9 @@ import { WholeEarthGlobe } from "../WholeEarthGlobe";
 import styles from "./HeroEngine.module.css";
 
 const WaterCanvas = lazy(() => import("./WaterCanvas"));
+const CosmicCanvas = lazy(() => import("./CosmicCanvas"));
+
+export type HeroBackgroundVariant = "water" | "cosmic";
 
 type HeroEngineProps = {
   siteSlug: string;
@@ -30,6 +33,7 @@ type HeroEngineProps = {
   transitioning?: boolean;
   showWholeEarthGlobe?: boolean;
   onWholeActivate?: () => void;
+  backgroundVariant?: HeroBackgroundVariant;
 };
 
 type HeroStyle = CSSProperties & {
@@ -53,7 +57,7 @@ class CanvasBoundary extends Component<{
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("Water hero renderer failed", error, info.componentStack);
+    console.error("Hero background renderer failed", error, info.componentStack);
     this.props.onError();
   }
 
@@ -71,6 +75,7 @@ export default function HeroEngine({
   transitioning = false,
   showWholeEarthGlobe = false,
   onWholeActivate,
+  backgroundVariant = "water",
 }: HeroEngineProps) {
   const { config, loading: configLoading, source, version } = useHeroConfig(siteSlug);
   const capability = useDeviceCapability();
@@ -83,6 +88,10 @@ export default function HeroEngine({
     : config.resolutionQuality === "medium"
       ? Math.min(capability.pixelRatio, 1.25)
       : capability.pixelRatio;
+  const renderedPixelRatio =
+    backgroundVariant === "cosmic" && capability.tier === "medium"
+      ? Math.max(0.75, requestedPixelRatio * 0.75)
+      : requestedPixelRatio;
   const shouldRender = capability.checked
     && capability.webgl2
     && !capability.reducedMotion
@@ -119,21 +128,34 @@ export default function HeroEngine({
       data-config-version={version}
       data-active-pillar={activePillar}
       data-transitioning={transitioning ? "true" : "false"}
+      data-background-variant={backgroundVariant}
     >
       <div className={`${styles.stage} ${ready ? styles.ready : ""}`} aria-hidden="true">
-        <div className={styles.fallback} />
+        <div
+          className={`${styles.fallback} ${
+            backgroundVariant === "cosmic" ? styles.cosmicFallback : ""
+          }`}
+        />
         {shouldRender && (
           <CanvasBoundary onError={onCanvasError}>
             <Suspense fallback={null}>
               <div className={styles.canvas}>
-                <WaterCanvas
-                  config={config}
-                  pixelRatio={requestedPixelRatio}
-                  tier={capability.tier}
-                  autoRotate={autoRotate}
-                  activePillar={activePillar}
-                  onReady={onCanvasReady}
-                />
+                {backgroundVariant === "cosmic" ? (
+                  <CosmicCanvas
+                    pixelRatio={renderedPixelRatio}
+                    tier={capability.tier}
+                    onReady={onCanvasReady}
+                  />
+                ) : (
+                  <WaterCanvas
+                    config={config}
+                    pixelRatio={renderedPixelRatio}
+                    tier={capability.tier}
+                    autoRotate={autoRotate}
+                    activePillar={activePillar}
+                    onReady={onCanvasReady}
+                  />
+                )}
               </div>
             </Suspense>
           </CanvasBoundary>
@@ -147,9 +169,13 @@ export default function HeroEngine({
         ) : null}
         <div className={styles.depth} />
         <div className={styles.surfaceLight} />
-        {!ready && <div className={styles.loading}>CALIBRATING WATER</div>}
+        {!ready && (
+          <div className={styles.loading}>
+            CALIBRATING {backgroundVariant === "cosmic" ? "COSMOS" : "WATER"}
+          </div>
+        )}
         <div className={styles.telemetry}>
-          FLUID / {config.resolutionQuality.toUpperCase()}<br />
+          {backgroundVariant === "cosmic" ? "COSMOS" : "FLUID"} / {config.resolutionQuality.toUpperCase()}<br />
           CONFIG / {configLoading ? "SYNC" : source.toUpperCase()}
         </div>
       </div>

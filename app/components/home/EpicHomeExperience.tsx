@@ -68,6 +68,7 @@ export function EpicHomeExperience() {
         <HeroEngine
           autoRotate
           siteSlug="studios"
+          backgroundVariant="cosmic"
           activePillar={visualPillar}
           transitioning={transitioning}
           showWholeEarthGlobe

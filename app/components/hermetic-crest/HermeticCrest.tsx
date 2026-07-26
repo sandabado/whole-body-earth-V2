@@ -45,7 +45,6 @@ type CrestStyle = CSSProperties & {
   "--field-speed": string;
   "--node-speed": string;
   "--active-color": string;
-  "--target-turn": string;
 };
 
 type PointerSample = {
@@ -57,14 +56,15 @@ type PointerSample = {
 const ELEMENTS = [
   // U+FE0E forces monochrome text presentation. Without it, some production
   // browsers substitute colored emoji glyphs that ignore the SVG fill color.
-  { id: "air", command: "press", label: "AIR", pillar: "PRESS", symbol: "🜁︎", x: 250, y: 103, color: COMMAND_PILLAR_COLORS.press },
-  { id: "fire", command: "presence", label: "FIRE", pillar: "PRESENCE", symbol: "🜂︎", x: 103, y: 250, color: COMMAND_PILLAR_COLORS.presence },
-  { id: "water", command: "studios", label: "WATER", pillar: "STUDIOS", symbol: "🜄︎", x: 397, y: 250, color: COMMAND_PILLAR_COLORS.studios },
-  { id: "earth", command: "foundation", label: "EARTH", pillar: "FOUNDATION", symbol: "🜃︎", x: 250, y: 397, color: COMMAND_PILLAR_COLORS.foundation },
-  { id: "ether", command: "guardian", label: "ETHER", pillar: "GUARDIAN", symbol: "⊙", x: 250, y: 250, color: COMMAND_PILLAR_COLORS.guardian },
+  { id: "air", command: "press", label: "AIR", pillar: "PRESS", business: "Whole Body Press", symbol: "🜁︎", x: 250, y: 103, color: COMMAND_PILLAR_COLORS.press },
+  { id: "fire", command: "presence", label: "FIRE", pillar: "PRESENCE", business: "Whole Body Presence", symbol: "🜂︎", x: 103, y: 250, color: COMMAND_PILLAR_COLORS.presence },
+  { id: "water", command: "studios", label: "WATER", pillar: "STUDIOS", business: "Whole Body Studios", symbol: "🜄︎", x: 397, y: 250, color: COMMAND_PILLAR_COLORS.studios },
+  { id: "earth", command: "foundation", label: "EARTH", pillar: "FOUNDATION", business: "Whole Body Foundation", symbol: "🜃︎", x: 250, y: 397, color: COMMAND_PILLAR_COLORS.foundation },
+  { id: "ether", command: "guardian", label: "ETHER", pillar: "GUARDIAN", business: "Whole Body Guardian", symbol: "⊙", x: 250, y: 250, color: COMMAND_PILLAR_COLORS.guardian },
 ] as const;
 
 type ElementId = (typeof ELEMENTS)[number]["id"];
+const DEFAULT_CENTER_COLOR = "#D4AF37";
 
 const PILLAR_TO_ELEMENT: Partial<Record<ActivePillar, ElementId>> = {
   presence: "fire",
@@ -109,6 +109,7 @@ export default function HermeticCrest({
   const pointerFrameRef = useRef<number | null>(null);
   const pointerBoundsRef = useRef<DOMRect | null>(null);
   const pointerSampleRef = useRef<PointerSample | null>(null);
+  const lastPointerTypeRef = useRef<string>("mouse");
   const previousActivePillarRef = useRef(activePillar);
   const instanceId = useId().replaceAll(":", "");
   const metalId = `${instanceId}-metal`;
@@ -126,12 +127,8 @@ export default function HermeticCrest({
   const activeElement = ELEMENTS.find((element) => element.id === selectedElement);
   const activeColor = activeElement?.color
     ?? (activePillar === "none"
-      ? COMMAND_PILLAR_COLORS.guardian
+      ? DEFAULT_CENTER_COLOR
       : COMMAND_PILLAR_COLORS[activePillar]);
-  const targetIndex = Math.max(
-    0,
-    ELEMENTS.findIndex((element) => element.id === selectedElement),
-  );
   const crestStyle: CrestStyle = {
     "--crest-size": `${size}px`,
     "--outer-speed": `${outerSpeed}s`,
@@ -139,8 +136,7 @@ export default function HermeticCrest({
     "--mandala-speed": `${mandalaSpeed}s`,
     "--field-speed": `${fieldPulseSpeed}s`,
     "--node-speed": `${fieldPulseSpeed * 3}s`,
-    "--active-color": activeColor ?? COMMAND_PILLAR_COLORS.guardian,
-    "--target-turn": `${360 + targetIndex * 72}deg`,
+    "--active-color": activeColor ?? DEFAULT_CENTER_COLOR,
   };
 
   useEffect(() => {
@@ -182,14 +178,24 @@ export default function HermeticCrest({
     const previewElement = ELEMENTS.find((element) =>
       element.id === (
         hoveredElement
-        ?? (phase === "turning" ? dialSelection : null)
+        ?? dialSelection
       )
     );
     onPillarPreview?.(previewElement?.command ?? null);
-  }, [dialSelection, hoveredElement, onPillarPreview, phase]);
+  }, [dialSelection, hoveredElement, onPillarPreview]);
 
   const selectElement = (element: (typeof ELEMENTS)[number]) => {
     if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+
+    const usesTapPreview = lastPointerTypeRef.current === "touch"
+      || window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (usesTapPreview && dialSelection !== element.id) {
+      setDialSelection(element.id);
+      setHoveredElement(null);
+      setPhase("open");
+      return;
+    }
+
     setDialSelection(element.id);
     setHoveredElement(element.id);
     setPhase("turning");
@@ -221,16 +227,8 @@ export default function HermeticCrest({
       const sample = pointerSampleRef.current;
       pointerFrameRef.current = null;
       if (!sample) return;
-      const nextElement: ElementId = Math.hypot(sample.horizontal, sample.vertical) < .16
-        ? "ether"
-        : Math.abs(sample.horizontal) > Math.abs(sample.vertical)
-          ? sample.horizontal > 0 ? "water" : "fire"
-          : sample.vertical > 0 ? "earth" : "air";
-      setHoveredElement((current) => current === nextElement ? current : nextElement);
       sample.target.style.setProperty("--tilt-x", `${(-sample.vertical * 4.5).toFixed(2)}deg`);
       sample.target.style.setProperty("--tilt-y", `${(sample.horizontal * 4.5).toFixed(2)}deg`);
-      sample.target.style.setProperty("--pointer-x", `${(sample.horizontal * 10).toFixed(2)}px`);
-      sample.target.style.setProperty("--pointer-y", `${(sample.vertical * 10).toFixed(2)}px`);
     });
   };
 
@@ -242,8 +240,20 @@ export default function HermeticCrest({
     setHoveredElement(null);
     event.currentTarget.style.setProperty("--tilt-x", "0deg");
     event.currentTarget.style.setProperty("--tilt-y", "0deg");
-    event.currentTarget.style.setProperty("--pointer-x", "0px");
-    event.currentTarget.style.setProperty("--pointer-y", "0px");
+  };
+
+  const resetTapPreview = (event: PointerEvent<HTMLDivElement>) => {
+    lastPointerTypeRef.current = event.pointerType;
+    if (
+      event.pointerType !== "touch"
+      || (event.target as HTMLElement).closest("button")
+    ) {
+      return;
+    }
+    setHoveredElement(null);
+    setDialSelection(null);
+    setPhase("locked");
+    onPillarPreview?.(null);
   };
 
   const status = phase === "turning"
@@ -268,17 +278,18 @@ export default function HermeticCrest({
       data-animate={animate ? "true" : "false"}
       data-running={animate && running ? "true" : "false"}
       role="group"
-      aria-label="Whole Body ancient key — choose one of five pillar fields"
+      aria-label="Whole Body five-field instrument — choose a pillar"
       onPointerEnter={enter}
       onPointerMove={move}
       onPointerLeave={reset}
+      onPointerDown={resetTapPreview}
     >
       <span className={styles.interfaceLabel} aria-hidden="true">WB.E / HERMETIC INTERFACE</span>
       <span className={styles.coordinate} aria-hidden="true">05-FIELD / QX-01</span>
       <span className={styles.svgShell}>
         <svg viewBox="0 0 500 500" role="img" aria-labelledby={`${instanceId}-title ${instanceId}-description`}>
-          <title id={`${instanceId}-title`}>The Whole Body ancient key</title>
-          <desc id={`${instanceId}-description`}>An aged metal key and lock organized as a Guardian-centered Quincunx, with Fire, Air, Water, and Earth around Ether.</desc>
+          <title id={`${instanceId}-title`}>The Whole Body five-field instrument</title>
+          <desc id={`${instanceId}-description`}>A golden calibrated circle organized as a Guardian-centered Quincunx, with Fire, Air, Water, and Earth around Ether.</desc>
           <defs>
             <linearGradient id={metalId} x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stopColor="#6f5d32" />
@@ -363,43 +374,8 @@ export default function HermeticCrest({
               ))}
             </g>
 
-            <g className={styles.lockMechanism}>
-              <circle cx="250" cy="250" r="60" fill="#070708" stroke={`url(#${metalId})`} strokeWidth="5" />
-              <circle cx="250" cy="250" r="51" fill="none" stroke="#6f5d32" strokeWidth="1" strokeDasharray="2 5" />
-              {Array.from({ length: 5 }, (_, index) => (
-                <g key={index} transform={`rotate(${index * 72} 250 250)`}>
-                  <rect
-                    className={styles.lockPin}
-                    x="246"
-                    y="174"
-                    width="8"
-                    height="23"
-                    rx="2"
-                    fill={`url(#${metalId})`}
-                    style={{ "--pin-delay": `${420 + index * 80}ms` } as CSSProperties}
-                  />
-                </g>
-              ))}
-              <g className={styles.aperture}>
-                {Array.from({ length: 5 }, (_, index) => (
-                  <path key={index} d="M250 207 L271 235 L258 253 L232 236 Z" transform={`rotate(${index * 72} 250 250)`} fill="#17131f" stroke="var(--active-color)" strokeWidth=".7" opacity=".96" />
-                ))}
-              </g>
-              <circle className={styles.observerCore} cx="250" cy="250" r="13" fill="var(--active-color)" />
-            </g>
-
-            <g className={styles.keyFollower}>
-              <g className={styles.keyAssembly}>
-                <circle className={styles.keyCurrent} cx="250" cy="250" r="42" />
-                <circle cx="250" cy="250" r="34" fill="none" stroke={`url(#${metalId})`} strokeWidth="11" />
-                <circle cx="250" cy="250" r="15" fill="#050505" stroke="var(--active-color)" strokeWidth="1.4" />
-                <path d="M243 283 L257 283 L257 346 L275 346 L275 334 L292 334 L292 360 L276 360 L276 374 L264 374 L264 389 L243 389 Z" fill={`url(#${metalId})`} stroke="#4d4025" strokeWidth="1.2" />
-                <path d="M250 289 L250 376" stroke="#f6dd78" strokeWidth="1.4" opacity=".62" />
-              </g>
-            </g>
-
             <g className={styles.inscriptions}>
-              <text x="250" y="71" textAnchor="middle">OBSERVER-CENTERED / KEY 05</text>
+              <text x="250" y="71" textAnchor="middle">OBSERVER-CENTERED / AXIS 05</text>
               <text x="250" y="442" textAnchor="middle">
                 <textPath href={`#${mottoPathId}`} startOffset="50%" textAnchor="middle">GEOMETRIA TENET · FIVE FIELDS / ONE BODY</textPath>
               </text>
@@ -419,12 +395,25 @@ export default function HermeticCrest({
               "--control-color": element.color,
               "--control-size": element.id === "ether" ? "18%" : "12%",
             } as CSSProperties}
-            aria-label={`Enter the ${element.pillar.toLowerCase()} pillar`}
+            data-element={element.id}
+            data-active={selectedElement === element.id ? "true" : "false"}
+            aria-label={`Preview ${element.business}; activate again to enter`}
             aria-current={activePillar === element.command ? "page" : undefined}
             onFocus={() => setHoveredElement(element.id)}
             onBlur={() => setHoveredElement(null)}
+            onPointerDown={(event) => {
+              lastPointerTypeRef.current = event.pointerType;
+            }}
+            onPointerEnter={(event) => {
+              if (event.pointerType !== "touch") setHoveredElement(element.id);
+            }}
+            onPointerLeave={(event) => {
+              if (event.pointerType !== "touch") setHoveredElement(null);
+            }}
             onClick={() => selectElement(element)}
-          />
+          >
+            <span className={styles.controlLabel}>{element.business}</span>
+          </button>
         ))}
       </span>
       <span className={styles.status} aria-live="polite"><i aria-hidden="true" />{status}</span>

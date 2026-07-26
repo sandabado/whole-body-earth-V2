@@ -21,11 +21,11 @@ const commands: ReadonlyArray<{
   symbol: string | null;
   color: string;
 }> = [
-  { id: "presence", label: "Presence", navLabel: "Presence", symbol: "\u{1F702}\u{FE0E}", color: COMMAND_PILLAR_COLORS.presence },
-  { id: "press", label: "Press", navLabel: "Press", symbol: "\u{1F701}\u{FE0E}", color: COMMAND_PILLAR_COLORS.press },
-  { id: "studios", label: "Studios", navLabel: "Studios", symbol: "\u{1F704}\u{FE0E}", color: COMMAND_PILLAR_COLORS.studios },
-  { id: "foundation", label: "Foundation", navLabel: "Foundation", symbol: "\u{1F703}\u{FE0E}", color: COMMAND_PILLAR_COLORS.foundation },
-  { id: "guardian", label: "Guardian", navLabel: "Guardian", symbol: "⊙", color: COMMAND_PILLAR_COLORS.guardian },
+  { id: "presence", label: "Whole Body Presence", navLabel: "Presence", symbol: "\u{1F702}\u{FE0E}", color: COMMAND_PILLAR_COLORS.presence },
+  { id: "press", label: "Whole Body Press", navLabel: "Press", symbol: "\u{1F701}\u{FE0E}", color: COMMAND_PILLAR_COLORS.press },
+  { id: "studios", label: "Whole Body Studios", navLabel: "Studios", symbol: "\u{1F704}\u{FE0E}", color: COMMAND_PILLAR_COLORS.studios },
+  { id: "foundation", label: "Whole Body Foundation", navLabel: "Foundation", symbol: "\u{1F703}\u{FE0E}", color: COMMAND_PILLAR_COLORS.foundation },
+  { id: "guardian", label: "Guardian — The Agreements", navLabel: "Guardian", symbol: "⊙", color: COMMAND_PILLAR_COLORS.guardian },
   { id: "whole", label: "Whole Body Earth — Live Calendar", navLabel: "NØW", symbol: null, color: COMMAND_PILLAR_COLORS.whole },
 ];
 

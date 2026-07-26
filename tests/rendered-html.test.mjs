@@ -6,10 +6,12 @@ const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 
 test("ships the fullscreen Whole Body Earth ritual portal", async () => {
-  const [page, home, nav, overlay, controller, layout, studiosLayout, packageJson] = await Promise.all([
+  const [page, home, nav, crest, solids, overlay, controller, layout, studiosLayout, packageJson] = await Promise.all([
     source("app/page.tsx"),
     source("app/components/home/EpicHomeExperience.tsx"),
     source("app/components/home/TopNav.tsx"),
+    source("app/components/hermetic-crest/HermeticCrest.tsx"),
+    source("app/components/home/HeroQuincunx.tsx"),
     source("app/components/TransitionOverlay.tsx"),
     source("app/components/WholeBodyTransition.tsx"),
     source("app/layout.tsx"),
@@ -24,6 +26,7 @@ test("ships the fullscreen Whole Body Earth ritual portal", async () => {
   assert.match(studiosLayout, /Whole Body Studios/);
   assert.match(page, /<EpicHomeExperience \/>/);
   assert.match(home, /<HeroQuincunx[\s\S]*activePillar=\{visualPillar\}/);
+  assert.match(home, /backgroundVariant="cosmic"/);
   assert.match(home, /<HermeticCrest/);
   assert.match(home, /onPillarActivate=\{beginNamedTransition\}/);
   assert.match(home, /<TopNav activePillar=\{activePillar\}/);
@@ -40,9 +43,29 @@ test("ships the fullscreen Whole Body Earth ritual portal", async () => {
   assert.match(nav, /Whole Body Earth — Live Calendar/);
   assert.doesNotMatch(nav, /⏺|recBlink|record/);
   assert.match(nav, /styles\.label/);
-  assert.match(nav, /navLabel: "Foundation"/);
+  for (const business of [
+    "Whole Body Presence",
+    "Whole Body Press",
+    "Whole Body Studios",
+    "Whole Body Foundation",
+    "Guardian — The Agreements",
+  ]) assert.match(nav, new RegExp(business));
   assert.match(nav, /navLabel: "NØW"/);
   assert.match(nav, /aria-label="Enter a Whole Body pillar"/);
+  for (const business of [
+    "Whole Body Presence",
+    "Whole Body Press",
+    "Whole Body Studios",
+    "Whole Body Foundation",
+    "Whole Body Guardian",
+  ]) assert.match(crest, new RegExp(business));
+  assert.doesNotMatch(crest, /keyFollower|keyAssembly|lockMechanism|KEY 05|ancient key/);
+  assert.match(crest, /usesTapPreview/);
+  assert.match(crest, /dialSelection !== element\.id/);
+  assert.match(solids, /DEFAULT_GOLD_COLOR = hexToRgb\("#D4AF37"\)/);
+  assert.match(solids, /solid\.pillar === activePillar \? 1 : 0/);
+  assert.match(solids, /FOCUS_TRANSITION_SECONDS = 0\.4/);
+  assert.match(solids, /easeOutCubic\(\s*focusTransitionElapsed \/ FOCUS_TRANSITION_SECONDS/);
   assert.match(controller, /TRANSITION_DURATION_MS = 1200/);
   assert.match(controller, /DISSOLVE_DURATION_MS = 300/);
   assert.match(controller, /router\.prefetch\(route\)/);
@@ -94,13 +117,15 @@ test("ships six seamless entrances including the Whole Earth observatory", async
   );
 });
 
-test("uses the reusable Water engine with active-pillar focus and hydration-safe degradation", async () => {
-  const [home, engine, canvas, capability, shader, styles] = await Promise.all([
+test("uses distinct cosmic and Water engines with hydration-safe degradation", async () => {
+  const [home, engine, canvas, cosmic, capability, shader, cosmicShader, styles] = await Promise.all([
     source("app/components/home/EpicHomeExperience.tsx"),
     source("app/components/HeroEngine/HeroEngine.tsx"),
     source("app/components/HeroEngine/WaterCanvas.tsx"),
+    source("app/components/HeroEngine/CosmicCanvas.tsx"),
     source("app/components/HeroEngine/hooks/useDeviceCapability.ts"),
     source("app/components/HeroEngine/shaders/water.frag.ts"),
+    source("app/components/HeroEngine/shaders/cosmic.frag.ts"),
     source("app/components/HeroEngine/HeroEngine.module.css"),
   ]);
 
@@ -111,6 +136,8 @@ test("uses the reusable Water engine with active-pillar focus and hydration-safe
   assert.match(home, /showWholeEarthGlobe/);
   assert.match(home, /onWholeActivate=/);
   assert.match(engine, /lazy\(\(\) => import\("\.\/WaterCanvas"\)\)/);
+  assert.match(engine, /lazy\(\(\) => import\("\.\/CosmicCanvas"\)\)/);
+  assert.match(engine, /backgroundVariant === "cosmic"/);
   assert.match(engine, /data-transitioning=\{transitioning \? "true" : "false"\}/);
   assert.match(engine, /CanvasBoundary/);
   assert.match(engine, /capability\.reducedMotion/);
@@ -123,6 +150,11 @@ test("uses the reusable Water engine with active-pillar focus and hydration-safe
   assert.match(shader, /uFluidDissipation/);
   assert.match(shader, /uPointerInfluenceStrength/);
   assert.match(shader, /caustic/);
+  assert.match(cosmic, /staticStarCount/);
+  assert.match(cosmic, /Math\.PI \* 2 \/ 300/);
+  assert.match(cosmicShader, /vec3 navy/);
+  assert.match(cosmicShader, /vec3 violet/);
+  assert.match(cosmicShader, /vec3 teal/);
   assert.match(styles, /prefers-reduced-motion:\s*reduce/);
 });
 
@@ -179,6 +211,7 @@ test("ships every engine source file", async () => {
     "app/components/HeroEngine/HeroEngine.tsx",
     "app/components/HeroEngine/HeroEngine.module.css",
     "app/components/HeroEngine/WaterCanvas.tsx",
+    "app/components/HeroEngine/CosmicCanvas.tsx",
     "app/components/HeroEngine/config.ts",
     "app/components/HeroEngine/hero-configs.json",
     "app/components/HeroEngine/hooks/useDeviceCapability.ts",
@@ -186,6 +219,8 @@ test("ships every engine source file", async () => {
     "app/components/HeroEngine/hooks/useScrollSpeed.ts",
     "app/components/HeroEngine/shaders/common.vert.ts",
     "app/components/HeroEngine/shaders/water.frag.ts",
+    "app/components/HeroEngine/shaders/cosmic.vert.ts",
+    "app/components/HeroEngine/shaders/cosmic.frag.ts",
     "public/og-water.png",
   ].map((path) => access(new URL(path, root))));
 });

@@ -11,7 +11,6 @@ type Point2 = Readonly<{ x: number; y: number }>;
 type Edge = readonly [from: number, to: number];
 type Face = readonly number[];
 type RGB = readonly [red: number, green: number, blue: number];
-type QuincunxPosition = "top" | "left" | "right" | "bottom" | "center";
 type ElementPillar = Exclude<ActivePillar, "none" | "whole">;
 
 const PILLAR_TURN_SLOT: Record<ElementPillar, number> = {
@@ -26,7 +25,6 @@ interface SolidDefinition {
   name: string;
   element: string;
   pillar: ElementPillar;
-  position: QuincunxPosition;
   color: RGB;
   vertices: readonly Vector3[];
   faces: readonly Face[];
@@ -52,17 +50,7 @@ const PHI = (1 + Math.sqrt(5)) / 2;
 const TAU = Math.PI * 2;
 const STATIC_TIME = 9;
 const MAX_DEVICE_PIXEL_RATIO = 2;
-const CONNECTIONS: readonly Edge[] = [
-  [0, 1],
-  [1, 3],
-  [3, 2],
-  [2, 0],
-  [0, 4],
-  [1, 4],
-  [2, 4],
-  [3, 4],
-];
-
+const FOCUS_TRANSITION_SECONDS = 0.4;
 const TETRAHEDRON_VERTICES: readonly Vector3[] = [
   { x: 1, y: 1, z: 1 },
   { x: -1, y: -1, z: 1 },
@@ -352,19 +340,19 @@ const SOLID_COLORS = {
   guardian: hexToRgb(COMMAND_PILLAR_COLORS.guardian),
 } satisfies Record<ElementPillar, RGB>;
 const WHOLE_COLOR = hexToRgb(COMMAND_PILLAR_COLORS.whole);
+const DEFAULT_GOLD_COLOR = hexToRgb("#D4AF37");
 
-// Array order also defines the semantic quincunx layout used by CONNECTIONS:
-// top, left, right, bottom, and the witnessing center.
+// Array order follows the five-field sequence and supplies the geometry used
+// by the one-at-a-time center instrument.
 const SOLIDS: readonly SolidDefinition[] = [
   makeSolid({
     name: "Octahedron",
     element: "Air",
     pillar: "press",
-    position: "top",
     color: SOLID_COLORS.press,
     vertices: OCTAHEDRON_VERTICES,
     faces: OCTAHEDRON_FACES,
-    revealAt: 3.05,
+    revealAt: 0.35,
     rotation: { x: 0.17, y: 0.26, z: 0.06 },
     phase: 0.8,
   }),
@@ -372,11 +360,10 @@ const SOLIDS: readonly SolidDefinition[] = [
     name: "Tetrahedron",
     element: "Fire",
     pillar: "presence",
-    position: "left",
     color: SOLID_COLORS.presence,
     vertices: TETRAHEDRON_VERTICES,
     faces: TETRAHEDRON_FACES,
-    revealAt: 3.7,
+    revealAt: 0.35,
     rotation: { x: -0.21, y: 0.31, z: 0.08 },
     phase: 2.2,
   }),
@@ -384,11 +371,10 @@ const SOLIDS: readonly SolidDefinition[] = [
     name: "Icosahedron",
     element: "Water",
     pillar: "studios",
-    position: "right",
     color: SOLID_COLORS.studios,
     vertices: ICOSAHEDRON_VERTICES,
     faces: ICOSAHEDRON_FACES,
-    revealAt: 4.35,
+    revealAt: 0.35,
     rotation: { x: 0.12, y: -0.22, z: 0.05 },
     phase: 3.7,
   }),
@@ -396,11 +382,10 @@ const SOLIDS: readonly SolidDefinition[] = [
     name: "Cube",
     element: "Earth",
     pillar: "foundation",
-    position: "bottom",
     color: SOLID_COLORS.foundation,
     vertices: CUBE_VERTICES,
     faces: CUBE_FACES,
-    revealAt: 5,
+    revealAt: 0.35,
     rotation: { x: -0.13, y: 0.2, z: -0.045 },
     phase: 5.1,
   }),
@@ -408,7 +393,6 @@ const SOLIDS: readonly SolidDefinition[] = [
     name: "Dodecahedron",
     element: "Ether",
     pillar: "guardian",
-    position: "center",
     color: SOLID_COLORS.guardian,
     vertices: DODECAHEDRON_VERTICES,
     faces: dodecahedronFaces,
@@ -459,26 +443,16 @@ function isElementPillar(pillar: ActivePillar): pillar is ElementPillar {
   return pillar !== "none" && pillar !== "whole";
 }
 
-function focusTargets(
-  activePillar: ActivePillar,
-  motionTime: number,
-  reducedMotion: boolean,
-): number[] {
+function focusTargets(activePillar: ActivePillar): number[] {
   if (isElementPillar(activePillar)) {
-    return SOLIDS.map((solid) =>
-      solid.pillar === activePillar || solid.position === "center" ? 1 : 0.12
-    );
+    return SOLIDS.map((solid) => solid.pillar === activePillar ? 1 : 0);
   }
 
   if (activePillar === "whole") {
-    if (reducedMotion) return SOLIDS.map(() => 0.58);
-    return SOLIDS.map((_, index) => {
-      const wave = Math.sin(motionTime * 0.72 - index * (TAU / SOLIDS.length)) * 0.5 + 0.5;
-      return 0.3 + wave * wave * 0.7;
-    });
+    return SOLIDS.map((solid) => solid.pillar === "guardian" ? 1 : 0);
   }
 
-  return SOLIDS.map(() => 0.3);
+  return SOLIDS.map((solid) => solid.pillar === "guardian" ? 1 : 0);
 }
 
 function nextFullTurn(current: number, pillar: ElementPillar): number {
@@ -523,32 +497,6 @@ function project(vertex: Vector3, center: Point2, radiusInPixels: number): Proje
   };
 }
 
-function nodePosition(
-  position: QuincunxPosition,
-  center: Point2,
-  orbitRadius: number,
-  elapsed: number,
-  phase: number,
-  reducedMotion: boolean,
-): Point2 {
-  const offsets: Record<QuincunxPosition, Point2> = {
-    top: { x: 0, y: -orbitRadius },
-    left: { x: -orbitRadius, y: 0 },
-    right: { x: orbitRadius, y: 0 },
-    bottom: { x: 0, y: orbitRadius },
-    center: { x: 0, y: 0 },
-  };
-  const offset = offsets[position];
-  const commonX = reducedMotion ? 0 : Math.cos(elapsed * 0.22) * 2.2;
-  const commonY = reducedMotion ? 0 : Math.sin(elapsed * 0.34) * 5;
-  const independentY = reducedMotion ? 0 : Math.sin(elapsed * 0.62 + phase) * 2.8;
-
-  return {
-    x: center.x + offset.x + commonX,
-    y: center.y + offset.y + commonY + independentY,
-  };
-}
-
 function drawGlow(
   context: CanvasRenderingContext2D,
   center: Point2,
@@ -578,6 +526,7 @@ function drawSolid(
   focusIntensity: number,
   renderColor: RGB = solid.color,
   rotationOverrideY: number | null = null,
+  displayScale = 1,
 ): void {
   const pointReveal = smoothstep(solid.revealAt, solid.revealAt + 0.32, revealElapsed);
   const geometryReveal = smoothstep(solid.revealAt + 0.25, solid.revealAt + 1.45, revealElapsed);
@@ -586,7 +535,10 @@ function drawSolid(
   const pulse = reducedMotion ? 0 : Math.sin(motionElapsed * 1.08 + solid.phase) * 0.5 + 0.5;
   const emergenceScale = 0.045 + easeOutCubic(geometryReveal) * 0.955;
   const breathingScale = reducedMotion ? 1 : 0.985 + pulse * 0.03;
-  const renderedRadius = radiusInPixels * emergenceScale * breathingScale;
+  const renderedRadius = radiusInPixels
+    * emergenceScale
+    * breathingScale
+    * displayScale;
 
   context.save();
   context.globalCompositeOperation = "screen";
@@ -675,64 +627,6 @@ function drawSolid(
   context.restore();
 }
 
-function drawConnections(
-  context: CanvasRenderingContext2D,
-  positions: readonly Point2[],
-  revealElapsed: number,
-  motionElapsed: number,
-  reducedMotion: boolean,
-  focusLevels: readonly number[],
-): void {
-  context.save();
-  context.globalCompositeOperation = "screen";
-  context.lineCap = "round";
-
-  CONNECTIONS.forEach(([fromIndex, toIndex], connectionIndex) => {
-    const from = positions[fromIndex];
-    const to = positions[toIndex];
-    const lineReveal = smoothstep(
-      4.65 + connectionIndex * 0.25,
-      5.8 + connectionIndex * 0.25,
-      revealElapsed,
-    );
-    const nodeReveal = Math.min(
-      smoothstep(SOLIDS[fromIndex].revealAt, SOLIDS[fromIndex].revealAt + 0.8, revealElapsed),
-      smoothstep(SOLIDS[toIndex].revealAt, SOLIDS[toIndex].revealAt + 0.8, revealElapsed),
-    );
-    const connectionFocus = (focusLevels[fromIndex] + focusLevels[toIndex]) * 0.5;
-    const alpha = lineReveal * nodeReveal * connectionFocus;
-    if (alpha <= 0.002) return;
-
-    const lineGradient = context.createLinearGradient(from.x, from.y, to.x, to.y);
-    lineGradient.addColorStop(0, rgba(SOLIDS[fromIndex].color, alpha * 0.08));
-    lineGradient.addColorStop(0.5, rgba([151, 118, 255], alpha * 0.24));
-    lineGradient.addColorStop(1, rgba(SOLIDS[toIndex].color, alpha * 0.08));
-    context.strokeStyle = lineGradient;
-    context.lineWidth = 0.8;
-    context.beginPath();
-    context.moveTo(from.x, from.y);
-    context.lineTo(to.x, to.y);
-    context.stroke();
-
-    const travel = reducedMotion
-      ? (connectionIndex * 0.137 + 0.34) % 1
-      : (motionElapsed * 0.14 + connectionIndex * 0.137) % 1;
-    const pulseX = from.x + (to.x - from.x) * travel;
-    const pulseY = from.y + (to.y - from.y) * travel;
-    const endpointFade = Math.sin(travel * Math.PI);
-    const pulseAlpha = alpha * endpointFade;
-    drawGlow(
-      context,
-      { x: pulseX, y: pulseY },
-      7,
-      [151, 118, 255],
-      pulseAlpha * 0.72,
-    );
-  });
-
-  context.restore();
-}
-
 function drawScene(
   context: CanvasRenderingContext2D,
   width: number,
@@ -774,56 +668,36 @@ function drawScene(
     context.fill();
   }
 
-  // The four elemental bodies are intentionally wider than the key itself:
-  // they form the surrounding constellation instead of disappearing beneath
-  // the dial's rings.
-  const orbitRadius = Math.min(
-    520,
-    Math.max(88, Math.min(width * 0.42, height * 0.38)),
-  );
-  const positions = SOLIDS.map((solid) =>
-    nodePosition(
-      solid.position,
-      center,
-      orbitRadius,
-      motionElapsed,
-      solid.phase,
-      reducedMotion,
-    ),
-  );
-
-  drawConnections(
-    context,
-    positions,
-    revealElapsed,
-    motionElapsed,
-    reducedMotion,
-    focusLevels,
+  const centerDrift = {
+    x: center.x + (reducedMotion ? 0 : Math.cos(motionElapsed * 0.22) * 1.6),
+    y: center.y + (reducedMotion ? 0 : Math.sin(motionElapsed * 0.34) * 2.4),
+  };
+  const baseRadius = Math.min(
+    138,
+    Math.max(54, Math.min(width, height) * 0.19),
   );
 
   SOLIDS.forEach((solid, index) => {
-    const baseRadius = solid.position === "center"
-      ? Math.min(128, Math.max(36, orbitRadius * 0.36))
-      : Math.min(104, Math.max(30, orbitRadius * 0.27));
-    const renderColor = solid.position === "center"
-      ? activePillar === "whole"
-        ? WHOLE_COLOR
-        : isElementPillar(activePillar)
-          ? SOLID_COLORS[activePillar]
-          : SOLID_COLORS.guardian
-      : solid.color;
+    const renderColor = activePillar === "whole"
+      ? WHOLE_COLOR
+      : activePillar === "none" && solid.pillar === "guardian"
+        ? DEFAULT_GOLD_COLOR
+        : solid.color;
     drawSolid(
       context,
       solid,
       index,
-      positions[index],
+      centerDrift,
       baseRadius,
       revealElapsed,
       motionElapsed,
       reducedMotion,
       focusLevels[index],
       renderColor,
-      solid.position === "center" ? dodecaTurn : null,
+      isElementPillar(activePillar) && solid.pillar === activePillar
+        ? dodecaTurn
+        : null,
+      0.8 + focusLevels[index] * 0.2,
     );
   });
 }
@@ -874,11 +748,10 @@ export function HeroQuincunx({
     let dodecaTurnElapsed = 0;
     let dodecaIsTurning = false;
     let lastTurnPillar: ElementPillar | null = null;
-    let focusLevels = focusTargets(
-      activePillarRef.current,
-      motionElapsed,
-      reducedMotion,
-    );
+    let focusLevels = focusTargets(activePillarRef.current);
+    let focusStartLevels = [...focusLevels];
+    let focusTransitionElapsed = FOCUS_TRANSITION_SECONDS;
+    let lastFocusPillar = activePillarRef.current;
     let lastFrameTime = 0;
     let animationFrame: number | null = null;
     let disposed = false;
@@ -886,14 +759,31 @@ export function HeroQuincunx({
     let lastRenderedAt = 0;
 
     const updateFocus = (delta: number, immediate = false) => {
-      const targets = focusTargets(
-        activePillarRef.current,
-        motionElapsed,
-        reducedMotion,
+      const requestedPillar = activePillarRef.current;
+      const targets = focusTargets(requestedPillar);
+
+      if (requestedPillar !== lastFocusPillar) {
+        focusStartLevels = [...focusLevels];
+        focusTransitionElapsed = 0;
+        lastFocusPillar = requestedPillar;
+      }
+
+      if (immediate) {
+        focusLevels = targets;
+        focusStartLevels = [...targets];
+        focusTransitionElapsed = FOCUS_TRANSITION_SECONDS;
+        return;
+      }
+
+      focusTransitionElapsed = Math.min(
+        FOCUS_TRANSITION_SECONDS,
+        focusTransitionElapsed + delta,
       );
-      const blend = immediate ? 1 : 1 - Math.exp(-delta * 2.1);
-      focusLevels = focusLevels.map((level, index) =>
-        level + (targets[index] - level) * blend
+      const progress = easeOutCubic(
+        focusTransitionElapsed / FOCUS_TRANSITION_SECONDS,
+      );
+      focusLevels = focusStartLevels.map((level, index) =>
+        level + (targets[index] - level) * progress
       );
     };
 
