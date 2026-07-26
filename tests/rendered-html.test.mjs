@@ -44,7 +44,9 @@ test("ships the fullscreen Whole Body Earth ritual portal", async () => {
   assert.match(transition, /studios: "\/studios"/);
   assert.match(transition, /foundation: "\/foundation"/);
   assert.match(transition, /guardian: "\/guardian"/);
-  assert.match(transition, /whole: "\/calendar"/);
+  assert.doesNotMatch(transition, /whole: "\/calendar"/);
+  assert.match(home, /pillar === "whole"/);
+  assert.match(home, /router\.push\("\/calendar"\)/);
   assert.match(transition, /event\.key === "Escape"/);
   assert.match(transition, /event\.key === "Tab"/);
   assert.match(transition, /SWIPE_CANCEL_THRESHOLD_PX = 72/);
@@ -54,14 +56,13 @@ test("ships the fullscreen Whole Body Earth ritual portal", async () => {
   assert.doesNotMatch(page + home + layout + packageJson, /Your site is taking shape|codex-preview|react-loading-skeleton/i);
 });
 
-test("ships six pillar-specific entrance sequences", async () => {
-  const [fire, air, water, earth, ether, observatory, styles] = await Promise.all([
+test("ships five pillar-specific entrances and a direct NØW route", async () => {
+  const [fire, air, water, earth, ether, styles] = await Promise.all([
     source("app/components/transitions/FireTransition.tsx"),
     source("app/components/transitions/AirTransition.tsx"),
     source("app/components/transitions/WaterTransition.tsx"),
     source("app/components/transitions/EarthTransition.tsx"),
     source("app/components/transitions/EtherTransition.tsx"),
-    source("app/components/transitions/ObservatoryTransition.tsx"),
     source("app/components/home/TransitionOverlay.module.css"),
   ]);
 
@@ -71,12 +72,11 @@ test("ships six pillar-specific entrance sequences", async () => {
   assert.match(water, /lazy\(\(\) => import\("\.\.\/HeroEngine\/WaterCanvas"\)\)/);
   assert.match(earth, /Entering the Earth Pillar/);
   assert.match(ether, /Entering the Ether Pillar/);
-  assert.match(observatory, /Entering the Constellation/);
   assert.match(styles, /--ease-epic:\s*cubic-bezier\(\.65,\s*0,\s*\.35,\s*1\)/);
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.doesNotMatch(
-    fire + air + water + earth + ether + observatory,
+    fire + air + water + earth + ether,
     /PillarShelf|whole-body-command-shelf/,
   );
 });

@@ -84,8 +84,7 @@
 }
 
 .air .ritualTitle,
-.water .ritualTitle,
-.observatory .ritualTitle {
+.water .ritualTitle {
   font-family: var(--font-body), Inter, Arial, sans-serif;
   font-size: clamp(1.2rem, 3vw, 2rem);
   letter-spacing: .18em;
@@ -452,55 +451,6 @@
   content: "";
 }
 
-.observatory {
-  --transition-color: var(--whole);
-  background: #050505;
-}
-
-.observatory::before {
-  z-index: 2;
-  background:
-    repeating-radial-gradient(circle at center, transparent 0 5vmin, rgba(255, 255, 255, .055) 5.2vmin 5.35vmin, transparent 5.55vmin 10vmin),
-    radial-gradient(circle at center, rgba(255, 255, 255, .08), transparent 60%);
-  transform: scale(1.6);
-  animation: observatoryTunnel 1200ms var(--ease-epic) both;
-}
-
-.observatory::after {
-  position: absolute;
-  z-index: 16;
-  inset: 0;
-  background: white;
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  animation: observatoryFlash 1200ms linear both;
-}
-
-.edgePulse {
-  --edge-color: var(--whole);
-  --edge-delay: 0ms;
-  position: absolute;
-  z-index: 6;
-  inset: calc(var(--edge-index, 0) * 1.25rem);
-  border: 2px solid var(--edge-color);
-  box-shadow: inset 0 0 36px color-mix(in srgb, var(--edge-color) 28%, transparent);
-  opacity: 0;
-  animation: edgePulse 480ms ease-in-out var(--edge-delay) both;
-}
-
-.observatory .dodecahedron {
-  --transition-color: var(--whole);
-  background:
-    repeating-conic-gradient(from 15deg, rgba(255, 255, 255, .82) 0 .5deg, transparent .8deg 29.2deg),
-    conic-gradient(var(--presence), var(--press), var(--studios), var(--foundation), var(--guardian), var(--presence));
-  animation: observatorySolid 1200ms var(--ease-epic) both;
-}
-
-.observatory .ritualCopy {
-  animation-name: observatoryCopy;
-}
-
 .srOnly {
   position: absolute;
   width: 1px;
@@ -649,37 +599,6 @@
   100% { opacity: 0; transform: translate(-50%, -50%) rotate(330deg) scale(1.7); }
 }
 
-@keyframes observatoryTunnel {
-  0% { opacity: 0; transform: scale(1.8); }
-  60% { opacity: 1; transform: scale(.62); }
-  100% { opacity: 0; transform: scale(.06); }
-}
-
-@keyframes observatoryFlash {
-  0%, 70% { opacity: 0; }
-  74%, 82% { opacity: 1; }
-  90%, 100% { opacity: 0; }
-}
-
-@keyframes edgePulse {
-  0% { opacity: 0; transform: scale(1.08); }
-  45%, 72% { opacity: .82; transform: scale(1); }
-  100% { opacity: 0; transform: scale(.94); }
-}
-
-@keyframes observatorySolid {
-  0%, 10% { opacity: 0; transform: translate(-50%, -50%) rotate(-90deg) scale(.18); }
-  62% { opacity: .92; transform: translate(-50%, -50%) rotate(620deg) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) rotate(980deg) scale(8); }
-}
-
-@keyframes observatoryCopy {
-  0%, 34% { opacity: 0; filter: blur(10px); transform: translate(-50%, -44%) scale(.96); }
-  46%, 67% { opacity: 1; filter: blur(0); color: white; transform: translate(-50%, -50%) scale(1); }
-  74%, 82% { opacity: 1; filter: blur(0); color: #050505; transform: translate(-50%, -50%) scale(1.03); }
-  92%, 100% { opacity: 0; filter: blur(7px); color: white; transform: translate(-50%, -56%) scale(1.08); }
-}
-
 @media (max-width: 760px) {
   .solid {
     width: min(46vw, 13rem);
@@ -700,8 +619,7 @@
   }
 
   .air .ritualTitle,
-  .water .ritualTitle,
-  .observatory .ritualTitle {
+  .water .ritualTitle {
     font-size: clamp(1rem, 5vw, 1.45rem);
     letter-spacing: .14em;
   }
@@ -732,8 +650,7 @@
   .blueprintGrid,
   .violetFlame,
   .constellation,
-  .surfaceRipple,
-  .edgePulse {
+  .surfaceRipple {
     animation: none;
   }
 }

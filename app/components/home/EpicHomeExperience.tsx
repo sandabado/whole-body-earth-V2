@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import HeroEngine from "../HeroEngine/HeroEngine";
 import type { ActivePillar } from "../HeroEngine/config";
@@ -12,10 +13,11 @@ import {
 } from "./PillarTransition";
 import { TopNav, type CommandPillar } from "./TopNav";
 
-type NamedPillar = Exclude<ActivePillar, "none" | "whole">;
+type NamedPillar = PortalPillar;
 
 export function EpicHomeExperience() {
-  const [activePillar, setActivePillar] = useState<ActivePillar>("none");
+  const router = useRouter();
+  const [activePillar, setActivePillar] = useState<NamedPillar | "none">("none");
   const [dialPreview, setDialPreview] = useState<NamedPillar | null>(null);
   const [dialTurnPillar, setDialTurnPillar] = useState<NamedPillar | null>(null);
   const transitioning = activePillar !== "none";
@@ -41,13 +43,13 @@ export function EpicHomeExperience() {
     };
   }, []);
 
-  const beginTransition = useCallback((pillar: PortalPillar) => {
+  const beginTransition = useCallback((pillar: NamedPillar) => {
     setActivePillar((current) => {
       if (current !== "none") return current;
       return pillar;
     });
     setDialPreview(null);
-    if (pillar !== "whole") setDialTurnPillar(pillar);
+    setDialTurnPillar(pillar);
   }, []);
 
   const beginNamedTransition = useCallback((pillar: NamedPillar) => {
@@ -55,8 +57,12 @@ export function EpicHomeExperience() {
   }, [beginTransition]);
 
   const selectNavPillar = useCallback((pillar: CommandPillar) => {
+    if (pillar === "whole") {
+      router.push("/calendar");
+      return;
+    }
     beginTransition(pillar);
-  }, [beginTransition]);
+  }, [beginTransition, router]);
 
   const previewDialPillar = useCallback((pillar: NamedPillar | null) => {
     if (!transitioning) setDialPreview(pillar);

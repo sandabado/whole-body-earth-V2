@@ -13,14 +13,13 @@ import AirTransition from "../transitions/AirTransition";
 import EarthTransition from "../transitions/EarthTransition";
 import EtherTransition from "../transitions/EtherTransition";
 import FireTransition from "../transitions/FireTransition";
-import ObservatoryTransition from "../transitions/ObservatoryTransition";
 import WaterTransition from "../transitions/WaterTransition";
 import styles from "./TransitionOverlay.module.css";
 
-export type PortalPillar = Exclude<ActivePillar, "none">;
+export type PortalPillar = Exclude<ActivePillar, "none" | "whole">;
 
 type PillarTransitionProps = {
-  activePillar: ActivePillar;
+  activePillar: PortalPillar | "none";
   onCancel: () => void;
   onComplete: () => void;
 };
@@ -41,7 +40,6 @@ const routes: Record<PortalPillar, string> = {
   studios: "/studios",
   foundation: "/foundation",
   guardian: "/guardian",
-  whole: "/calendar",
 };
 
 const names: Record<PortalPillar, string> = {
@@ -50,7 +48,6 @@ const names: Record<PortalPillar, string> = {
   studios: "the Water Pillar",
   foundation: "the Earth Pillar",
   guardian: "the Ether Pillar",
-  whole: "the Constellation",
 };
 
 function TransitionScene({ pillar }: { pillar: PortalPillar }) {
@@ -65,8 +62,6 @@ function TransitionScene({ pillar }: { pillar: PortalPillar }) {
       return <EarthTransition />;
     case "guardian":
       return <EtherTransition />;
-    case "whole":
-      return <ObservatoryTransition />;
   }
 }
 
