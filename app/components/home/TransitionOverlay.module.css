@@ -1,0 +1,739 @@
+.overlay {
+  --transition-color: var(--guardian);
+  --transition-soft: color-mix(in srgb, var(--transition-color) 38%, transparent);
+  --transition-ink: var(--text-primary);
+  --ease-epic: cubic-bezier(.65, 0, .35, 1);
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  border: 0;
+  outline: 0;
+  background: var(--void);
+  color: var(--transition-ink);
+  cursor: wait;
+  isolation: isolate;
+  touch-action: none;
+}
+
+.overlay[data-cancelling="true"] {
+  opacity: 0;
+  transform: scale(.985);
+  transition:
+    opacity 220ms var(--ease-epic),
+    transform 220ms var(--ease-epic);
+}
+
+.overlay::after {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  background-image: url("/noise.png");
+  background-repeat: repeat;
+  content: "";
+  mix-blend-mode: soft-light;
+  opacity: .045;
+  pointer-events: none;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--void);
+}
+
+.scene::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.ritualCopy {
+  position: absolute;
+  z-index: 18;
+  top: 50%;
+  left: 50%;
+  width: min(88vw, 64rem);
+  text-align: center;
+  transform: translate(-50%, -50%);
+  animation: ritualCopy 1200ms var(--ease-epic) both;
+}
+
+.ritualCopy p {
+  margin: 0;
+}
+
+.ritualKicker {
+  margin-bottom: .8rem !important;
+  color: color-mix(in srgb, var(--transition-color) 86%, white);
+  font: 500 .65rem/1 var(--font-data), "JetBrains Mono", monospace;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+}
+
+.ritualTitle {
+  color: var(--transition-ink);
+  font: 500 clamp(1.7rem, 4.5vw, 3.25rem)/1.05 var(--font-editorial), "Cormorant Garamond", Georgia, serif;
+  letter-spacing: .05em;
+  text-wrap: balance;
+  text-transform: uppercase;
+}
+
+.air .ritualTitle,
+.water .ritualTitle,
+.observatory .ritualTitle {
+  font-family: var(--font-body), Inter, Arial, sans-serif;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  letter-spacing: .18em;
+}
+
+.earth .ritualTitle {
+  color: #d99b70;
+  font-family: var(--font-data), "JetBrains Mono", monospace;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  letter-spacing: .16em;
+}
+
+.ether .ritualTitle {
+  text-shadow: 0 0 28px color-mix(in srgb, var(--guardian) 72%, transparent);
+}
+
+.solid {
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  left: 50%;
+  width: clamp(9rem, 24vw, 18rem);
+  aspect-ratio: 1;
+  filter:
+    drop-shadow(0 0 12px var(--transition-soft))
+    drop-shadow(0 0 44px var(--transition-soft));
+  transform: translate(-50%, -50%);
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.fire {
+  --transition-color: var(--presence);
+  background: #080302;
+  animation: fireGround 1200ms var(--ease-epic) both;
+}
+
+.fire::before {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 215, 122, .2), transparent 12%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--presence) 92%, transparent), transparent 54%),
+    radial-gradient(circle at 50% 68%, rgba(255, 73, 15, .48), transparent 44%);
+  animation: fireBloom 1200ms var(--ease-epic) both;
+}
+
+.heat {
+  position: absolute;
+  z-index: 12;
+  inset: -8%;
+  background:
+    repeating-radial-gradient(ellipse at 50% 55%, transparent 0 18px, rgba(255, 211, 128, .07) 20px 21px, transparent 24px 45px);
+  filter: blur(4px);
+  mix-blend-mode: screen;
+  opacity: .45;
+  animation: heatHaze 520ms ease-in-out infinite alternate;
+}
+
+.tetrahedron {
+  background:
+    linear-gradient(30deg, transparent 49.3%, #f0c85d 50%, transparent 50.7%),
+    linear-gradient(-30deg, transparent 49.3%, #f0c85d 50%, transparent 50.7%),
+    linear-gradient(90deg, transparent 49.4%, #f0c85d 50%, transparent 50.6%);
+  clip-path: polygon(50% 2%, 97% 92%, 3% 92%);
+  animation: forgeSolid 1200ms var(--ease-epic) both;
+}
+
+.tetrahedron::before {
+  position: absolute;
+  inset: 3%;
+  border: 1px solid rgba(255, 231, 161, .72);
+  background: conic-gradient(from 90deg, rgba(255, 107, 53, .24), transparent 22%, rgba(240, 200, 93, .16), transparent 67%);
+  clip-path: inherit;
+  content: "";
+}
+
+.particleField {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fireParticle {
+  --angle: 0deg;
+  --distance: 40vmax;
+  --delay: 0ms;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--particle-size, 3px);
+  height: calc(var(--particle-size, 3px) * 2.4);
+  border-radius: 999px;
+  background: #ffd67a;
+  box-shadow: 0 0 12px var(--presence);
+  opacity: 0;
+  transform-origin: center;
+  animation: fireParticle 950ms var(--ease-epic) var(--delay) both;
+}
+
+.air {
+  --transition-color: var(--press);
+  background: #080704;
+}
+
+.air::before {
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, .18), transparent 16% 84%, rgba(5, 5, 5, .18)),
+    radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--press) 42%, transparent), transparent 58%),
+    linear-gradient(110deg, #171407, #6d5813 52%, #090804);
+  filter: saturate(.8);
+  animation: airGround 1200ms var(--ease-epic) both;
+}
+
+.fog {
+  position: absolute;
+  z-index: 5;
+  width: 54vw;
+  height: 28vh;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--press) 18%, rgba(255, 255, 255, .09));
+  filter: blur(56px);
+  opacity: .42;
+  animation: fogPass 1000ms var(--ease-epic) both;
+}
+
+.fog:nth-child(1) { top: 9%; left: -18%; }
+.fog:nth-child(2) { top: 35%; right: -16%; animation-delay: 90ms; animation-direction: reverse; }
+.fog:nth-child(3) { bottom: 4%; left: 10%; animation-delay: 150ms; }
+
+.windStreak {
+  --streak-y: 50%;
+  --streak-delay: 0ms;
+  position: absolute;
+  z-index: 7;
+  top: var(--streak-y);
+  left: -32vw;
+  width: clamp(9rem, 27vw, 28rem);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 239, 171, .78), transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--press) 46%, transparent);
+  opacity: 0;
+  animation: windStreak 780ms cubic-bezier(.25, .8, .25, 1) var(--streak-delay) both;
+}
+
+.octahedron {
+  background:
+    linear-gradient(45deg, transparent 49.4%, #f4d56c 50%, transparent 50.6%),
+    linear-gradient(-45deg, transparent 49.4%, #f4d56c 50%, transparent 50.6%),
+    radial-gradient(circle at center, color-mix(in srgb, var(--press) 20%, transparent), transparent 68%);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  animation: airSolid 1200ms var(--ease-epic) both;
+}
+
+.octahedron::before {
+  position: absolute;
+  inset: 2%;
+  border: 1px solid rgba(255, 232, 144, .75);
+  clip-path: inherit;
+  content: "";
+}
+
+.water {
+  --transition-color: var(--studios);
+  background: #020607;
+}
+
+.water::before {
+  z-index: 2;
+  background:
+    linear-gradient(0deg, rgba(4, 63, 77, .72), transparent 68%),
+    radial-gradient(ellipse at 50% 72%, color-mix(in srgb, var(--studios) 54%, transparent), transparent 62%);
+  animation: waterRise 1200ms var(--ease-epic) both;
+}
+
+.waterCanvas,
+.waterFallback {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+}
+
+.waterCanvas > div,
+.waterCanvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.waterFallback {
+  background:
+    repeating-radial-gradient(ellipse at 52% 118%, transparent 0 7vh, rgba(60, 172, 197, .08) 8vh 8.5vh, transparent 9vh 15vh),
+    linear-gradient(0deg, #06232b, #020607 70%);
+  animation: waterFallback 850ms ease-in-out infinite alternate;
+}
+
+.surfaceRipple {
+  position: absolute;
+  z-index: 9;
+  top: 50%;
+  left: 50%;
+  width: min(78vw, 56rem);
+  aspect-ratio: 2.4;
+  border: 1px solid rgba(163, 233, 246, .3);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3vw rgba(46, 134, 171, .08),
+    0 0 0 8vw rgba(46, 134, 171, .04);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.2);
+  animation: surfaceRipple 1200ms var(--ease-epic) both;
+}
+
+.icosahedron {
+  background:
+    repeating-conic-gradient(from 18deg, rgba(183, 237, 247, .82) 0 .6deg, transparent .8deg 35.2deg),
+    radial-gradient(circle, rgba(89, 187, 207, .28), transparent 68%);
+  clip-path: polygon(50% 0, 79% 10%, 100% 36%, 92% 72%, 66% 100%, 34% 100%, 8% 72%, 0 36%, 21% 10%);
+  mix-blend-mode: screen;
+  animation: waterSolid 1200ms var(--ease-epic) both;
+}
+
+.icosahedron::before {
+  position: absolute;
+  inset: 5%;
+  border: 1px solid rgba(194, 238, 248, .58);
+  background: linear-gradient(135deg, rgba(255, 255, 255, .16), transparent 44%, rgba(46, 134, 171, .2));
+  clip-path: inherit;
+  content: "";
+}
+
+.earth {
+  --transition-color: var(--foundation);
+  background: #050704;
+}
+
+.earth::before {
+  background:
+    radial-gradient(ellipse at 50% 72%, color-mix(in srgb, var(--foundation) 30%, transparent), transparent 58%),
+    linear-gradient(155deg, #10160c, #070905 60%, #020302);
+  animation: earthGround 1200ms var(--ease-epic) both;
+}
+
+.blueprintGrid {
+  position: absolute;
+  z-index: 5;
+  inset: -10%;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--foundation) 15%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--foundation) 15%, transparent) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+  mask-image: radial-gradient(circle at center, black, transparent 74%);
+  opacity: 0;
+  transform: perspective(700px) rotateX(58deg) translateY(30%);
+  animation: blueprintReveal 1200ms var(--ease-epic) both;
+}
+
+.cube {
+  --cube-depth: clamp(3.5rem, 9vw, 6.5rem);
+  width: clamp(7rem, 18vw, 13rem);
+  animation: cubeDescend 1200ms var(--ease-epic) both;
+}
+
+.cubeFace {
+  position: absolute;
+  inset: 0;
+  border: 1px solid color-mix(in srgb, var(--foundation) 80%, white);
+  background: color-mix(in srgb, var(--foundation) 10%, transparent);
+  box-shadow: inset 0 0 28px color-mix(in srgb, var(--foundation) 10%, transparent);
+}
+
+.cubeFace:nth-child(1) { transform: translateZ(var(--cube-depth)); }
+.cubeFace:nth-child(2) { transform: rotateY(180deg) translateZ(var(--cube-depth)); }
+.cubeFace:nth-child(3) { transform: rotateY(90deg) translateZ(var(--cube-depth)); }
+.cubeFace:nth-child(4) { transform: rotateY(-90deg) translateZ(var(--cube-depth)); }
+.cubeFace:nth-child(5) { transform: rotateX(90deg) translateZ(var(--cube-depth)); }
+.cubeFace:nth-child(6) { transform: rotateX(-90deg) translateZ(var(--cube-depth)); }
+
+.gravel {
+  --gravel-x: 50%;
+  --gravel-delay: 0ms;
+  position: absolute;
+  z-index: 7;
+  bottom: 4%;
+  left: var(--gravel-x);
+  width: var(--gravel-size, 4px);
+  aspect-ratio: 1.6;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--foundation) 66%, #38362b);
+  opacity: 0;
+  animation: gravelSettle 650ms var(--ease-epic) var(--gravel-delay) both;
+}
+
+.ether {
+  --transition-color: var(--guardian);
+  background: #030205;
+}
+
+.ether::before {
+  background:
+    radial-gradient(circle at center, color-mix(in srgb, var(--guardian) 36%, transparent), transparent 46%),
+    radial-gradient(circle at center, #090514, #050505 72%);
+  animation: voidOpen 1200ms var(--ease-epic) both;
+}
+
+.constellation {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  background:
+    repeating-conic-gradient(from 0deg at 50% 50%, transparent 0 13deg, rgba(151, 123, 255, .11) 13.3deg 13.6deg, transparent 14deg 30deg);
+  opacity: 0;
+  transform: scale(.72) rotate(-12deg);
+  animation: constellationForm 1200ms var(--ease-epic) both;
+}
+
+.star {
+  --star-x: 50%;
+  --star-y: 50%;
+  --star-delay: 0ms;
+  position: absolute;
+  z-index: 7;
+  top: var(--star-y);
+  left: var(--star-x);
+  width: var(--star-size, 3px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #e3dcff;
+  box-shadow: 0 0 12px var(--guardian);
+  opacity: 0;
+  animation: starPulse 680ms ease-in-out var(--star-delay) both;
+}
+
+.violetFlame {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: 50%;
+  width: min(30vmax, 22rem);
+  aspect-ratio: .78;
+  border-radius: 58% 42% 62% 38% / 72% 38% 62% 28%;
+  background:
+    radial-gradient(circle at 50% 72%, rgba(255, 255, 255, .86), transparent 12%),
+    radial-gradient(ellipse at 50% 72%, #936fff, transparent 40%),
+    linear-gradient(145deg, #28115f, #6d4aff 55%, transparent 72%);
+  filter: blur(2px) drop-shadow(0 0 42px var(--guardian));
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: translate(-50%, -42%) scale(.12) rotate(18deg);
+  animation: violetFlame 1200ms var(--ease-epic) both;
+}
+
+.dodecahedron {
+  background:
+    repeating-conic-gradient(from 15deg, rgba(224, 215, 255, .8) 0 .5deg, transparent .8deg 29.2deg),
+    radial-gradient(circle, color-mix(in srgb, var(--guardian) 22%, transparent), transparent 67%);
+  clip-path: polygon(50% 0, 75% 7%, 93% 25%, 100% 50%, 93% 75%, 75% 93%, 50% 100%, 25% 93%, 7% 75%, 0 50%, 7% 25%, 25% 7%);
+  animation: etherSolid 1200ms var(--ease-epic) both;
+}
+
+.dodecahedron::before {
+  position: absolute;
+  inset: 7%;
+  border: 1px solid rgba(224, 215, 255, .62);
+  clip-path: inherit;
+  content: "";
+}
+
+.observatory {
+  --transition-color: var(--whole);
+  background: #050505;
+}
+
+.observatory::before {
+  z-index: 2;
+  background:
+    repeating-radial-gradient(circle at center, transparent 0 5vmin, rgba(255, 255, 255, .055) 5.2vmin 5.35vmin, transparent 5.55vmin 10vmin),
+    radial-gradient(circle at center, rgba(255, 255, 255, .08), transparent 60%);
+  transform: scale(1.6);
+  animation: observatoryTunnel 1200ms var(--ease-epic) both;
+}
+
+.observatory::after {
+  position: absolute;
+  z-index: 16;
+  inset: 0;
+  background: white;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  animation: observatoryFlash 1200ms linear both;
+}
+
+.edgePulse {
+  --edge-color: var(--whole);
+  --edge-delay: 0ms;
+  position: absolute;
+  z-index: 6;
+  inset: calc(var(--edge-index, 0) * 1.25rem);
+  border: 2px solid var(--edge-color);
+  box-shadow: inset 0 0 36px color-mix(in srgb, var(--edge-color) 28%, transparent);
+  opacity: 0;
+  animation: edgePulse 480ms ease-in-out var(--edge-delay) both;
+}
+
+.observatory .dodecahedron {
+  --transition-color: var(--whole);
+  background:
+    repeating-conic-gradient(from 15deg, rgba(255, 255, 255, .82) 0 .5deg, transparent .8deg 29.2deg),
+    conic-gradient(var(--presence), var(--press), var(--studios), var(--foundation), var(--guardian), var(--presence));
+  animation: observatorySolid 1200ms var(--ease-epic) both;
+}
+
+.observatory .ritualCopy {
+  animation-name: observatoryCopy;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+  white-space: nowrap;
+}
+
+@keyframes ritualCopy {
+  0%, 38% { opacity: 0; filter: blur(12px); transform: translate(-50%, -44%) scale(.96); }
+  50%, 78% { opacity: 1; filter: blur(0); transform: translate(-50%, -50%) scale(1); }
+  94%, 100% { opacity: 0; filter: blur(8px); transform: translate(-50%, -56%) scale(1.02); }
+}
+
+@keyframes fireGround {
+  0% { background-color: #050505; }
+  30%, 82% { background-color: #2c0802; }
+  100% { background-color: #050505; }
+}
+
+@keyframes fireBloom {
+  0% { opacity: 0; transform: scale(.1); }
+  32%, 82% { opacity: 1; transform: scale(1.35); }
+  100% { opacity: .1; transform: scale(2); }
+}
+
+@keyframes heatHaze {
+  from { transform: translate3d(-.35%, -.25%, 0) scale(1.02); }
+  to { transform: translate3d(.35%, .25%, 0) scale(1.035); }
+}
+
+@keyframes forgeSolid {
+  0%, 14% { opacity: 0; transform: translate(-50%, -50%) rotate(-80deg) scale(.08); }
+  42%, 80% { opacity: .92; transform: translate(-50%, -50%) rotate(320deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(410deg) scale(1.8); }
+}
+
+@keyframes fireParticle {
+  0% { opacity: 0; transform: rotate(var(--angle)) translateX(0) scale(.4); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--angle)) translateX(var(--distance)) scale(.08); }
+}
+
+@keyframes airGround {
+  0% { opacity: 0; transform: scaleX(.86); }
+  32%, 82% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: .08; transform: scaleX(1.12); }
+}
+
+@keyframes fogPass {
+  0% { opacity: 0; transform: translateX(-34vw) scale(.7); }
+  42%, 78% { opacity: .5; transform: translateX(34vw) scale(1.15); }
+  100% { opacity: 0; transform: translateX(72vw) scale(1.4); }
+}
+
+@keyframes windStreak {
+  0% { opacity: 0; transform: translateX(0) scaleX(.4); }
+  22% { opacity: .8; }
+  100% { opacity: 0; transform: translateX(164vw) scaleX(1.4); }
+}
+
+@keyframes airSolid {
+  0%, 14% { opacity: 0; transform: translate(-50%, -50%) rotateY(-100deg) rotateZ(45deg) scale(.18); }
+  42%, 82% { opacity: .86; transform: translate(-50%, -50%) rotateY(330deg) rotateZ(0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotateY(410deg) scale(1.45); }
+}
+
+@keyframes waterRise {
+  0% { opacity: 0; transform: translateY(55%); }
+  38%, 84% { opacity: 1; transform: translateY(0); }
+  100% { opacity: .2; transform: translateY(-9%); }
+}
+
+@keyframes waterFallback {
+  from { transform: scale(1.08) translateY(2%); }
+  to { transform: scale(1.15) translateY(-2%); }
+}
+
+@keyframes surfaceRipple {
+  0%, 16% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+  48% { opacity: .72; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); }
+}
+
+@keyframes waterSolid {
+  0%, 14% { opacity: 0; transform: translate(-50%, 35%) rotate(-40deg) scale(.24); }
+  46%, 80% { opacity: .76; transform: translate(-50%, -50%) rotate(280deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -78%) rotate(360deg) scale(1.5); }
+}
+
+@keyframes earthGround {
+  0% { opacity: 0; }
+  34%, 86% { opacity: 1; }
+  100% { opacity: .1; }
+}
+
+@keyframes blueprintReveal {
+  0%, 14% { opacity: 0; background-size: 8rem 8rem; }
+  52%, 82% { opacity: .78; background-size: 4rem 4rem; }
+  100% { opacity: 0; background-size: 3.5rem 3.5rem; }
+}
+
+@keyframes cubeDescend {
+  0%, 12% { opacity: 0; transform: translate(-50%, -170%) rotateX(-32deg) rotateY(-42deg) scale(.58); }
+  52%, 82% { opacity: .92; transform: translate(-50%, -50%) rotateX(-18deg) rotateY(38deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -32%) rotateX(-8deg) rotateY(68deg) scale(1.28); }
+}
+
+@keyframes gravelSettle {
+  0% { opacity: 0; transform: translateY(-42vh) rotate(0); }
+  70% { opacity: .84; }
+  100% { opacity: 0; transform: translateY(0) rotate(240deg); }
+}
+
+@keyframes voidOpen {
+  0% { opacity: 0; transform: scale(.12); }
+  38%, 86% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: .2; transform: scale(1.7); }
+}
+
+@keyframes constellationForm {
+  0%, 18% { opacity: 0; transform: scale(.72) rotate(-12deg); }
+  56%, 84% { opacity: .9; transform: scale(1) rotate(0); }
+  100% { opacity: 0; transform: scale(1.3) rotate(8deg); }
+}
+
+@keyframes starPulse {
+  0% { opacity: 0; transform: scale(.2); }
+  46%, 72% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 0; transform: scale(.4); }
+}
+
+@keyframes violetFlame {
+  0%, 12% { opacity: 0; transform: translate(-50%, -42%) scale(.12) rotate(18deg); }
+  52%, 84% { opacity: .8; transform: translate(-50%, -52%) scale(1.2) rotate(-5deg); }
+  100% { opacity: 0; transform: translate(-50%, -58%) scale(2.2) rotate(-12deg); }
+}
+
+@keyframes etherSolid {
+  0%, 16% { opacity: 0; transform: translate(-50%, -50%) rotate(-64deg) scale(.12); }
+  54%, 82% { opacity: .86; transform: translate(-50%, -50%) rotate(245deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(330deg) scale(1.7); }
+}
+
+@keyframes observatoryTunnel {
+  0% { opacity: 0; transform: scale(1.8); }
+  60% { opacity: 1; transform: scale(.62); }
+  100% { opacity: 0; transform: scale(.06); }
+}
+
+@keyframes observatoryFlash {
+  0%, 70% { opacity: 0; }
+  74%, 82% { opacity: 1; }
+  90%, 100% { opacity: 0; }
+}
+
+@keyframes edgePulse {
+  0% { opacity: 0; transform: scale(1.08); }
+  45%, 72% { opacity: .82; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.94); }
+}
+
+@keyframes observatorySolid {
+  0%, 10% { opacity: 0; transform: translate(-50%, -50%) rotate(-90deg) scale(.18); }
+  62% { opacity: .92; transform: translate(-50%, -50%) rotate(620deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(980deg) scale(8); }
+}
+
+@keyframes observatoryCopy {
+  0%, 34% { opacity: 0; filter: blur(10px); transform: translate(-50%, -44%) scale(.96); }
+  46%, 67% { opacity: 1; filter: blur(0); color: white; transform: translate(-50%, -50%) scale(1); }
+  74%, 82% { opacity: 1; filter: blur(0); color: #050505; transform: translate(-50%, -50%) scale(1.03); }
+  92%, 100% { opacity: 0; filter: blur(7px); color: white; transform: translate(-50%, -56%) scale(1.08); }
+}
+
+@media (max-width: 760px) {
+  .solid {
+    width: min(46vw, 13rem);
+  }
+
+  .ritualCopy {
+    top: 53%;
+    width: calc(100vw - 2rem);
+  }
+
+  .ritualKicker {
+    font-size: .56rem;
+    letter-spacing: .22em;
+  }
+
+  .ritualTitle {
+    font-size: clamp(1.45rem, 8vw, 2.2rem);
+  }
+
+  .air .ritualTitle,
+  .water .ritualTitle,
+  .observatory .ritualTitle {
+    font-size: clamp(1rem, 5vw, 1.45rem);
+    letter-spacing: .14em;
+  }
+
+  .fireParticle:nth-child(n + 41),
+  .star:nth-child(n + 31),
+  .gravel:nth-child(n + 31),
+  .windStreak:nth-child(n + 15) {
+    display: none;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    display: none;
+  }
+
+  .overlay,
+  .scene,
+  .scene::before,
+  .scene::after,
+  .ritualCopy,
+  .solid,
+  .particleField *,
+  .fog,
+  .windStreak,
+  .blueprintGrid,
+  .violetFlame,
+  .constellation,
+  .surfaceRipple,
+  .edgePulse {
+    animation: none;
+  }
+}

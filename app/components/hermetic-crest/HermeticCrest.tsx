@@ -26,16 +26,14 @@ interface HermeticCrestProps {
   };
   className?: string;
   activePillar?: ActivePillar;
-  shelfOpen?: boolean;
   onPillarPreview?: (
     pillar: Exclude<ActivePillar, "none" | "whole"> | null,
   ) => void;
   onPillarTurnStart?: (
     pillar: Exclude<ActivePillar, "none" | "whole">,
   ) => void;
-  onPillarSelect?: (
+  onPillarActivate?: (
     pillar: Exclude<ActivePillar, "none" | "whole">,
-    trigger: HTMLButtonElement,
   ) => void;
 }
 
@@ -97,10 +95,9 @@ export default function HermeticCrest({
   layerControls = {},
   className,
   activePillar = "none",
-  shelfOpen = false,
   onPillarPreview,
   onPillarTurnStart,
-  onPillarSelect,
+  onPillarActivate,
 }: HermeticCrestProps) {
   const [phase, setPhase] = useState<CrestPhase>("locked");
   const [hoveredElement, setHoveredElement] = useState<ElementId | null>(null);
@@ -191,21 +188,18 @@ export default function HermeticCrest({
     onPillarPreview?.(previewElement?.command ?? null);
   }, [dialSelection, hoveredElement, onPillarPreview, phase]);
 
-  const selectElement = (
-    element: (typeof ELEMENTS)[number],
-    trigger: HTMLButtonElement,
-  ) => {
+  const selectElement = (element: (typeof ELEMENTS)[number]) => {
     if (timerRef.current !== null) window.clearTimeout(timerRef.current);
     setDialSelection(element.id);
     setHoveredElement(element.id);
     setPhase("turning");
     onPillarTurnStart?.(element.command);
+    onPillarActivate?.(element.command);
     const unlockDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ? 0
       : 600;
     timerRef.current = window.setTimeout(() => {
       setPhase("open");
-      onPillarSelect?.(element.command, trigger);
       timerRef.current = null;
     }, unlockDuration);
   };
@@ -261,8 +255,8 @@ export default function HermeticCrest({
         : activePillar === "whole"
         ? "Whole field / live constellation"
       : phase === "open"
-        ? "Field open / hover a house"
-        : "Choose a field / turn the key";
+        ? "Portal aligned / choose a field"
+        : "Choose a field / enter a pillar";
 
   return (
     <div
@@ -425,12 +419,11 @@ export default function HermeticCrest({
               "--control-color": element.color,
               "--control-size": element.id === "ether" ? "18%" : "12%",
             } as CSSProperties}
-            aria-label={`Open ${element.pillar.toLowerCase()} shelf`}
-            aria-controls="whole-body-command-shelf"
-            aria-expanded={shelfOpen && activePillar === element.command}
+            aria-label={`Enter the ${element.pillar.toLowerCase()} pillar`}
+            aria-current={activePillar === element.command ? "page" : undefined}
             onFocus={() => setHoveredElement(element.id)}
             onBlur={() => setHoveredElement(null)}
-            onClick={(event) => selectElement(element, event.currentTarget)}
+            onClick={() => selectElement(element)}
           />
         ))}
       </span>

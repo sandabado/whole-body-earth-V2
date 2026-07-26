@@ -5,6 +5,16 @@
   overflow: hidden;
   background: var(--void);
   pointer-events: none;
+  transition:
+    filter 300ms cubic-bezier(.65, 0, .35, 1),
+    opacity 300ms cubic-bezier(.65, 0, .35, 1),
+    transform 600ms cubic-bezier(.65, 0, .35, 1);
+}
+
+:global(.water-hero[data-transitioning="true"]) .stage {
+  opacity: .2;
+  filter: saturate(.72) brightness(.62);
+  transform: scale(1.015);
 }
 
 .fallback,
@@ -141,4 +151,7 @@
   .loading::before { animation: none; }
   .canvas { display: none; }
   .stage .fallback { opacity: 1; transition: none; }
+  :global(.water-hero[data-transitioning="true"]) .stage {
+    transform: none;
+  }
 }

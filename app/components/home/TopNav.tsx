@@ -11,7 +11,7 @@ export type CommandPillar = Exclude<ActivePillar, "none">;
 
 export interface TopNavProps {
   activePillar: ActivePillar;
-  onSelect: (pillar: CommandPillar, trigger: HTMLButtonElement) => void;
+  onSelect: (pillar: CommandPillar) => void;
 }
 
 const commands: ReadonlyArray<{
@@ -29,10 +29,17 @@ const commands: ReadonlyArray<{
   { id: "whole", label: "NØW", navLabel: "NØW", symbol: "⏺︎", color: COMMAND_PILLAR_COLORS.whole },
 ];
 
-/** Opens each pillar's command shelf from the persistent homepage bottom rail. */
+/** Launches a pillar-entry ritual from the persistent homepage bottom rail. */
 export function TopNav({ activePillar, onSelect }: TopNavProps) {
+  const transitioning = activePillar !== "none";
+
   return (
-    <nav className={styles.nav} aria-label="Open a Whole Body pillar shelf">
+    <nav
+      className={styles.nav}
+      aria-label="Enter a Whole Body pillar"
+      aria-hidden={transitioning ? true : undefined}
+      inert={transitioning ? true : undefined}
+    >
       <ul className={styles.rail}>
         {commands.map((command) => {
           const active = activePillar === command.id;
@@ -47,10 +54,10 @@ export function TopNav({ activePillar, onSelect }: TopNavProps) {
                 style={{ "--command-color": command.color } as CSSProperties}
                 data-command={command.id}
                 data-active={active ? "true" : "false"}
-                aria-label={`${active ? "Close" : "Open"} ${command.label} shelf`}
-                aria-expanded={active}
-                aria-controls="whole-body-command-shelf"
-                onClick={(event) => onSelect(command.id, event.currentTarget)}
+                aria-label={`Enter ${command.label}`}
+                aria-current={active ? "page" : undefined}
+                disabled={transitioning}
+                onClick={() => onSelect(command.id)}
               >
                 <span
                   className={styles.symbol}

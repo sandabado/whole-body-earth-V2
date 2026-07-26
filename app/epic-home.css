@@ -129,15 +129,19 @@ body:has(.command-deck-home) {
   width: 100%;
 }
 
-.command-deck-home[data-shelf-open="true"] .command-deck-constellation {
-  opacity: .8;
-  transform: scale(1.18);
+.command-deck-home[data-transitioning="true"] .command-deck-constellation {
+  opacity: .24;
+  transform: scale(1.22);
 }
 
-.command-deck-home[data-shelf-open="true"] .command-deck-visual {
-  opacity: .4;
-  filter: blur(4px);
-  transform: translate3d(-50%, calc(-50% - 24svh), 0) scale(.76);
+.command-deck-home[data-transitioning="true"] .command-deck-visual {
+  opacity: .2;
+  filter: blur(3px) saturate(.72);
+  transform: translate3d(
+    -50%,
+    calc(-50% + clamp(2rem, 5svh, 4.5rem)),
+    0
+  ) scale(.92);
 }
 
 .command-deck-hero-content {
@@ -160,10 +164,10 @@ body:has(.command-deck-home) {
     transform var(--duration-dim) var(--ease-meditative);
 }
 
-.command-deck-home[data-shelf-open="true"] .command-deck-hero-content {
-  opacity: .28;
-  filter: blur(4px);
-  transform: translate3d(0, 1rem, 0);
+.command-deck-home[data-transitioning="true"] .command-deck-hero-content {
+  opacity: .16;
+  filter: blur(3px);
+  transform: translate3d(0, -.5rem, 0);
   pointer-events: none;
 }
 
@@ -246,10 +250,6 @@ body:has(.command-deck-home) {
 
   .command-deck-dial-shell {
     width: min(55svh, calc(100vw - 1.75rem));
-  }
-
-  .command-deck-home[data-shelf-open="true"] .command-deck-visual {
-    transform: translate3d(-50%, calc(-50% - 43svh), 0) scale(.46);
   }
 
   .command-deck-hero-content {

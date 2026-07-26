@@ -26,6 +26,7 @@ type HeroEngineProps = {
   ariaLabel: string;
   autoRotate?: boolean;
   activePillar?: ActivePillar;
+  transitioning?: boolean;
 };
 
 type HeroStyle = CSSProperties & {
@@ -64,6 +65,7 @@ export default function HeroEngine({
   ariaLabel,
   autoRotate = false,
   activePillar = "none",
+  transitioning = false,
 }: HeroEngineProps) {
   const { config, loading: configLoading, source, version } = useHeroConfig(siteSlug);
   const capability = useDeviceCapability();
@@ -111,6 +113,7 @@ export default function HeroEngine({
       data-config-source={source}
       data-config-version={version}
       data-active-pillar={activePillar}
+      data-transitioning={transitioning ? "true" : "false"}
     >
       <div className={`${styles.stage} ${ready ? styles.ready : ""}`} aria-hidden="true">
         <div className={styles.fallback} />
