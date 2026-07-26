@@ -3,11 +3,11 @@
   z-index: 1;
   top: calc(50% + clamp(2rem, 5svh, 4.5rem));
   left: 50%;
-  width: min(76svh, 52rem, calc(100vw - 1rem));
+  width: min(64svh, 44rem, calc(100vw - 1.5rem));
   aspect-ratio: 1;
   border-radius: 50%;
   outline: 0;
-  opacity: .88;
+  opacity: .96;
   pointer-events: auto;
   transform: translate(-50%, -50%);
   transition: opacity 300ms cubic-bezier(.65, 0, .35, 1), filter 300ms cubic-bezier(.65, 0, .35, 1);
@@ -32,7 +32,7 @@
 
 @media (max-width: 760px) {
   .shell {
-    width: min(74svh, calc(100vw - .5rem));
+    width: min(62svh, calc(100vw - 1rem));
     opacity: .96;
   }
 }
@@ -42,4 +42,3 @@
     transition: none;
   }
 }
-

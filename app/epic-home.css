@@ -112,9 +112,9 @@ body:has(.command-deck-home) {
 .command-deck-constellation {
   position: absolute;
   inset: -7% -18%;
-  opacity: .68;
+  opacity: .48;
   pointer-events: none;
-  transform: scale(1.12);
+  transform: scale(.92);
   mix-blend-mode: screen;
   transition: opacity var(--duration-dim) var(--ease-gentle), transform var(--duration-dim) var(--ease-meditative);
 }
