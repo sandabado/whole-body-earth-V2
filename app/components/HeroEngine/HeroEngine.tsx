@@ -16,6 +16,7 @@ import {
   COMMAND_PILLAR_COLORS,
   type ActivePillar,
 } from "./config";
+import { WholeEarthGlobe } from "../WholeEarthGlobe";
 import styles from "./HeroEngine.module.css";
 
 const WaterCanvas = lazy(() => import("./WaterCanvas"));
@@ -27,6 +28,8 @@ type HeroEngineProps = {
   autoRotate?: boolean;
   activePillar?: ActivePillar;
   transitioning?: boolean;
+  showWholeEarthGlobe?: boolean;
+  onWholeActivate?: () => void;
 };
 
 type HeroStyle = CSSProperties & {
@@ -66,6 +69,8 @@ export default function HeroEngine({
   autoRotate = false,
   activePillar = "none",
   transitioning = false,
+  showWholeEarthGlobe = false,
+  onWholeActivate,
 }: HeroEngineProps) {
   const { config, loading: configLoading, source, version } = useHeroConfig(siteSlug);
   const capability = useDeviceCapability();
@@ -133,6 +138,13 @@ export default function HeroEngine({
             </Suspense>
           </CanvasBoundary>
         )}
+        {showWholeEarthGlobe && onWholeActivate ? (
+          <WholeEarthGlobe
+            activePillar={activePillar}
+            transitioning={transitioning}
+            onActivate={onWholeActivate}
+          />
+        ) : null}
         <div className={styles.depth} />
         <div className={styles.surfaceLight} />
         {!ready && <div className={styles.loading}>CALIBRATING WATER</div>}

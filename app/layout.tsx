@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter, JetBrains_Mono } from "next/font/google";
+import { WholeBodyTransitionProvider } from "./components/WholeBodyTransition";
 import "./globals.css";
 import "./design-system.css";
 
@@ -36,9 +37,9 @@ export const metadata: Metadata = {
     siteName: "Whole Body Earth",
     images: [
       {
-        url: "/og-home-v2.png",
-        width: 1730,
-        height: 909,
+        url: "/og-home-globe.png",
+        width: 1733,
+        height: 907,
         alt: "Whole Body Earth — five pillars held in one living constellation",
       },
     ],
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Whole Body Earth — Five Pillars. One Whole Body.",
     description: "Five pillars. One whole body.",
-    images: ["/og-home-v2.png"],
+    images: ["/og-home-globe.png"],
   },
 };
 
@@ -58,7 +59,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable} ${jetbrains.variable}`}>
-      <body>{children}</body>
+      <body>
+        <WholeBodyTransitionProvider>{children}</WholeBodyTransitionProvider>
+      </body>
     </html>
   );
 }

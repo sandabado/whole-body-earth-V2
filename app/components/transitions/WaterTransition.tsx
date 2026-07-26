@@ -3,7 +3,7 @@
 import { lazy, Suspense } from "react";
 import { getDefaultHeroConfig } from "../HeroEngine/config";
 import { useDeviceCapability } from "../HeroEngine/hooks/useDeviceCapability";
-import styles from "../home/TransitionOverlay.module.css";
+import styles from "../TransitionOverlay.module.css";
 
 const WaterCanvas = lazy(() => import("../HeroEngine/WaterCanvas"));
 const waterConfig = getDefaultHeroConfig("studios");

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import styles from "../home/TransitionOverlay.module.css";
+import styles from "../TransitionOverlay.module.css";
 
 type GravelStyle = CSSProperties & {
   "--gravel-x": string;

@@ -6,17 +6,19 @@ const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 
 test("ships the fullscreen Whole Body Earth ritual portal", async () => {
-  const [page, home, nav, transition, layout, studiosLayout, packageJson] = await Promise.all([
+  const [page, home, nav, overlay, controller, layout, studiosLayout, packageJson] = await Promise.all([
     source("app/page.tsx"),
     source("app/components/home/EpicHomeExperience.tsx"),
     source("app/components/home/TopNav.tsx"),
-    source("app/components/home/PillarTransition.tsx"),
+    source("app/components/TransitionOverlay.tsx"),
+    source("app/components/WholeBodyTransition.tsx"),
     source("app/layout.tsx"),
     source("app/studios/layout.tsx"),
     source("package.json"),
   ]);
 
   assert.match(layout, /Whole Body Earth/);
+  assert.match(layout, /<WholeBodyTransitionProvider>\{children\}<\/WholeBodyTransitionProvider>/);
   assert.doesNotMatch(layout, /SiteExperience|Whole Body Studios/);
   assert.match(studiosLayout, /<SiteExperience>\{children\}<\/SiteExperience>/);
   assert.match(studiosLayout, /Whole Body Studios/);
@@ -25,7 +27,8 @@ test("ships the fullscreen Whole Body Earth ritual portal", async () => {
   assert.match(home, /<HermeticCrest/);
   assert.match(home, /onPillarActivate=\{beginNamedTransition\}/);
   assert.match(home, /<TopNav activePillar=\{activePillar\}/);
-  assert.match(home, /<PillarTransition/);
+  assert.match(home, /useWholeBodyTransition/);
+  assert.doesNotMatch(home, /<PillarTransition/);
   assert.doesNotMatch(home, /PillarShelf|shelfOpen|data-shelf-open/);
   assert.match(home, /Five pillars\. One whole body\./);
   assert.match(home, /href="\/reading"/);
@@ -33,37 +36,42 @@ test("ships the fullscreen Whole Body Earth ritual portal", async () => {
   for (const command of ["presence", "press", "studios", "foundation", "guardian", "whole"])
     assert.match(nav, new RegExp(`id: "${command}"`));
   assert.match(nav, /symbol: "⊙"/);
-  assert.match(nav, /symbol: "⏺/);
+  assert.match(nav, /function GlobeIcon/);
+  assert.match(nav, /Whole Body Earth — Live Calendar/);
+  assert.doesNotMatch(nav, /⏺|recBlink|record/);
   assert.match(nav, /styles\.label/);
   assert.match(nav, /navLabel: "Foundation"/);
   assert.match(nav, /navLabel: "NØW"/);
   assert.match(nav, /aria-label="Enter a Whole Body pillar"/);
-  assert.match(transition, /TRANSITION_DURATION_MS = 1200/);
-  assert.match(transition, /presence: "\/presence"/);
-  assert.match(transition, /press: "\/press"/);
-  assert.match(transition, /studios: "\/studios"/);
-  assert.match(transition, /foundation: "\/foundation"/);
-  assert.match(transition, /guardian: "\/guardian"/);
-  assert.doesNotMatch(transition, /whole: "\/calendar"/);
-  assert.match(home, /pillar === "whole"/);
-  assert.match(home, /router\.push\("\/calendar"\)/);
-  assert.match(transition, /event\.key === "Escape"/);
-  assert.match(transition, /event\.key === "Tab"/);
-  assert.match(transition, /SWIPE_CANCEL_THRESHOLD_PX = 72/);
-  assert.match(transition, /prefers-reduced-motion: reduce/);
-  assert.match(transition, /role="dialog"/);
-  assert.match(transition, /aria-modal="true"/);
+  assert.match(controller, /TRANSITION_DURATION_MS = 1200/);
+  assert.match(controller, /DISSOLVE_DURATION_MS = 300/);
+  assert.match(controller, /router\.prefetch\(route\)/);
+  assert.match(controller, /presence: "\/presence"/);
+  assert.match(controller, /press: "\/press"/);
+  assert.match(controller, /studios: "\/studios"/);
+  assert.match(controller, /foundation: "\/foundation"/);
+  assert.match(controller, /guardian: "\/guardian"/);
+  assert.match(controller, /whole: "\/calendar"/);
+  assert.match(controller, /pathname !== TRANSITION_ROUTES\[pillar\]/);
+  assert.match(overlay, /event\.key === "Escape" && cancellableRef\.current/);
+  assert.match(overlay, /event\.key === "Tab"/);
+  assert.match(overlay, /SWIPE_CANCEL_THRESHOLD_PX = 72/);
+  assert.match(controller, /prefers-reduced-motion: reduce/);
+  assert.match(overlay, /role="dialog"/);
+  assert.match(overlay, /aria-modal=/);
   assert.doesNotMatch(page + home + layout + packageJson, /Your site is taking shape|codex-preview|react-loading-skeleton/i);
 });
 
-test("ships five pillar-specific entrances and a direct NØW route", async () => {
-  const [fire, air, water, earth, ether, styles] = await Promise.all([
+test("ships six seamless entrances including the Whole Earth observatory", async () => {
+  const [fire, air, water, earth, ether, observatory, styles, globe] = await Promise.all([
     source("app/components/transitions/FireTransition.tsx"),
     source("app/components/transitions/AirTransition.tsx"),
     source("app/components/transitions/WaterTransition.tsx"),
     source("app/components/transitions/EarthTransition.tsx"),
     source("app/components/transitions/EtherTransition.tsx"),
-    source("app/components/home/TransitionOverlay.module.css"),
+    source("app/components/transitions/ObservatoryTransition.tsx"),
+    source("app/components/TransitionOverlay.module.css"),
+    source("app/components/WholeEarthGlobe.tsx"),
   ]);
 
   assert.match(fire, /Entering the Fire Pillar/);
@@ -72,11 +80,16 @@ test("ships five pillar-specific entrances and a direct NØW route", async () =>
   assert.match(water, /lazy\(\(\) => import\("\.\.\/HeroEngine\/WaterCanvas"\)\)/);
   assert.match(earth, /Entering the Earth Pillar/);
   assert.match(ether, /Entering the Ether Pillar/);
+  assert.match(observatory, /Entering the Constellation/);
+  assert.match(observatory, /length: 48/);
+  assert.match(globe, /TAU \/ 60/);
+  assert.match(globe, /TAU \/ 2/);
+  assert.match(globe, /whole-body-earth-globe-hit-target/);
   assert.match(styles, /--ease-epic:\s*cubic-bezier\(\.65,\s*0,\s*\.35,\s*1\)/);
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.doesNotMatch(
-    fire + air + water + earth + ether,
+    fire + air + water + earth + ether + observatory,
     /PillarShelf|whole-body-command-shelf/,
   );
 });
@@ -95,6 +108,8 @@ test("uses the reusable Water engine with active-pillar focus and hydration-safe
   assert.match(home, /siteSlug="studios"/);
   assert.match(home, /activePillar=\{visualPillar\}/);
   assert.match(home, /transitioning=\{transitioning\}/);
+  assert.match(home, /showWholeEarthGlobe/);
+  assert.match(home, /onWholeActivate=/);
   assert.match(engine, /lazy\(\(\) => import\("\.\/WaterCanvas"\)\)/);
   assert.match(engine, /data-transitioning=\{transitioning \? "true" : "false"\}/);
   assert.match(engine, /CanvasBoundary/);

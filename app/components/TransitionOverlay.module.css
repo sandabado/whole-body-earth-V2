@@ -16,6 +16,14 @@
   cursor: wait;
   isolation: isolate;
   touch-action: none;
+  opacity: 1;
+  transition: opacity 300ms ease-out;
+  will-change: opacity;
+}
+
+.overlay[data-phase="dissolving"] {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .overlay[data-cancelling="true"] {
@@ -24,6 +32,36 @@
   transition:
     opacity 220ms var(--ease-epic),
     transform 220ms var(--ease-epic);
+}
+
+.handoffStatus {
+  position: absolute;
+  z-index: 24;
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  color: color-mix(in srgb, var(--transition-color) 78%, white);
+  font: 500 .58rem/1 var(--font-data), "JetBrains Mono", monospace;
+  letter-spacing: .2em;
+  opacity: 0;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  transition: opacity 240ms ease;
+}
+
+.handoffStatus i {
+  width: .35rem;
+  height: .35rem;
+  border-radius: 50%;
+  background: var(--transition-color);
+  box-shadow: 0 0 12px var(--transition-color);
+  animation: handoffPulse 1.2s ease-in-out infinite;
+}
+
+.overlay[data-phase="handoff"] .handoffStatus {
+  opacity: .82;
 }
 
 .overlay::after {
@@ -451,6 +489,93 @@
   content: "";
 }
 
+.observatory {
+  --transition-color: #c0c0c0;
+  background:
+    radial-gradient(circle at center, rgba(109, 74, 255, .1), transparent 34%),
+    #020204;
+}
+
+.observatory::before {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(192, 192, 192, .12), transparent 28%),
+    repeating-radial-gradient(circle at center, transparent 0 11vh, rgba(192, 192, 192, .035) 11.1vh 11.25vh);
+  animation: observatoryVoid 1200ms var(--ease-epic) both;
+}
+
+.observatoryGlobe {
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  left: 50%;
+  width: min(68vmin, 42rem);
+  aspect-ratio: 1;
+  border: 1px solid rgba(192, 192, 192, .72);
+  border-radius: 50%;
+  filter: drop-shadow(0 0 22px rgba(192, 192, 192, .16));
+  transform: translate(-50%, -50%);
+  transform-style: preserve-3d;
+  animation: observatoryZoom 1200ms var(--ease-epic) both;
+}
+
+.observatoryMeridian,
+.observatoryParallel {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(192, 192, 192, .34);
+  border-radius: 50%;
+}
+
+.observatoryMeridian {
+  opacity: 0;
+  transform: rotateY(calc(var(--meridian-index) * 3.75deg));
+  animation: meridianMultiply 1200ms var(--ease-epic) both;
+  animation-delay: calc(var(--meridian-index) * 2ms);
+}
+
+.observatoryMeridian:nth-child(-n + 12) {
+  opacity: .62;
+}
+
+.observatoryParallel {
+  top: var(--parallel-top);
+  bottom: auto;
+  height: var(--parallel-height);
+  opacity: .44;
+  transform: scaleX(var(--parallel-scale));
+}
+
+.observatoryColorCycle {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  background: radial-gradient(circle at center, var(--presence), transparent 44%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: observatoryColors 1200ms step-end both;
+}
+
+.observatoryStars {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 14% 23%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle at 72% 19%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle at 86% 64%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle at 38% 78%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle at 58% 42%, #fff 0 1px, transparent 1.5px);
+  background-size: 19rem 17rem, 23rem 21rem, 29rem 27rem, 31rem 26rem, 37rem 33rem;
+  opacity: 0;
+  animation: observatoryStars 1200ms var(--ease-epic) both;
+}
+
+.observatory .ritualTitle {
+  color: #c0c0c0;
+  font-size: clamp(1.8rem, 4.2vw, 2.5rem);
+  text-shadow: 0 0 26px rgba(192, 192, 192, .24);
+}
+
 .srOnly {
   position: absolute;
   width: 1px;
@@ -465,20 +590,19 @@
 
 @keyframes ritualCopy {
   0%, 38% { opacity: 0; filter: blur(12px); transform: translate(-50%, -44%) scale(.96); }
-  50%, 78% { opacity: 1; filter: blur(0); transform: translate(-50%, -50%) scale(1); }
-  94%, 100% { opacity: 0; filter: blur(8px); transform: translate(-50%, -56%) scale(1.02); }
+  50%, 100% { opacity: 1; filter: blur(0); transform: translate(-50%, -50%) scale(1); }
 }
 
 @keyframes fireGround {
   0% { background-color: #050505; }
   30%, 82% { background-color: #2c0802; }
-  100% { background-color: #050505; }
+  100% { background-color: #160501; }
 }
 
 @keyframes fireBloom {
   0% { opacity: 0; transform: scale(.1); }
   32%, 82% { opacity: 1; transform: scale(1.35); }
-  100% { opacity: .1; transform: scale(2); }
+  100% { opacity: .5; transform: scale(1.55); }
 }
 
 @keyframes heatHaze {
@@ -489,7 +613,7 @@
 @keyframes forgeSolid {
   0%, 14% { opacity: 0; transform: translate(-50%, -50%) rotate(-80deg) scale(.08); }
   42%, 80% { opacity: .92; transform: translate(-50%, -50%) rotate(320deg) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) rotate(410deg) scale(1.8); }
+  100% { opacity: .78; transform: translate(-50%, -50%) rotate(410deg) scale(1.12); }
 }
 
 @keyframes fireParticle {
@@ -501,7 +625,7 @@
 @keyframes airGround {
   0% { opacity: 0; transform: scaleX(.86); }
   32%, 82% { opacity: 1; transform: scaleX(1); }
-  100% { opacity: .08; transform: scaleX(1.12); }
+  100% { opacity: .72; transform: scaleX(1.04); }
 }
 
 @keyframes fogPass {
@@ -519,13 +643,13 @@
 @keyframes airSolid {
   0%, 14% { opacity: 0; transform: translate(-50%, -50%) rotateY(-100deg) rotateZ(45deg) scale(.18); }
   42%, 82% { opacity: .86; transform: translate(-50%, -50%) rotateY(330deg) rotateZ(0) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) rotateY(410deg) scale(1.45); }
+  100% { opacity: .74; transform: translate(-50%, -50%) rotateY(410deg) scale(1.08); }
 }
 
 @keyframes waterRise {
   0% { opacity: 0; transform: translateY(55%); }
   38%, 84% { opacity: 1; transform: translateY(0); }
-  100% { opacity: .2; transform: translateY(-9%); }
+  100% { opacity: .82; transform: translateY(-3%); }
 }
 
 @keyframes waterFallback {
@@ -542,25 +666,25 @@
 @keyframes waterSolid {
   0%, 14% { opacity: 0; transform: translate(-50%, 35%) rotate(-40deg) scale(.24); }
   46%, 80% { opacity: .76; transform: translate(-50%, -50%) rotate(280deg) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -78%) rotate(360deg) scale(1.5); }
+  100% { opacity: .7; transform: translate(-50%, -56%) rotate(360deg) scale(1.08); }
 }
 
 @keyframes earthGround {
   0% { opacity: 0; }
   34%, 86% { opacity: 1; }
-  100% { opacity: .1; }
+  100% { opacity: .86; }
 }
 
 @keyframes blueprintReveal {
   0%, 14% { opacity: 0; background-size: 8rem 8rem; }
   52%, 82% { opacity: .78; background-size: 4rem 4rem; }
-  100% { opacity: 0; background-size: 3.5rem 3.5rem; }
+  100% { opacity: .68; background-size: 3.5rem 3.5rem; }
 }
 
 @keyframes cubeDescend {
   0%, 12% { opacity: 0; transform: translate(-50%, -170%) rotateX(-32deg) rotateY(-42deg) scale(.58); }
   52%, 82% { opacity: .92; transform: translate(-50%, -50%) rotateX(-18deg) rotateY(38deg) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -32%) rotateX(-8deg) rotateY(68deg) scale(1.28); }
+  100% { opacity: .8; transform: translate(-50%, -48%) rotateX(-8deg) rotateY(68deg) scale(1.05); }
 }
 
 @keyframes gravelSettle {
@@ -572,13 +696,13 @@
 @keyframes voidOpen {
   0% { opacity: 0; transform: scale(.12); }
   38%, 86% { opacity: 1; transform: scale(1.2); }
-  100% { opacity: .2; transform: scale(1.7); }
+  100% { opacity: .82; transform: scale(1.35); }
 }
 
 @keyframes constellationForm {
   0%, 18% { opacity: 0; transform: scale(.72) rotate(-12deg); }
   56%, 84% { opacity: .9; transform: scale(1) rotate(0); }
-  100% { opacity: 0; transform: scale(1.3) rotate(8deg); }
+  100% { opacity: .72; transform: scale(1.08) rotate(8deg); }
 }
 
 @keyframes starPulse {
@@ -590,13 +714,51 @@
 @keyframes violetFlame {
   0%, 12% { opacity: 0; transform: translate(-50%, -42%) scale(.12) rotate(18deg); }
   52%, 84% { opacity: .8; transform: translate(-50%, -52%) scale(1.2) rotate(-5deg); }
-  100% { opacity: 0; transform: translate(-50%, -58%) scale(2.2) rotate(-12deg); }
+  100% { opacity: .62; transform: translate(-50%, -54%) scale(1.28) rotate(-12deg); }
 }
 
 @keyframes etherSolid {
   0%, 16% { opacity: 0; transform: translate(-50%, -50%) rotate(-64deg) scale(.12); }
   54%, 82% { opacity: .86; transform: translate(-50%, -50%) rotate(245deg) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) rotate(330deg) scale(1.7); }
+  100% { opacity: .76; transform: translate(-50%, -50%) rotate(330deg) scale(1.08); }
+}
+
+@keyframes handoffPulse {
+  50% { opacity: .24; transform: scale(.72); }
+}
+
+@keyframes observatoryVoid {
+  0% { opacity: .2; transform: scale(.84); }
+  42% { opacity: 1; }
+  100% { opacity: .8; transform: scale(1.18); }
+}
+
+@keyframes observatoryZoom {
+  0% { opacity: .36; transform: translate(-50%, -50%) rotateY(0) scale(.54); }
+  18% { opacity: .92; transform: translate(-50%, -50%) rotateY(52deg) scale(.82); }
+  48% { transform: translate(-50%, -50%) rotateY(210deg) scale(1.18); }
+  78% { opacity: 1; transform: translate(-50%, -50%) rotateY(480deg) scale(2.2); }
+  100% { opacity: .5; transform: translate(-50%, -50%) rotateY(620deg) scale(4.4); }
+}
+
+@keyframes meridianMultiply {
+  0%, 30% { opacity: 0; }
+  50%, 100% { opacity: .32; }
+}
+
+@keyframes observatoryColors {
+  0%, 49% { opacity: 0; background: radial-gradient(circle at center, var(--presence), transparent 44%); }
+  50% { opacity: .18; background: radial-gradient(circle at center, var(--presence), transparent 44%); }
+  57% { background: radial-gradient(circle at center, var(--press), transparent 44%); }
+  64% { background: radial-gradient(circle at center, var(--studios), transparent 44%); }
+  71% { background: radial-gradient(circle at center, var(--foundation), transparent 44%); }
+  78% { opacity: .18; background: radial-gradient(circle at center, var(--guardian), transparent 44%); }
+  86%, 100% { opacity: 0; }
+}
+
+@keyframes observatoryStars {
+  0%, 54% { opacity: 0; transform: scale(.88); }
+  78%, 100% { opacity: .52; transform: scale(1.08); }
 }
 
 @media (max-width: 760px) {
@@ -635,7 +797,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .overlay {
-    display: none;
+    transition-duration: 200ms;
   }
 
   .overlay,
@@ -652,5 +814,11 @@
   .constellation,
   .surfaceRipple {
     animation: none;
+  }
+
+  .overlay[data-reduced-motion="true"] .ritualCopy,
+  .overlay[data-reduced-motion="true"] .solid,
+  .overlay[data-reduced-motion="true"] .observatoryGlobe {
+    display: none;
   }
 }

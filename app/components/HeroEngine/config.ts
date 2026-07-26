@@ -17,7 +17,7 @@ export const COMMAND_PILLAR_COLORS = {
   studios: "#2E86AB",
   foundation: "#84A66E",
   guardian: "#6D4AFF",
-  whole: "#FF3366",
+  whole: "#C0C0C0",
 } as const satisfies Record<Exclude<ActivePillar, "none">, string>;
 
 export interface HeroConfig {

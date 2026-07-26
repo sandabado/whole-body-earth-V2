@@ -1,26 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import HeroEngine from "../HeroEngine/HeroEngine";
 import type { ActivePillar } from "../HeroEngine/config";
 import HermeticCrest from "../hermetic-crest/HermeticCrest";
+import { useWholeBodyTransition } from "../WholeBodyTransition";
 import { HeroQuincunx } from "./HeroQuincunx";
-import {
-  PillarTransition,
-  type PortalPillar,
-} from "./PillarTransition";
 import { TopNav, type CommandPillar } from "./TopNav";
 
-type NamedPillar = PortalPillar;
+type NamedPillar = Exclude<ActivePillar, "none" | "whole">;
 
 export function EpicHomeExperience() {
-  const router = useRouter();
-  const [activePillar, setActivePillar] = useState<NamedPillar | "none">("none");
+  const {
+    activePillar,
+    transitioning,
+    beginTransition,
+  } = useWholeBodyTransition();
   const [dialPreview, setDialPreview] = useState<NamedPillar | null>(null);
   const [dialTurnPillar, setDialTurnPillar] = useState<NamedPillar | null>(null);
-  const transitioning = activePillar !== "none";
 
   useEffect(() => {
     const root = document.documentElement;
@@ -43,36 +41,21 @@ export function EpicHomeExperience() {
     };
   }, []);
 
-  const beginTransition = useCallback((pillar: NamedPillar) => {
-    setActivePillar((current) => {
-      if (current !== "none") return current;
-      return pillar;
-    });
+  const beginNamedTransition = useCallback((pillar: NamedPillar) => {
     setDialPreview(null);
     setDialTurnPillar(pillar);
-  }, []);
-
-  const beginNamedTransition = useCallback((pillar: NamedPillar) => {
     beginTransition(pillar);
   }, [beginTransition]);
 
   const selectNavPillar = useCallback((pillar: CommandPillar) => {
-    if (pillar === "whole") {
-      router.push("/calendar");
-      return;
-    }
+    setDialPreview(null);
+    setDialTurnPillar(pillar === "whole" ? null : pillar);
     beginTransition(pillar);
-  }, [beginTransition, router]);
+  }, [beginTransition]);
 
   const previewDialPillar = useCallback((pillar: NamedPillar | null) => {
     if (!transitioning) setDialPreview(pillar);
   }, [transitioning]);
-
-  const cancelTransition = useCallback(() => {
-    setActivePillar("none");
-    setDialPreview(null);
-    setDialTurnPillar(null);
-  }, []);
 
   const visualPillar: ActivePillar = dialPreview ?? activePillar;
 
@@ -87,6 +70,8 @@ export function EpicHomeExperience() {
           siteSlug="studios"
           activePillar={visualPillar}
           transitioning={transitioning}
+          showWholeEarthGlobe
+          onWholeActivate={() => selectNavPillar("whole")}
           ariaLabel="Whole Body Earth — five living pillars held in one constellation"
         >
           <div className="command-deck-vignette" aria-hidden="true" />
@@ -128,11 +113,6 @@ export function EpicHomeExperience() {
             </div>
           </div>
 
-          <PillarTransition
-            activePillar={activePillar}
-            onCancel={cancelTransition}
-            onComplete={cancelTransition}
-          />
         </HeroEngine>
       </main>
     </div>
